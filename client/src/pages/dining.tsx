@@ -23,6 +23,13 @@ export default function Dining({ userData }: DiningProps) {
   const [isCartClosing, setIsCartClosing] = useState(false);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
+  // Function to format category names for display
+  const formatCategoryName = (category: string) => {
+    return category
+      .replace(/_/g, ' ') // Replace underscores with spaces
+      .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize first letter of each word
+  };
+
   const { data: menuItems = [], isLoading } = useQuery<MenuItem[]>({
     queryKey: ['/api/menu'],
   });
@@ -216,7 +223,7 @@ export default function Dining({ userData }: DiningProps) {
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="font-semibold text-gray-900 text-base leading-tight flex-1 pr-2">{item.name}</h3>
                       <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap">
-                        {item.category}
+                        {formatCategoryName(item.category)}
                       </span>
                     </div>
                     <p className={`text-sm text-gray-600 mb-3 leading-relaxed transition-all duration-200 ${
