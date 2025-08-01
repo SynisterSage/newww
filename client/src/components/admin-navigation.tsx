@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import { useState } from "react";
 import { 
   LayoutDashboard, 
   Calendar, 
@@ -17,6 +18,7 @@ interface AdminNavigationProps {
 
 export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminNavigationProps) {
   const [location] = useLocation();
+  const [showSwitchMenu, setShowSwitchMenu] = useState(false);
 
   const navItems = [
     { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -72,31 +74,49 @@ export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminN
             })}
           </nav>
 
-          {/* Member View Switch */}
-          <div className="absolute bottom-20 left-6 right-6">
-            <button
-              onClick={onSwitchToMember}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-blue-600/10 border border-blue-600/20 text-blue-300 hover:bg-blue-600/20 hover:text-blue-200 transition-all duration-200 group mt-[28px] mb-[28px]"
-            >
-              <Eye className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              <span className="font-medium">View as Member</span>
-            </button>
-          </div>
-
           <div className="absolute bottom-6 left-6 right-6">
-            <div className="bg-white/10 rounded-xl p-4">
+            {/* Switch Menu - appears above profile when expanded */}
+            <div className={`mb-2 transition-all duration-300 ease-in-out ${
+              showSwitchMenu 
+                ? 'opacity-100 transform translate-y-0' 
+                : 'opacity-0 transform translate-y-4 pointer-events-none'
+            }`}>
+              <div className="bg-white/15 backdrop-blur-sm rounded-xl p-2 border border-white/20">
+                <button
+                  onClick={() => {
+                    setShowSwitchMenu(false);
+                    onSwitchToMember?.();
+                  }}
+                  className="w-full flex items-center space-x-3 px-3 py-3 rounded-lg bg-blue-600/10 border border-blue-500/20 text-blue-200 hover:bg-blue-600/20 hover:border-blue-500/40 transition-all duration-200 group"
+                >
+                  <Eye className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <span className="font-medium text-sm">Switch to Member View</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Profile Section - clickable */}
+            <button
+              onClick={() => setShowSwitchMenu(!showSwitchMenu)}
+              className="w-full bg-white/10 rounded-xl p-4 hover:bg-white/15 transition-all duration-200 border border-transparent hover:border-white/20"
+            >
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold text-sm">
                     {adminEmail ? adminEmail.substring(0, 2).toUpperCase() : "AD"}
                   </span>
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 text-left">
                   <h3 className="font-medium text-white text-sm truncate">{adminEmail || "Admin"}</h3>
                   <p className="text-xs text-white/70">Staff Member</p>
                 </div>
+                <div className={`transition-transform duration-200 ${showSwitchMenu ? 'rotate-180' : ''}`}>
+                  <svg className="w-4 h-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                  </svg>
+                </div>
               </div>
-            </div>
+            </button>
           </div>
         </div>
       </aside>
