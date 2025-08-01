@@ -111,7 +111,7 @@ export default function Events() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fbfff5]">
+    <div className="min-h-screen bg-[#F8F6F0]">
       <div className="p-6 space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-golf-green">Club Events</h1>

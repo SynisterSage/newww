@@ -124,7 +124,7 @@ export default function Dining() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fbfff5]">
+    <div className="min-h-screen bg-[#F8F6F0]">
       {/* Mobile Cart Overlay */}
       {isCartOpen && (
         <div 

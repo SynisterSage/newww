@@ -30,7 +30,7 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#fbfff5]">
+      <div className="min-h-screen bg-[#F8F6F0]">
         <div className="p-4 lg:p-8">
           <div className="animate-pulse space-y-8">
             <div className="h-64 bg-gray-300 rounded-2xl"></div>
@@ -46,7 +46,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fbfff5]">
+    <div className="min-h-screen bg-[#F8F6F0]">
       <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
       {/* Modern Header */}
       <div className="mb-8">

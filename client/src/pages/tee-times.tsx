@@ -172,7 +172,7 @@ export default function TeeTimes() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#fbfff5]">
+      <div className="min-h-screen bg-[#F8F6F0]">
         <div className="p-6 lg:p-8">
           <div className="animate-pulse space-y-6">
             <div className="h-20 bg-muted rounded-xl"></div>
@@ -188,7 +188,7 @@ export default function TeeTimes() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fbfff5]">
+    <div className="min-h-screen bg-[#F8F6F0]">
       <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
 
 
