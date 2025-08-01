@@ -21,6 +21,19 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
     return tomorrow.toISOString().split('T')[0];
   });
 
+  const getTodayDate = () => {
+    return new Date().toISOString().split('T')[0];
+  };
+
+  const getTomorrowDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  };
+
+  const isToday = selectedDate === getTodayDate();
+  const isTomorrow = selectedDate === getTomorrowDate();
+
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', selectedDate],
   });
@@ -176,19 +189,36 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
         {/* Date Selector */}
         <Card className="border-0 shadow-sm">
           <CardContent className="p-6">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Calendar className="w-4 h-4 text-golf-green" />
                 <span className="text-sm font-medium text-foreground">Select Date</span>
               </div>
               
-              <div className="flex-1 max-w-xs">
-                <Input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full"
-                />
+              <div className="flex items-center space-x-3">
+                <Button
+                  variant={isToday ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedDate(getTodayDate())}
+                  className={isToday ? "bg-golf-green hover:bg-golf-green-light text-white" : ""}
+                >
+                  Today
+                  <span className="ml-2 text-xs opacity-75">
+                    {format(new Date(), 'M/d')}
+                  </span>
+                </Button>
+                
+                <Button
+                  variant={isTomorrow ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedDate(getTomorrowDate())}
+                  className={isTomorrow ? "bg-golf-green hover:bg-golf-green-light text-white" : ""}
+                >
+                  Tomorrow
+                  <span className="ml-2 text-xs opacity-75">
+                    {format(new Date(getTomorrowDate()), 'M/d')}
+                  </span>
+                </Button>
               </div>
               
               <div className="text-sm text-muted-foreground">
