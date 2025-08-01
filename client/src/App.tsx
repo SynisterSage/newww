@@ -269,8 +269,8 @@ function Router() {
       <main className="flex-1 lg:ml-64 pb-16 lg:pb-0">
         <Switch>
           <Route path="/">{() => <Dashboard userEmail={userEmail} user={userData} />}</Route>
-          <Route path="/tee-times" component={TeeTimes} />
-          <Route path="/dining" component={Dining} />
+          <Route path="/tee-times">{() => <TeeTimes userData={userData} />}</Route>
+          <Route path="/dining">{() => <Dining userData={userData} />}</Route>
           <Route path="/conditions" component={Conditions} />
           <Route path="/events" component={Events} />
           <Route component={NotFound} />

@@ -7,12 +7,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar, Clock, Users, MapPin, Plus, Edit, X, Filter } from "lucide-react";
 import { format } from "date-fns";
-import type { TeeTime } from "@shared/schema";
+import type { TeeTime, User } from "@shared/schema";
 
-export default function TeeTimes() {
+interface TeeTimesProps {
+  userData?: User;
+}
+
+export default function TeeTimes({ userData }: TeeTimesProps) {
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState(() => {
     const tomorrow = new Date();
@@ -39,14 +43,18 @@ export default function TeeTimes() {
 
   const bookingMutation = useMutation({
     mutationFn: async (bookingData: any) => {
+      if (!userData?.id) {
+        throw new Error("User not logged in");
+      }
+      
       const response = await apiRequest('POST', '/api/teetimes', {
-        userId: 'user-1',
+        userId: userData.id,
         date: bookingData.date,
         time: bookingData.time,
         course: "Packanack Golf Course",
         holes: parseInt(bookingData.holes),
         spotsAvailable: parseInt(bookingData.players),
-        price: bookingData.holes === "9" ? "45.00" : "85.00",
+        price: bookingData.holes === "9" ? 45.00 : 85.00,
         status: "booked"
       });
       return response.json();

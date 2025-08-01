@@ -6,9 +6,13 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useState } from "react";
 import { ShoppingCart, Plus, Minus, Trash2, X } from "lucide-react";
-import type { MenuItem } from "@shared/schema";
+import type { MenuItem, User } from "@shared/schema";
 
-export default function Dining() {
+interface DiningProps {
+  userData?: User;
+}
+
+export default function Dining({ userData }: DiningProps) {
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentOrder, setCurrentOrder] = useState<{[key: string]: number}>({});
@@ -24,8 +28,15 @@ export default function Dining() {
   });
 
   const orderMutation = useMutation({
-    mutationFn: async (orderData: { userId: string; items: string[]; total: string; deliveryOption: string; deliveryLocation?: string; specialRequests?: string }) => {
-      const response = await apiRequest('POST', '/api/orders', orderData);
+    mutationFn: async (orderData: { items: string[]; total: string; deliveryOption: string; deliveryLocation?: string; specialRequests?: string }) => {
+      if (!userData?.id) {
+        throw new Error("User not logged in");
+      }
+      
+      const response = await apiRequest('POST', '/api/orders', {
+        ...orderData,
+        userId: userData.id
+      });
       return response.json();
     },
     onSuccess: () => {
@@ -96,7 +107,6 @@ export default function Dining() {
     );
     
     orderMutation.mutate({
-      userId: 'user-1',
       items: orderItems,
       total: calculateTotal().toFixed(2),
       deliveryOption,

@@ -19,11 +19,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/teetimes", async (req, res) => {
     try {
+      console.log("Received tee time data:", req.body);
       const teetimeData = insertTeetimeSchema.parse(req.body);
+      console.log("Parsed tee time data:", teetimeData);
       const teetime = await storage.createTeetime(teetimeData);
       res.status(201).json(teetime);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid tee time data" });
+    } catch (error: any) {
+      console.error("Tee time validation error:", error);
+      res.status(400).json({ message: "Invalid tee time data", error: error.message });
     }
   });
 
