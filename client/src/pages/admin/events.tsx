@@ -342,7 +342,7 @@ export default function AdminEvents() {
                 
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-[#08452e]" />
-                  <span>0/{event.maxSignups} registered</span>
+                  <span>{(event as any).registrationCount || 0}/{event.maxSignups} registered</span>
                 </div>
                 
                 {event.price && parseFloat(event.price) > 0 && (
