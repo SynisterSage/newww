@@ -299,7 +299,6 @@ export default function AdminEvents() {
                     <SelectItem value="tournament">Tournament</SelectItem>
                     <SelectItem value="social">Social Event</SelectItem>
                     <SelectItem value="lesson">Lesson</SelectItem>
-                    <SelectItem value="special">Special Event</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -401,10 +400,6 @@ export default function AdminEvents() {
           <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-muted-foreground mb-2">No Events Created</h3>
           <p className="text-muted-foreground mb-4">Create your first event to get started</p>
-          <Button onClick={() => setIsCreateDialogOpen(true)} className="bg-[#08452e] hover:bg-[#08452e]/90">
-            <Plus className="w-4 h-4 mr-2" />
-            Create Event
-          </Button>
         </div>
       )}
 
@@ -470,7 +465,6 @@ export default function AdminEvents() {
                     <SelectItem value="tournament">Tournament</SelectItem>
                     <SelectItem value="social">Social Event</SelectItem>
                     <SelectItem value="lesson">Lesson</SelectItem>
-                    <SelectItem value="special">Special Event</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
