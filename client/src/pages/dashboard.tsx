@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Utensils, MapPin, User, Trophy, Clock, TrendingUp, DollarSign, Wind, Droplets, Sun } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
-import type { User as UserType, TeeTimes, Order } from "@shared/schema";
+import type { User as UserType, TeeTime, Order } from "@shared/schema";
 
 export default function Dashboard() {
   const { data: user, isLoading } = useQuery<UserType>({
@@ -12,12 +12,12 @@ export default function Dashboard() {
   });
 
   // Get all tee times for the next 7 days to show upcoming bookings
-  const { data: teetimes = [] } = useQuery<TeeTimes[]>({
+  const { data: teetimes = [] } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', format(new Date(), 'yyyy-MM-dd')],
   });
 
   // Also get tomorrow's tee times to ensure we see upcoming bookings
-  const { data: tomorrowTeetimes = [] } = useQuery<TeeTimes[]>({
+  const { data: tomorrowTeetimes = [] } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', format(new Date(Date.now() + 24 * 60 * 60 * 1000), 'yyyy-MM-dd')],
   });
 
@@ -87,7 +87,7 @@ export default function Dashboard() {
 
         <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 shadow-sm">
           <CardContent className="p-6 text-center">
-            <Link href="/gps">
+            <Link href="/conditions">
               <div className="w-14 h-14 bg-golf-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                 <MapPin className="w-7 h-7 text-golf-blue" />
               </div>
@@ -99,11 +99,13 @@ export default function Dashboard() {
 
         <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 shadow-sm">
           <CardContent className="p-6 text-center">
-            <div className="w-14 h-14 bg-golf-purple/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-              <Trophy className="w-7 h-7 text-golf-purple" />
-            </div>
-            <h3 className="font-semibold text-foreground mb-1">Club Events</h3>
-            <p className="text-sm text-muted-foreground">View tournament schedule</p>
+            <Link href="/events">
+              <div className="w-14 h-14 bg-golf-purple/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Trophy className="w-7 h-7 text-golf-purple" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-1">Club Events</h3>
+              <p className="text-sm text-muted-foreground">View tournament schedule</p>
+            </Link>
           </CardContent>
         </Card>
       </div>
@@ -116,7 +118,7 @@ export default function Dashboard() {
               <div className="w-12 h-12 bg-golf-green-soft rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <Calendar className="w-6 h-6 text-golf-green" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{allTeetimes.filter((t: TeeTimes) => new Date(`${t.date}T${t.time}`) > new Date()).length}</div>
+              <div className="text-2xl font-bold text-foreground mb-1">{allTeetimes.filter((t: TeeTime) => new Date(`${t.date}T${t.time}`) > new Date()).length}</div>
               <div className="text-sm text-muted-foreground">Upcoming Tee Times</div>
             </CardContent>
           </Card>
@@ -141,7 +143,7 @@ export default function Dashboard() {
               <div className="w-12 h-12 bg-golf-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <TrendingUp className="w-6 h-6 text-golf-blue" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{allTeetimes.filter((t: TeeTimes) => {
+              <div className="text-2xl font-bold text-foreground mb-1">{allTeetimes.filter((t: TeeTime) => {
                 const teetimeDate = new Date(t.date);
                 const now = new Date();
                 return teetimeDate.getMonth() === now.getMonth() && teetimeDate.getFullYear() === now.getFullYear();
@@ -173,7 +175,7 @@ export default function Dashboard() {
                 <h3 className="text-lg font-semibold text-foreground">Upcoming Tee Times</h3>
               </div>
               <div className="space-y-3">
-                {allTeetimes.filter((t: TeeTimes) => new Date(`${t.date}T${t.time}`) > new Date()).slice(0, 3).map((teetime: TeeTimes, index: number) => (
+                {allTeetimes.filter((t: TeeTime) => new Date(`${t.date}T${t.time}`) > new Date()).slice(0, 3).map((teetime: TeeTime, index: number) => (
                   <div key={teetime.id || index} className="flex items-center space-x-3">
                     <div className="bg-golf-green p-2 rounded-full">
                       <Clock className="h-4 w-4 text-white" />
@@ -187,7 +189,7 @@ export default function Dashboard() {
                     </span>
                   </div>
                 ))}
-                {allTeetimes.filter((t: TeeTimes) => new Date(`${t.date}T${t.time}`) > new Date()).length === 0 && (
+                {allTeetimes.filter((t: TeeTime) => new Date(`${t.date}T${t.time}`) > new Date()).length === 0 && (
                   <p className="text-muted-foreground text-center py-4">No upcoming tee times</p>
                 )}
               </div>
@@ -208,8 +210,8 @@ export default function Dashboard() {
                       <Utensils className="h-4 w-4 text-white" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium">${order.total?.toFixed(2) || '160.00'}</p>
-                      <p className="text-sm text-muted-foreground">{order.location || '19th Hole Bar'}</p>
+                      <p className="font-medium">${typeof order.total === 'string' ? order.total : '160.00'}</p>
+                      <p className="text-sm text-muted-foreground">19th Hole Bar</p>
                     </div>
                     <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
                       {order.status || 'placed'}

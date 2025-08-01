@@ -567,9 +567,7 @@ export default function TeeTimes() {
                     <span className="text-lg font-semibold">
                       No tee times available
                     </span>
-                    <span className="bg-orange-100 text-orange-700 text-xs font-medium px-2 py-1 inline-flex items-center rounded-full border">
-                      pending
-                    </span>
+
                   </div>
                   <p className="text-sm text-muted-foreground">Tee Time Booking</p>
                 </div>
