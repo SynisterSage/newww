@@ -108,9 +108,7 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
     const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
     return teetimeDate >= thirtyDaysAgo && teetimeDate <= thirtyDaysFromNow;
   }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Sort by most recent first
-  
-  console.log('Dashboard - User teetimes:', userTeetimes);
-  console.log('Dashboard - Recent teetimes:', recentTeetimes);
+
 
   if (isLoading) {
     return (
@@ -205,172 +203,157 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
           </CardContent>
         </Card>
       </div>
-      {/* Your Stats Section */}
+      {/* Your Activity Section */}
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-foreground mb-6">Your Stats</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-golf-green-soft rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <Calendar className="w-6 h-6 text-golf-green" />
-              </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{recentTeetimes.length}</div>
-              <div className="text-sm text-muted-foreground">Recent Tee Times</div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-golf-orange/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <Utensils className="w-6 h-6 text-golf-orange" />
-              </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{recentOrders.length}</div>
-              <div className="text-sm text-muted-foreground">Recent Orders</div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-golf-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <TrendingUp className="w-6 h-6 text-golf-blue" />
-              </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{recentTeetimes.filter((t: TeeTime) => {
-                const teetimeDate = new Date(t.date);
-                const now = new Date();
-                return teetimeDate.getMonth() === now.getMonth() && teetimeDate.getFullYear() === now.getFullYear();
-              }).length} Rounds</div>
-              <div className="text-sm text-muted-foreground">This Month</div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-golf-purple/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <Clock className="w-6 h-6 text-golf-purple" />
-              </div>
-              <div className="text-2xl font-bold text-foreground mb-1">Par -2</div>
-              <div className="text-sm text-muted-foreground">Best Score</div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column - Two sections */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Upcoming Tee Times */}
-          <Card className="border-0 shadow-sm">
+        <h2 className="text-2xl font-semibold text-[#08452e] mb-6">Your Activity</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-6">
-              <div className="flex items-center space-x-2 mb-4">
-                <Calendar className="w-5 h-5" />
-                <h3 className="text-lg font-semibold text-foreground">Recent Tee Times</h3>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-golf-green-soft rounded-2xl flex items-center justify-center">
+                    <Calendar className="w-6 h-6 text-golf-green" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">Recent Tee Times</h3>
+                    <p className="text-sm text-muted-foreground">Last 30 days</p>
+                  </div>
+                </div>
+                <div className="text-3xl font-bold text-golf-green">{recentTeetimes.length}</div>
               </div>
-              <div className="space-y-3">
-                {recentTeetimes.slice(0, 3).map((teetime: TeeTime, index: number) => (
-                  <div key={teetime.id || index} className="flex items-center space-x-3">
-                    <div className="bg-golf-green p-2 rounded-full">
-                      <Clock className="h-4 w-4 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium">{format(new Date(teetime.date), 'MMM dd')} at {teetime.time}</p>
-                      <p className="text-sm text-muted-foreground">{teetime.holes} holes • {teetime.status}</p>
-                    </div>
-                    <span className={`text-sm px-2 py-1 rounded ${
-                      teetime.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      teetime.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                      new Date(`${teetime.date}T${teetime.time}`) > new Date() ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+              <div className="space-y-2">
+                {recentTeetimes.slice(0, 2).map((teetime: TeeTime, index: number) => (
+                  <div key={teetime.id || index} className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">{format(new Date(teetime.date), 'MMM dd')} • {teetime.time}</span>
+                    <span className={`px-2 py-1 rounded text-xs ${
+                      teetime.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                      teetime.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                      'bg-blue-100 text-blue-700'
                     }`}>
-                      {teetime.status === 'pending' ? 'Pending' : 
-                       teetime.status === 'confirmed' ? 'Confirmed' :
-                       new Date(`${teetime.date}T${teetime.time}`) > new Date() ? 'Upcoming' : 'Completed'}
+                      {teetime.status}
                     </span>
                   </div>
                 ))}
                 {recentTeetimes.length === 0 && (
-                  <p className="text-muted-foreground text-center py-4">No recent tee times</p>
+                  <p className="text-muted-foreground text-sm italic">No recent tee times</p>
                 )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Recent Orders */}
-          <Card className="border-0 shadow-sm">
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-6">
-              <div className="flex items-center space-x-2 mb-4">
-                <Utensils className="w-5 h-5" />
-                <h3 className="text-lg font-semibold text-foreground">Recent Orders</h3>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-golf-orange/10 rounded-2xl flex items-center justify-center">
+                    <Utensils className="w-6 h-6 text-golf-orange" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">Recent Orders</h3>
+                    <p className="text-sm text-muted-foreground">Last 30 days</p>
+                  </div>
+                </div>
+                <div className="text-3xl font-bold text-golf-orange">{recentOrders.length}</div>
               </div>
-              <div className="space-y-3">
-                {recentOrders.slice(0, 3).map((order: Order, index: number) => (
-                  <div key={order.id || index} className="flex items-center space-x-3">
-                    <div className="bg-orange-500 p-2 rounded-full">
-                      <Utensils className="h-4 w-4 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium">${order.total}</p>
-                      <p className="text-sm text-muted-foreground">Clubhouse</p>
-                    </div>
-                    <span className={`text-sm px-2 py-1 rounded capitalize ${
-                      order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                      order.status === 'preparing' ? 'bg-orange-100 text-orange-800' :
-                      order.status === 'ready' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
+              <div className="space-y-2">
+                {recentOrders.slice(0, 2).map((order: Order, index: number) => (
+                  <div key={order.id || index} className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">${order.total} • Clubhouse</span>
+                    <span className={`px-2 py-1 rounded text-xs capitalize ${
+                      order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                      order.status === 'preparing' ? 'bg-orange-100 text-orange-700' :
+                      order.status === 'ready' ? 'bg-blue-100 text-blue-700' :
+                      'bg-gray-100 text-gray-700'
                     }`}>
                       {order.status || 'placed'}
                     </span>
                   </div>
                 ))}
                 {recentOrders.length === 0 && (
-                  <p className="text-muted-foreground text-center py-4">No recent orders</p>
+                  <p className="text-muted-foreground text-sm italic">No recent orders</p>
                 )}
               </div>
             </CardContent>
           </Card>
         </div>
+      </div>
+      {/* Course Conditions Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Today's Weather */}
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-2 mb-6">
+              <Sun className="w-5 h-5 text-golf-green" />
+              <h3 className="text-lg font-semibold text-[#08452e]">Today's Weather</h3>
+            </div>
+            
+            <div className="text-center mb-6">
+              <div className="bg-gradient-to-br from-blue-400 to-blue-600 p-6 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center shadow-lg">
+                <Sun className="h-8 w-8 text-white" />
+              </div>
+              <div className="text-4xl font-bold text-foreground mb-2">{weather.temperature}°F</div>
+              <p className="text-muted-foreground capitalize text-lg">{weather.condition}</p>
+            </div>
 
-        {/* Right Column - Course Conditions */}
-        <div>
-          <Card className="border-0 shadow-sm h-full">
-            <CardContent className="p-6 h-full flex flex-col">
-              <div className="flex items-center space-x-2 mb-6">
-                <Sun className="w-5 h-5" />
-                <h3 className="text-lg font-semibold text-foreground">Course Conditions</h3>
+            <div className="grid grid-cols-2 gap-6 text-center">
+              <div className="bg-stone-50 rounded-xl p-4">
+                <Wind className="h-6 w-6 mx-auto mb-2 text-blue-500" />
+                <p className="text-lg font-semibold text-foreground">{weather.windSpeed} mph</p>
+                <p className="text-xs text-muted-foreground">Wind Speed</p>
+              </div>
+              <div className="bg-stone-50 rounded-xl p-4">
+                <Droplets className="h-6 w-6 mx-auto mb-2 text-blue-500" />
+                <p className="text-lg font-semibold text-foreground">{weather.humidity}%</p>
+                <p className="text-xs text-muted-foreground">Humidity</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Club Status */}
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-2 mb-6">
+              <MapPin className="w-5 h-5 text-golf-green" />
+              <h3 className="text-lg font-semibold text-[#08452e]">Club Status</h3>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <p className="font-semibold text-green-800">Course Open</p>
+                  </div>
+                  <span className="text-sm text-green-600 bg-green-100 px-2 py-1 rounded">9-Hole</span>
+                </div>
+                <p className="text-sm text-green-700">Packanack Golf Club is open for play</p>
               </div>
               
-              {/* Weather */}
-              <div className="text-center mb-6">
-                <div className="bg-blue-500 p-6 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                  <Sun className="h-8 w-8 text-white" />
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <Utensils className="w-4 h-4 text-blue-600" />
+                    <p className="font-semibold text-blue-800">Clubhouse Dining</p>
+                  </div>
+                  <span className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">Open</span>
                 </div>
-                <div className="text-3xl font-bold">{weather.temperature}°F</div>
-                <p className="text-muted-foreground capitalize">{weather.condition}</p>
+                <p className="text-sm text-blue-700">Full menu available • Pickup & delivery</p>
               </div>
-
-              {/* Conditions */}
-              <div className="grid grid-cols-2 gap-4 text-center mb-6">
-                <div>
-                  <Wind className="h-6 w-6 mx-auto mb-2 text-blue-500" />
-                  <p className="text-sm font-medium">{weather.windSpeed} mph</p>
-                  <p className="text-xs text-muted-foreground">Wind</p>
+              
+              <div className="bg-stone-50 border border-stone-200 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="w-4 h-4 text-stone-600" />
+                    <p className="font-semibold text-stone-800">Tee Times</p>
+                  </div>
+                  <span className="text-sm text-stone-600 bg-stone-100 px-2 py-1 rounded">Available</span>
                 </div>
-                <div>
-                  <Droplets className="h-6 w-6 mx-auto mb-2 text-blue-500" />
-                  <p className="text-sm font-medium">{weather.humidity}%</p>
-                  <p className="text-xs text-muted-foreground">Humidity</p>
-                </div>
+                <p className="text-sm text-stone-700">Book online • Walk-ins welcome</p>
               </div>
-
-              {/* Course Status - Push to bottom */}
-              <div className="mt-auto bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="flex items-center justify-center mb-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                  <p className="font-medium text-green-800 text-center">Perfect Weather!</p>
-                </div>
-                <p className="text-sm text-green-700 text-center">Ideal conditions for your round today</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
     </div>
