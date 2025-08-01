@@ -66,6 +66,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // General tee time update route
+  app.patch("/api/teetimes/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const teetime = await storage.getTeetimeById(id);
+      if (!teetime) {
+        return res.status(404).json({ message: "Tee time not found" });
+      }
+      
+      const updatedTeetime = await storage.updateTeetime(id, updates);
+      res.json(updatedTeetime);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update tee time" });
+    }
+  });
+
   // Menu routes
   app.get("/api/menu", async (req, res) => {
     try {

@@ -87,7 +87,8 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
     mutationFn: async (teetimeId: string) => {
       const response = await apiRequest('PATCH', `/api/teetimes/${teetimeId}`, {
         status: "available",
-        userId: null
+        userId: null,
+        spotsAvailable: 4
       });
       return response.json();
     },
@@ -151,8 +152,10 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
   };
 
   const getStatusBadge = (teetime: TeeTime) => {
-    if (teetime.status === "booked") return { text: "confirmed", color: "bg-green-100 text-green-700" };
-    if (teetime.isPremium) return { text: "pending", color: "bg-yellow-100 text-yellow-700" };
+    if (teetime.status === "pending") return { text: "pending", color: "bg-yellow-100 text-yellow-700" };
+    if (teetime.status === "confirmed") return { text: "confirmed", color: "bg-green-100 text-green-700" };
+    if (teetime.status === "booked") return { text: "booked", color: "bg-blue-100 text-blue-700" };
+    if (teetime.isPremium) return { text: "premium", color: "bg-purple-100 text-purple-700" };
     return { text: "available", color: "bg-blue-100 text-blue-700" };
   };
 
@@ -471,7 +474,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {teetimes.map((teetime) => {
           const status = getStatusBadge(teetime);
-          const isUserBooking = teetime.userId === 'user-1';
+          const isUserBooking = teetime.userId === userData?.id;
           
           return (
             <Card key={teetime.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
