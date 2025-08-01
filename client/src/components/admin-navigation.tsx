@@ -90,7 +90,7 @@ export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminN
                   className="w-full flex items-center space-x-3 px-3 py-3 rounded-lg bg-blue-600/10 border border-blue-500/20 text-blue-200 hover:bg-blue-600/20 hover:border-blue-500/40 transition-all duration-200 group"
                 >
                   <Eye className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                  <span className="font-medium text-sm">Switch to Member View</span>
+                  <span className="font-medium text-sm">Member View</span>
                 </button>
               </div>
             </div>
