@@ -302,9 +302,6 @@ export default function AdminTeeTimesPage() {
                         <p><span className="font-medium">Holes:</span> {teetime.holes}</p>
                         <p><span className="font-medium">Price:</span> ${teetime.price}</p>
                         <p><span className="font-medium">Spots:</span> {teetime.spotsAvailable}</p>
-                        {teetime.isPremium && (
-                          <p className="col-span-2 text-amber-600 font-medium text-center">★ Premium</p>
-                        )}
                       </div>
                     </div>
                   </CardContent>

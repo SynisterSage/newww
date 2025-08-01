@@ -261,26 +261,26 @@ export class MemStorage implements IStorage {
     const today = new Date().toISOString().split('T')[0];
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
-    // Base tee time slots for 9-hole Packanack Golf Course
+    // Base tee time slots for 9-hole Packanack Golf Course - all standard pricing
     const baseTimeSlots = [
-      { time: "6:30 AM", price: "65.00", isPremium: false },
-      { time: "7:00 AM", price: "65.00", isPremium: false },
-      { time: "7:30 AM", price: "75.00", isPremium: true },
-      { time: "8:00 AM", price: "75.00", isPremium: true },
-      { time: "8:30 AM", price: "75.00", isPremium: true },
-      { time: "9:00 AM", price: "70.00", isPremium: false },
-      { time: "9:30 AM", price: "70.00", isPremium: false },
-      { time: "10:00 AM", price: "70.00", isPremium: false },
-      { time: "10:30 AM", price: "65.00", isPremium: false },
-      { time: "11:00 AM", price: "65.00", isPremium: false },
-      { time: "11:30 AM", price: "65.00", isPremium: false },
-      { time: "12:00 PM", price: "60.00", isPremium: false },
-      { time: "12:30 PM", price: "60.00", isPremium: false },
-      { time: "1:00 PM", price: "60.00", isPremium: false },
-      { time: "1:30 PM", price: "60.00", isPremium: false },
-      { time: "2:00 PM", price: "55.00", isPremium: false },
-      { time: "2:30 PM", price: "55.00", isPremium: false },
-      { time: "3:00 PM", price: "55.00", isPremium: false },
+      { time: "6:30 AM", price: "65.00" },
+      { time: "7:00 AM", price: "65.00" },
+      { time: "7:30 AM", price: "65.00" },
+      { time: "8:00 AM", price: "65.00" },
+      { time: "8:30 AM", price: "65.00" },
+      { time: "9:00 AM", price: "65.00" },
+      { time: "9:30 AM", price: "65.00" },
+      { time: "10:00 AM", price: "65.00" },
+      { time: "10:30 AM", price: "65.00" },
+      { time: "11:00 AM", price: "65.00" },
+      { time: "11:30 AM", price: "65.00" },
+      { time: "12:00 PM", price: "60.00" },
+      { time: "12:30 PM", price: "60.00" },
+      { time: "1:00 PM", price: "60.00" },
+      { time: "1:30 PM", price: "60.00" },
+      { time: "2:00 PM", price: "55.00" },
+      { time: "2:30 PM", price: "55.00" },
+      { time: "3:00 PM", price: "55.00" },
     ];
 
     // Get some real members for bookings
@@ -299,7 +299,7 @@ export class MemStorage implements IStorage {
           spotsAvailable: 4,
           price: slot.price,
           status: "available",
-          isPremium: slot.isPremium
+          isPremium: false // No premium tee times
         };
 
         // All tee times start as available - no pre-existing bookings
