@@ -15,7 +15,7 @@ interface DashboardProps {
 export default function Dashboard({ userEmail, user }: DashboardProps) {
   const { data: fetchedUser, isLoading } = useQuery<UserType>({
     queryKey: ['/api/user', user?.id || 'user-1'],
-    enabled: !user && !!user?.id, // Only fetch if user data wasn't passed in and we have an ID
+    enabled: !user, // Only fetch if user data wasn't passed in
   });
 
   // Use passed user data or fetched data
