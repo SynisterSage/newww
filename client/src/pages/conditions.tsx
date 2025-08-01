@@ -370,7 +370,7 @@ export default function Conditions() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {courseUpdates.map((update) => (
-              <Card key={update.id} className="shadow-sm border-0 hover:shadow-md transition-shadow h-40">
+              <Card key={update.id} className="shadow-sm border-0 hover:shadow-md transition-shadow h-48">
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4 h-full">
                     <div className={`p-2 rounded-lg ${getStatusColor(update.status)} flex-shrink-0`}>
