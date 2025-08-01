@@ -140,73 +140,7 @@ export default function TeeTimes() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
-      {/* Booking Confirmation Card */}
-      {showBookingCard && latestBooking && (
-        <Card className="border-0 shadow-lg bg-white relative">
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-golf-green rounded-lg flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg font-semibold">
-                      {new Date(latestBooking.date).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric', 
-                        year: 'numeric' 
-                      })}
-                    </span>
-                    <Badge className="bg-orange-100 text-orange-700 text-xs font-medium px-2 py-1">
-                      pending
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Tee Time Booking</p>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowBookingCard(false)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Clock className="w-4 h-4 mr-3" />
-                <span>{latestBooking.time}</span>
-              </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Users className="w-4 h-4 mr-3" />
-                <span>{latestBooking.players} Players</span>
-              </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <MapPin className="w-4 h-4 mr-3" />
-                <span>{latestBooking.course}</span>
-              </div>
-            </div>
-            
-            <p className="text-sm text-muted-foreground mt-4 mb-4">
-              Tournament preparation
-            </p>
-            
-            <div className="flex space-x-3">
-              <Button variant="outline" size="sm" className="flex items-center">
-                <Edit className="w-4 h-4 mr-1" />
-                Edit
-              </Button>
-              <Button variant="outline" size="sm" className="flex items-center text-red-600 hover:text-red-700">
-                <X className="w-4 h-4 mr-1" />
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+
 
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -443,7 +377,73 @@ export default function TeeTimes() {
         })}
       </div>
 
-      {teetimes.length === 0 && (
+      {/* Booking Confirmation Card or No Tee Times Message */}
+      {showBookingCard && latestBooking ? (
+        <Card className="border-0 shadow-lg bg-white relative">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-golf-green rounded-lg flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg font-semibold">
+                      {new Date(latestBooking.date).toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                      })}
+                    </span>
+                    <Badge className="bg-orange-100 text-orange-700 text-xs font-medium px-2 py-1">
+                      pending
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Tee Time Booking</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowBookingCard(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Clock className="w-4 h-4 mr-3" />
+                <span>{latestBooking.time}</span>
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Users className="w-4 h-4 mr-3" />
+                <span>{latestBooking.players} Players</span>
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <MapPin className="w-4 h-4 mr-3" />
+                <span>{latestBooking.course}</span>
+              </div>
+            </div>
+            
+            <p className="text-sm text-muted-foreground mt-4 mb-4">
+              Tournament preparation
+            </p>
+            
+            <div className="flex space-x-3">
+              <Button variant="outline" size="sm" className="flex items-center">
+                <Edit className="w-4 h-4 mr-1" />
+                Edit
+              </Button>
+              <Button variant="outline" size="sm" className="flex items-center text-red-600 hover:text-red-700">
+                <X className="w-4 h-4 mr-1" />
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : teetimes.length === 0 && (
         <div className="text-center py-12">
           <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">No tee times found</h3>
