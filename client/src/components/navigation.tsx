@@ -73,10 +73,12 @@ export default function Navigation({ userEmail }: NavigationProps) {
             <div className="bg-white/10 rounded-xl p-4">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-golf-gold rounded-full flex items-center justify-center">
-                  <span className="text-golf-green font-bold text-sm">JD</span>
+                  <span className="text-golf-green font-bold text-sm">
+                    {userEmail ? userEmail.substring(0, 2).toUpperCase() : "JD"}
+                  </span>
                 </div>
                 <div>
-                  <h3 className="font-medium text-white">Lex Ferguson</h3>
+                  <h3 className="font-medium text-white">{userEmail || "Member"}</h3>
                   <p className="text-xs text-white/70">Member</p>
                 </div>
               </div>
