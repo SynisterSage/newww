@@ -265,8 +265,14 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
                       <p className="font-medium">{format(new Date(teetime.date), 'MMM dd')} at {teetime.time}</p>
                       <p className="text-sm text-muted-foreground">{teetime.holes} holes • {teetime.status}</p>
                     </div>
-                    <span className={`text-sm px-2 py-1 rounded ${new Date(`${teetime.date}T${teetime.time}`) > new Date() ? 'bg-golf-green text-white' : 'bg-gray-100 text-gray-800'}`}>
-                      {new Date(`${teetime.date}T${teetime.time}`) > new Date() ? 'Upcoming' : 'Completed'}
+                    <span className={`text-sm px-2 py-1 rounded ${
+                      teetime.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      teetime.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                      new Date(`${teetime.date}T${teetime.time}`) > new Date() ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {teetime.status === 'pending' ? 'Pending' : 
+                       teetime.status === 'confirmed' ? 'Confirmed' :
+                       new Date(`${teetime.date}T${teetime.time}`) > new Date() ? 'Upcoming' : 'Completed'}
                     </span>
                   </div>
                 ))}

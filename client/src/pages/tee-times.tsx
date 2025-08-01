@@ -60,7 +60,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
         holes: parseInt(bookingData.holes),
         spotsAvailable: parseInt(bookingData.players),
         price: bookingData.holes === "9" ? "45.00" : "85.00",
-        status: "booked"
+        status: "pending"
       });
       return response.json();
     },

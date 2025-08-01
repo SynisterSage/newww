@@ -187,10 +187,10 @@ export default function AdminMembers() {
                         {member.membershipType}
                       </span>
                     </TableCell>
-                    <TableCell className="py-4 px-4 text-center font-medium">{member.handicap}</TableCell>
+                    <TableCell className="py-4 px-4 text-center font-medium">{member.handicap || "—"}</TableCell>
                     <TableCell className="py-4 px-4 text-center">{member.roundsPlayed}</TableCell>
                     <TableCell className="py-4 px-4 font-medium text-right">
-                      <span className={`${parseFloat(member.accountBalance) > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      <span className={`${parseFloat(member.accountBalance || '0') > 0 ? 'text-red-600' : 'text-green-600'}`}>
                         ${member.accountBalance}
                       </span>
                     </TableCell>

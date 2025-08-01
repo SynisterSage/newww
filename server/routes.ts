@@ -57,7 +57,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedTeetime = await storage.updateTeetime(id, {
         userId,
         spotsAvailable: teetime.spotsAvailable - 1,
-        status: teetime.spotsAvailable === 1 ? "booked" : "available"
+        status: teetime.spotsAvailable === 1 ? "pending" : "available"
       });
       
       res.json(updatedTeetime);
