@@ -102,12 +102,15 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
 
   // Filter for recent tee times (past and upcoming within 30 days)
   const recentTeetimes = userTeetimes.filter((teetime: TeeTime) => {
-    const teetimeDate = new Date(`${teetime.date}T${teetime.time}`);
+    const teetimeDate = new Date(teetime.date); // Remove time part for date comparison
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
     const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
     return teetimeDate >= thirtyDaysAgo && teetimeDate <= thirtyDaysFromNow;
   }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Sort by most recent first
+  
+  console.log('Dashboard - User teetimes:', userTeetimes);
+  console.log('Dashboard - Recent teetimes:', recentTeetimes);
 
   if (isLoading) {
     return (
