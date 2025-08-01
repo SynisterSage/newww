@@ -61,6 +61,7 @@ export class MemStorage implements IStorage {
   private orders: Map<string, Order>;
   private courseHoles: Map<string, CourseHole>;
   private rounds: Map<string, Round>;
+  private sessions: Map<string, Session>;
 
   constructor() {
     this.users = new Map();
@@ -70,6 +71,7 @@ export class MemStorage implements IStorage {
     this.orders = new Map();
     this.courseHoles = new Map();
     this.rounds = new Map();
+    this.sessions = new Map();
     
     this.initializeData();
   }
@@ -320,13 +322,39 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).find(user => user.username === username);
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.email === email);
+  }
+
   async getAllUsers(): Promise<User[]> {
     return Array.from(this.users.values());
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      id,
+      email: insertUser.email || null,
+      phone: insertUser.phone || null,
+      firstName: insertUser.firstName || null,
+      lastName: insertUser.lastName || null,
+      address: insertUser.address || null,
+      city: insertUser.city || null,
+      state: insertUser.state || null,
+      zipCode: insertUser.zipCode || null,
+      emergencyContact: insertUser.emergencyContact || null,
+      emergencyPhone: insertUser.emergencyPhone || null,
+      handicap: insertUser.handicap || null,
+      roundsPlayed: insertUser.roundsPlayed || null,
+      accountBalance: insertUser.accountBalance || null,
+      joinDate: insertUser.joinDate || null,
+      isActive: insertUser.isActive || null,
+      username: insertUser.username,
+      password: insertUser.password,
+      memberNumber: insertUser.memberNumber,
+      memberStatus: insertUser.memberStatus || "Gold",
+      membershipType: insertUser.membershipType || "Full"
+    };
     this.users.set(id, user);
     return user;
   }
@@ -358,7 +386,14 @@ export class MemStorage implements IStorage {
 
   async createAdminUser(insertAdminUser: InsertAdminUser): Promise<AdminUser> {
     const id = randomUUID();
-    const adminUser: AdminUser = { ...insertAdminUser, id };
+    const adminUser: AdminUser = { 
+      id,
+      email: insertAdminUser.email,
+      name: insertAdminUser.name,
+      password: insertAdminUser.password,
+      role: insertAdminUser.role || "staff",
+      isActive: insertAdminUser.isActive || null
+    };
     this.adminUsers.set(id, adminUser);
     return adminUser;
   }
@@ -392,7 +427,18 @@ export class MemStorage implements IStorage {
 
   async createTeetime(insertTeetime: InsertTeeTime): Promise<TeeTime> {
     const id = randomUUID();
-    const teetime: TeeTime = { ...insertTeetime, id };
+    const teetime: TeeTime = { 
+      id,
+      userId: insertTeetime.userId || null,
+      date: insertTeetime.date,
+      time: insertTeetime.time,
+      course: insertTeetime.course || "Packanack Golf Course",
+      holes: insertTeetime.holes || 18,
+      spotsAvailable: insertTeetime.spotsAvailable || 4,
+      price: insertTeetime.price,
+      status: insertTeetime.status || "available",
+      isPremium: insertTeetime.isPremium || null
+    };
     this.teetimes.set(id, teetime);
     return teetime;
   }
@@ -421,7 +467,15 @@ export class MemStorage implements IStorage {
 
   async createMenuItem(insertItem: InsertMenuItem): Promise<MenuItem> {
     const id = randomUUID();
-    const item: MenuItem = { ...insertItem, id };
+    const item: MenuItem = { 
+      id,
+      name: insertItem.name,
+      description: insertItem.description,
+      price: insertItem.price,
+      category: insertItem.category,
+      isSpecial: insertItem.isSpecial || null,
+      available: insertItem.available || null
+    };
     this.menuItems.set(id, item);
     return item;
   }
@@ -438,8 +492,11 @@ export class MemStorage implements IStorage {
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
     const id = randomUUID();
     const order: Order = { 
-      ...insertOrder, 
       id,
+      userId: insertOrder.userId || null,
+      items: insertOrder.items,
+      total: insertOrder.total,
+      status: insertOrder.status || "pending",
       createdAt: new Date()
     };
     this.orders.set(id, order);
@@ -482,13 +539,54 @@ export class MemStorage implements IStorage {
   async createRound(insertRound: InsertRound): Promise<Round> {
     const id = randomUUID();
     const round: Round = { 
-      ...insertRound, 
       id,
+      userId: insertRound.userId || null,
+      currentHole: insertRound.currentHole || null,
+      scores: insertRound.scores || null,
+      status: insertRound.status || "in_progress",
       startTime: new Date(),
       endTime: null
     };
     this.rounds.set(id, round);
     return round;
+  }
+
+  // Session methods for MemStorage
+  async createSession(insertSession: InsertSession): Promise<Session> {
+    const id = randomUUID();
+    const session: Session = {
+      id,
+      userId: insertSession.userId || null,
+      adminUserId: insertSession.adminUserId || null,
+      sessionToken: insertSession.sessionToken,
+      expiresAt: insertSession.expiresAt,
+      createdAt: new Date()
+    };
+    this.sessions.set(session.sessionToken, session);
+    return session;
+  }
+
+  async getSessionByToken(token: string): Promise<Session | undefined> {
+    return this.sessions.get(token);
+  }
+
+  async deleteSession(token: string): Promise<void> {
+    this.sessions.delete(token);
+  }
+
+  async cleanExpiredSessions(): Promise<void> {
+    const now = new Date();
+    const sessionsToDelete: string[] = [];
+    
+    this.sessions.forEach((session, token) => {
+      if (session.expiresAt < now) {
+        sessionsToDelete.push(token);
+      }
+    });
+    
+    sessionsToDelete.forEach(token => {
+      this.sessions.delete(token);
+    });
   }
 
   async updateRound(id: string, updates: Partial<Round>): Promise<Round | undefined> {

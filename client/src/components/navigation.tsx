@@ -65,14 +65,14 @@ export default function Navigation({ userEmail, userData, isAdminView, onSwitchT
               
               return (
                 <Link key={item.path} href={item.path}>
-                  <a className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                  <div className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer ${
                     isActive 
                       ? "bg-white/15 text-white border-l-3 border-golf-gold ml-0 pl-3" 
                       : "text-white/70 hover:bg-white/8 hover:text-white hover:pl-5"
                   }`}>
                     <Icon className="w-5 h-5 flex-shrink-0" />
                     <span className="font-medium">{item.label}</span>
-                  </a>
+                  </div>
                 </Link>
               );
             })}
