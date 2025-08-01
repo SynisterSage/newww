@@ -30,6 +30,7 @@ export default function TeeTimes() {
     specialRequests: ""
   });
   const [userBookings, setUserBookings] = useState<any[]>([]);
+  const [editingBooking, setEditingBooking] = useState<any>(null);
 
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', selectedDate],
@@ -106,7 +107,46 @@ export default function TeeTimes() {
       });
       return;
     }
-    bookingMutation.mutate(newBooking);
+    
+    if (editingBooking) {
+      // Update existing booking
+      const updatedBookings = userBookings.map(booking => 
+        booking.id === editingBooking.id 
+          ? { ...booking, ...newBooking, holes: newBooking.holes }
+          : booking
+      );
+      setUserBookings(updatedBookings);
+      setEditingBooking(null);
+      setIsBookingModalOpen(false);
+      setNewBooking({ date: "", time: "", players: "1", holes: "18", specialRequests: "" });
+      toast({
+        title: "Booking Updated",
+        description: "Your tee time has been successfully updated!",
+      });
+    } else {
+      // Create new booking
+      bookingMutation.mutate(newBooking);
+    }
+  };
+
+  const handleCancelBooking = (bookingId: string) => {
+    setUserBookings(prev => prev.filter(booking => booking.id !== bookingId));
+    toast({
+      title: "Booking Cancelled",
+      description: "Your tee time has been cancelled.",
+    });
+  };
+
+  const handleEditBooking = (booking: any) => {
+    setEditingBooking(booking);
+    setNewBooking({
+      date: booking.date,
+      time: booking.time,
+      players: booking.players,
+      holes: booking.holes.toString(),
+      specialRequests: ""
+    });
+    setIsBookingModalOpen(true);
   };
 
   const getStatusBadge = (teetime: TeeTime) => {
@@ -152,7 +192,13 @@ export default function TeeTimes() {
         
         <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-golf-green hover:bg-golf-green-light text-white w-full lg:w-auto">
+            <Button 
+              className="bg-golf-green hover:bg-golf-green-light text-white w-full lg:w-auto"
+              onClick={() => {
+                setEditingBooking(null);
+                setNewBooking({ date: "", time: "", players: "1", holes: "18", specialRequests: "" });
+              }}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Book Tee Time
             </Button>
@@ -161,7 +207,7 @@ export default function TeeTimes() {
             <DialogHeader>
               <DialogTitle className="text-xl font-bold text-golf-green mb-4">
                 <Calendar className="w-6 h-6 inline mr-2" />
-                Book New Tee Time
+                {editingBooking ? "Edit Tee Time" : "Book New Tee Time"}
               </DialogTitle>
             </DialogHeader>
             
@@ -340,11 +386,21 @@ export default function TeeTimes() {
                     </div>
                   </div>
                   <div className="flex gap-2 mt-4">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleEditBooking(booking)}
+                    >
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1 text-red-600 hover:text-red-700">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 text-red-600 hover:text-red-700"
+                      onClick={() => handleCancelBooking(booking.id)}
+                    >
                       <X className="w-4 h-4 mr-2" />
                       Cancel
                     </Button>
@@ -473,7 +529,11 @@ export default function TeeTimes() {
               <p className="text-muted-foreground mb-4">Try selecting a different date or course</p>
               <Button 
                 className="bg-golf-green hover:bg-golf-green-light text-white"
-                onClick={() => setIsBookingModalOpen(true)}
+                onClick={() => {
+                  setEditingBooking(null);
+                  setNewBooking({ date: "", time: "", players: "1", holes: "18", specialRequests: "" });
+                  setIsBookingModalOpen(true);
+                }}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Book New Tee Time
