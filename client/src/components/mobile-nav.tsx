@@ -14,12 +14,12 @@ export default function MobileNav() {
     { path: "/", label: "Dashboard", icon: Home },
     { path: "/tee-times", label: "Tee Times", icon: Calendar },
     { path: "/dining", label: "Dining", icon: Utensils },
-    { path: "/conditions", label: "Conditions", icon: Info },
+    { path: "/course-conditions", label: "Conditions", icon: Info },
     { path: "/events", label: "Events", icon: Trophy },
   ];
 
   return (
-    <div className="xl:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border px-2 sm:px-4 py-2 z-50 shadow-lg">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border px-2 sm:px-4 py-2 z-50 shadow-lg">
       <div className="flex justify-around">
         {navItems.map((item) => {
           const Icon = item.icon;
