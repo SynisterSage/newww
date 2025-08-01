@@ -52,16 +52,6 @@ export default function Dining() {
     
     // Auto-open cart with animation
     setIsCartOpen(true);
-    
-    // Show toast notification
-    const item = menuItems.find(m => m.id === itemId);
-    if (item) {
-      toast({
-        title: "Added to Cart",
-        description: `${item.name} has been added to your order`,
-        duration: 2000,
-      });
-    }
   };
 
   const removeFromOrder = (itemId: string) => {
