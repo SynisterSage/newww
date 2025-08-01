@@ -173,9 +173,9 @@ export default function ConditionsPage() {
         </div>
 
         {/* Course Notices */}
-        {(conditions?.hazardNotes || (conditions?.maintenanceNotes && conditions.maintenanceNotes.length > 0)) && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-[#08452e] mb-4">Important Notices</h2>
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-[#08452e] mb-4">Important Notices</h2>
+          {(conditions?.hazardNotes || (conditions?.maintenanceNotes && conditions.maintenanceNotes.length > 0)) ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {conditions?.hazardNotes && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-6">
@@ -206,8 +206,20 @@ export default function ConditionsPage() {
                 ))
               }
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+              <div className="flex items-center gap-4">
+                <div className="flex-shrink-0">
+                  <CheckCircle className="h-6 w-6 text-green-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-green-700 font-medium">No new course notices</p>
+                  <p className="text-green-600 text-sm mt-1">All clear! Check back later for updates.</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
