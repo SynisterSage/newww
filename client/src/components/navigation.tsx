@@ -20,7 +20,7 @@ export default function Navigation({ userEmail }: NavigationProps) {
     { path: "/tee-times", label: "Tee Times", icon: Calendar },
     { path: "/dining", label: "Dining", icon: Utensils },
     { path: "/conditions", label: "Course Conditions", icon: Info },
-    { path: "/events", label: "Events & Tournaments", icon: Trophy },
+    { path: "/events", label: "Events", icon: Trophy },
   ];
 
   return (

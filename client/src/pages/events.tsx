@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trophy, Calendar, Users, MapPin, Clock } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Trophy, Calendar, Users, MapPin, Clock, ChevronRight } from "lucide-react";
 import { format, addDays, addWeeks } from "date-fns";
 
 interface Event {
@@ -17,97 +20,69 @@ interface Event {
 }
 
 export default function Events() {
+  const { toast } = useToast();
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  
   const events: Event[] = [
     {
       id: "1",
-      title: "Member Championship",
-      date: addDays(new Date(), 7),
-      time: "8:00 AM",
+      title: "The President's Cup",
+      date: new Date("2025-03-15"),
+      time: "4:00 AM",
       type: "tournament",
-      participants: 24,
+      participants: 16,
       maxParticipants: 32,
       location: "Championship Course",
-      description: "Annual member championship tournament. 18-hole stroke play.",
+      description: "A two-day stroke play tournament to kick off the season. All members are welcome to...",
       registrationOpen: true
     },
     {
       id: "2",
-      title: "Ladies Night",
-      date: addDays(new Date(), 3),
-      time: "6:00 PM",
+      title: "Couples' Scramble & Dine",
+      date: new Date("2025-03-22"),
+      time: "11:00 AM",
       type: "social",
-      participants: 16,
+      participants: 8,
       maxParticipants: 20,
-      location: "Clubhouse Dining",
-      description: "Monthly ladies night with dinner and networking.",
+      location: "Championship Course",
+      description: "A fun, relaxed 9-hole scramble followed by a gourmet dinner at the clubhouse.",
       registrationOpen: true
     },
     {
       id: "3",
       title: "Junior Golf Clinic",
-      date: addWeeks(new Date(), 1),
-      time: "10:00 AM",
+      date: new Date("2025-04-05"),
+      time: "5:00 AM",
       type: "lesson",
-      participants: 8,
-      maxParticipants: 12,
+      participants: 12,
+      maxParticipants: 16,
       location: "Practice Range",
-      description: "Golf lessons for young members aged 8-16.",
+      description: "A weekend clinic for young golfers aged 8-16 to learn the fundamentals from our club...",
       registrationOpen: true
-    },
-    {
-      id: "4",
-      title: "Charity Scramble",
-      date: addWeeks(new Date(), 2),
-      time: "1:00 PM",
-      type: "special",
-      participants: 36,
-      maxParticipants: 48,
-      location: "Championship Course",
-      description: "Annual charity scramble supporting local youth programs.",
-      registrationOpen: true
-    },
-    {
-      id: "5",
-      title: "Wine Tasting Evening",
-      date: addDays(new Date(), 14),
-      time: "7:00 PM",
-      type: "social",
-      participants: 22,
-      maxParticipants: 30,
-      location: "19th Hole Bar",
-      description: "Exclusive wine tasting with sommelier guidance.",
-      registrationOpen: false
     }
   ];
 
-  const getEventIcon = (type: Event["type"]) => {
+  const getEventTypeDisplay = (type: Event["type"]) => {
     switch (type) {
       case "tournament":
-        return <Trophy className="w-5 h-5 text-golf-gold" />;
+        return { label: "Stroke Play", color: "bg-blue-100 text-blue-800" };
       case "social":
-        return <Users className="w-5 h-5 text-golf-purple" />;
+        return { label: "Scramble", color: "bg-green-100 text-green-800" };
       case "lesson":
-        return <Clock className="w-5 h-5 text-golf-blue" />;
+        return { label: "Clinic", color: "bg-purple-100 text-purple-800" };
       case "special":
-        return <MapPin className="w-5 h-5 text-golf-orange" />;
+        return { label: "Special", color: "bg-orange-100 text-orange-800" };
       default:
-        return <Calendar className="w-5 h-5 text-golf-green" />;
+        return { label: "Event", color: "bg-gray-100 text-gray-800" };
     }
   };
 
-  const getEventTypeColor = (type: Event["type"]) => {
-    switch (type) {
-      case "tournament":
-        return "bg-golf-gold/10 text-golf-gold border-golf-gold/20";
-      case "social":
-        return "bg-golf-purple/10 text-golf-purple border-golf-purple/20";
-      case "lesson":
-        return "bg-golf-blue/10 text-golf-blue border-golf-blue/20";
-      case "special":
-        return "bg-golf-orange/10 text-golf-orange border-golf-orange/20";
-      default:
-        return "bg-golf-green/10 text-golf-green border-golf-green/20";
-    }
+  const handleSignUp = (event: Event) => {
+    toast({
+      title: "Event Registration Successful!",
+      description: `You've successfully registered for ${event.title}. We'll send you a confirmation email shortly.`,
+    });
+    setSelectedEvent(null);
   };
 
   return (
@@ -121,113 +96,107 @@ export default function Events() {
       </div>
 
       {/* Upcoming Events */}
-      <div className="space-y-4">
-        {events.map((event) => (
-          <Card key={event.id} className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start space-x-4 flex-1">
-                  <div className="mt-1">
-                    {getEventIcon(event.type)}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {events.map((event) => {
+          const eventType = getEventTypeDisplay(event.type);
+          
+          return (
+            <Card key={event.id} className="hover:shadow-lg transition-shadow border-0 shadow-sm bg-white">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <span className="text-sm text-muted-foreground">Past</span>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${eventType.color}`}>
+                    {eventType.label}
+                  </span>
+                </div>
+                
+                <h3 className="text-xl font-semibold text-[#08452e] mb-4">{event.title}</h3>
+                
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <Calendar className="w-4 h-4" />
+                    <span>{format(event.date, 'EEEE, MMM dd, yyyy')}</span>
                   </div>
-                  
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-semibold">{event.title}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getEventTypeColor(event.type)}`}>
-                        {event.type}
-                      </span>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
-                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <Calendar className="w-4 h-4" />
-                        <span>{format(event.date, 'MMM dd, yyyy')}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <Clock className="w-4 h-4" />
-                        <span>{event.time}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <MapPin className="w-4 h-4" />
-                        <span>{event.location}</span>
-                      </div>
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {event.description}
-                    </p>
-                    
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-2 text-sm">
-                        <Users className="w-4 h-4 text-muted-foreground" />
-                        <span>
-                          {event.participants}
-                          {event.maxParticipants && ` / ${event.maxParticipants}`} participants
-                        </span>
-                      </div>
-                      
-                      {event.maxParticipants && (
-                        <div className="flex-1 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-golf-green h-2 rounded-full transition-all"
-                            style={{ 
-                              width: `${(event.participants / event.maxParticipants) * 100}%` 
-                            }}
-                          ></div>
-                        </div>
-                      )}
-                    </div>
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <Clock className="w-4 h-4" />
+                    <span>{event.time}</span>
                   </div>
                 </div>
                 
-                <div className="ml-4">
-                  {event.registrationOpen ? (
-                    <Button className="bg-golf-green hover:bg-golf-green-light">
-                      Register
-                    </Button>
-                  ) : (
-                    <Button variant="outline" disabled>
-                      Registration Closed
-                    </Button>
-                  )}
+                <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+                  {event.description}
+                </p>
+                
+                {/* Participant Progress Bar */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span className="text-muted-foreground">Participants</span>
+                    <span className="font-medium">{event.participants} / {event.maxParticipants}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-[#1B4332] h-2 rounded-full transition-all"
+                      style={{ 
+                        width: `${(event.participants / event.maxParticipants!) * 100}%` 
+                      }}
+                    ></div>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-between border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white"
+                      onClick={() => setSelectedEvent(event)}
+                    >
+                      View Details
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </DialogTrigger>
+                  
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <div className="flex items-start justify-between mb-4">
+                        <span className="text-sm text-muted-foreground">Past</span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${eventType.color}`}>
+                          {eventType.label}
+                        </span>
+                      </div>
+                      <DialogTitle className="text-xl text-[#08452e]">{event.title}</DialogTitle>
+                    </DialogHeader>
+                    
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                          <Calendar className="w-4 h-4" />
+                          <span>{format(event.date, 'EEEE, MMM dd, yyyy')}</span>
+                        </div>
+                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                          <Clock className="w-4 h-4" />
+                          <span>{event.time}</span>
+                        </div>
+                      </div>
+                      
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {event.description}
+                      </p>
+                      
+                      <Button 
+                        className="w-full bg-[#1B4332] hover:bg-[#2D5A3D] text-white"
+                        onClick={() => handleSignUp(event)}
+                        disabled={!event.registrationOpen}
+                      >
+                        {event.registrationOpen ? 'Sign Up for Event' : 'Registration Closed'}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
-
-      {/* Event Categories */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Event Categories</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 border rounded-lg">
-              <Trophy className="w-8 h-8 mx-auto mb-2 text-golf-gold" />
-              <h4 className="font-medium">Tournaments</h4>
-              <p className="text-sm text-muted-foreground">Competitive events</p>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <Users className="w-8 h-8 mx-auto mb-2 text-golf-purple" />
-              <h4 className="font-medium">Social Events</h4>
-              <p className="text-sm text-muted-foreground">Networking & fun</p>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <Clock className="w-8 h-8 mx-auto mb-2 text-golf-blue" />
-              <h4 className="font-medium">Lessons</h4>
-              <p className="text-sm text-muted-foreground">Skill development</p>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <MapPin className="w-8 h-8 mx-auto mb-2 text-golf-orange" />
-              <h4 className="font-medium">Special Events</h4>
-              <p className="text-sm text-muted-foreground">Unique experiences</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
     </div>
   );
