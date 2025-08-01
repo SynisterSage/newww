@@ -188,7 +188,7 @@ export default function Events() {
                     
                     <DialogContent className="max-w-lg">
                       <DialogHeader>
-                        <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center justify-between mt-[14px] mb-[14px]">
                           <span className="text-sm text-muted-foreground">Past</span>
                           <span className={`px-3 py-1 rounded-full text-xs font-medium ${eventType.color}`}>
                             {eventType.label}
