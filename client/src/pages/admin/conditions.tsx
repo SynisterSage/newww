@@ -25,7 +25,7 @@ export default function CourseConditionsPage() {
 
   const updateConditionsMutation = useMutation({
     mutationFn: (data: Partial<InsertCourseConditions>) => 
-      apiRequest("/api/course/conditions", "PATCH", data),
+      apiRequest("PATCH", "/api/course/conditions", data),
     onSuccess: () => {
       toast({
         title: "Course Conditions Updated",
