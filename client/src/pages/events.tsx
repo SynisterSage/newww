@@ -276,11 +276,11 @@ export default function Events() {
                             
                             <Button 
                               variant="outline"
-                              className="w-full h-10 border-red-500 text-red-600 hover:bg-red-50 hover:border-red-600"
+                              className="w-full h-10 border-red-500 text-red-600 hover:bg-red-50 hover:border-red-600 hover:text-red-700 transition-all duration-200"
                               onClick={() => handleWithdrawal(event)}
                               disabled={!canWithdraw(event.date)}
                             >
-                              {canWithdraw(event.date) ? 'Withdraw from Event' : 'Cannot withdraw (< 24h)'}
+                              {canWithdraw(event.date) ? 'Withdraw' : 'Cannot withdraw (< 24h)'}
                             </Button>
                             
                             {!canWithdraw(event.date) && (
