@@ -27,6 +27,7 @@ function Router() {
   const [adminData, setAdminData] = useState<AdminUser | null>(null);
   const [isAdminView, setIsAdminView] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isSwitchingToMember, setIsSwitchingToMember] = useState(false);
   const [location] = useLocation();
 
   const handleLogin = (email: string, user?: User) => {
@@ -68,6 +69,34 @@ function Router() {
     );
   }
 
+  // Show switching to member view animation
+  if (isSwitchingToMember) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-600 via-slate-400 to-blue-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative w-24 h-24 mx-auto mb-8">
+            {/* Rotating rings animation with admin colors */}
+            <div className="absolute inset-0 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <div className="absolute inset-2 border-4 border-blue-500 border-r-transparent rounded-full animate-spin animation-delay-200"></div>
+            <div className="absolute inset-4 border-4 border-slate-500 border-b-transparent rounded-full animate-spin animation-delay-400"></div>
+            
+            {/* Admin shield icon in center */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-8 h-8 bg-white rounded-full border-2 border-blue-600 shadow-lg flex items-center justify-center">
+                <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M2.166 4a2 2 0 012-2h11.668a2 2 0 012 2v6.854c0 2.264-1.487 4.262-3.685 4.847L10 17l-4.149-1.299C3.653 15.116 2.166 13.118 2.166 10.854V4zm9.334 6a1 1 0 11-2 0 1 1 0 012 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <h3 className="text-xl font-semibold text-blue-600 mb-2">Switching to Member View...</h3>
+          <p className="text-muted-foreground">Preparing your member experience</p>
+        </div>
+      </div>
+    );
+  }
+
   // Check if current path is admin route
   const isAdminRoute = location.startsWith('/admin');
 
@@ -81,11 +110,17 @@ function Router() {
     return <AuthLogin onLogin={handleLogin} />;
   }
 
-  const handleSwitchToMember = () => {
+  const handleSwitchToMember = async () => {
+    setIsSwitchingToMember(true);
+    
+    // Show switching animation for 1.5 seconds
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
     // Set member authentication as true with admin email
     setUserEmail(adminData?.email || "admin@packanackgolf.com");
     setIsAuthenticated(true);
     setIsAdminView(true);
+    setIsSwitchingToMember(false);
     // Navigate to member dashboard
     window.location.href = "/";
   };
