@@ -32,7 +32,6 @@ export default function Navigation() {
           </div>
         </div>
       </nav>
-
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block w-64 bg-golf-green text-white min-h-screen fixed left-0 top-0 z-40">
         <div className="p-6">
@@ -41,7 +40,7 @@ export default function Navigation() {
               <Trophy className="w-6 h-6 text-golf-green" />
             </div>
             <div>
-              <h1 className="font-bold text-lg">Oakwood Club</h1>
+              <h1 className="font-bold text-lg">PGC</h1>
               <p className="text-xs text-white/70">Members Only</p>
             </div>
           </div>
