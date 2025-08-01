@@ -106,7 +106,7 @@ export default function AdminMembers() {
         </div>
 
       {/* Search and Stats Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-[18px] mb-[18px]">
         <Card className="lg:col-span-1">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-semibold">Total Members</CardTitle>
