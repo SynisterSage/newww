@@ -282,7 +282,7 @@ export default function Events() {
                     </DialogContent>
                   </Dialog>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-2 mt-[15px] mb-[15px]">
                         <Button 
                           variant="default"
                           className="w-full h-10 bg-[#1B4332] hover:bg-[#1B4332] text-white border-[#1B4332] cursor-default"
