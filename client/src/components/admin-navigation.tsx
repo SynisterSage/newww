@@ -39,7 +39,6 @@ export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminN
           </div>
         </div>
       </nav>
-      
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block w-64 text-white min-h-screen fixed left-0 top-0 z-40 bg-slate-800">
         <div className="p-6">
@@ -77,7 +76,7 @@ export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminN
           <div className="absolute bottom-20 left-6 right-6">
             <button
               onClick={onSwitchToMember}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-blue-600/10 border border-blue-600/20 text-blue-300 hover:bg-blue-600/20 hover:text-blue-200 transition-all duration-200 group"
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-blue-600/10 border border-blue-600/20 text-blue-300 hover:bg-blue-600/20 hover:text-blue-200 transition-all duration-200 group mt-[35px] mb-[35px]"
             >
               <Eye className="w-5 h-5 group-hover:scale-110 transition-transform" />
               <span className="font-medium">View as Member</span>
