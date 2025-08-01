@@ -21,6 +21,8 @@ interface Event {
 
 export default function Events() {
   const { toast } = useToast();
+  const [registeredEvents, setRegisteredEvents] = useState<Set<string>>(new Set());
+  const [openModal, setOpenModal] = useState<string | null>(null);
   
   const events: Event[] = [
     {
@@ -77,6 +79,8 @@ export default function Events() {
   };
 
   const handleSignUp = (event: Event) => {
+    setRegisteredEvents(prev => new Set([...prev, event.id]));
+    setOpenModal(null); // Close the modal
     toast({
       title: "Event Registration Successful!",
       description: `You've successfully registered for ${event.title}. We'll send you a confirmation email shortly.`,
@@ -97,6 +101,7 @@ export default function Events() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {events.map((event) => {
           const eventType = getEventTypeDisplay(event.type);
+          const isRegistered = registeredEvents.has(event.id);
           
           return (
             <Card key={event.id} className="hover:shadow-lg transition-all duration-300 border-0 shadow-sm bg-white h-[420px] flex flex-col">
@@ -153,14 +158,19 @@ export default function Events() {
                 
                 {/* Action Button - Fixed at bottom */}
                 <div className="mt-auto">
-                  <Dialog>
+                  <Dialog open={openModal === event.id} onOpenChange={(open) => setOpenModal(open ? event.id : null)}>
                     <DialogTrigger asChild>
                       <Button 
-                        variant="outline" 
-                        className="w-full h-10 justify-between border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white transition-colors"
+                        variant={isRegistered ? "default" : "outline"}
+                        className={`w-full h-10 justify-between transition-colors ${
+                          isRegistered 
+                            ? "bg-green-600 hover:bg-green-700 text-white border-green-600" 
+                            : "border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white"
+                        }`}
+                        disabled={isRegistered}
                       >
-                        <span>View Details</span>
-                        <ChevronRight className="w-4 h-4" />
+                        <span>{isRegistered ? 'Registered' : 'View Details'}</span>
+                        {!isRegistered && <ChevronRight className="w-4 h-4" />}
                       </Button>
                     </DialogTrigger>
                     
@@ -192,8 +202,9 @@ export default function Events() {
                           </div>
                         </div>
                         
-                        {/* Description */}
+                        {/* Full Description */}
                         <div>
+                          <h4 className="text-sm font-medium text-foreground mb-2">Event Description</h4>
                           <p className="text-sm text-muted-foreground leading-relaxed">
                             {event.description}
                           </p>
@@ -223,13 +234,28 @@ export default function Events() {
                         </div>
                         
                         {/* Sign Up Button */}
-                        <Button 
-                          className="w-full h-12 bg-[#1B4332] hover:bg-[#2D5A3D] text-white font-medium"
-                          onClick={() => handleSignUp(event)}
-                          disabled={!event.registrationOpen}
-                        >
-                          {event.registrationOpen ? 'Sign Up for Event' : 'Registration Closed'}
-                        </Button>
+                        {!isRegistered && (
+                          <Button 
+                            className="w-full h-12 bg-[#1B4332] hover:bg-[#2D5A3D] text-white font-medium"
+                            onClick={() => handleSignUp(event)}
+                            disabled={!event.registrationOpen}
+                          >
+                            {event.registrationOpen ? 'Sign Up for Event' : 'Registration Closed'}
+                          </Button>
+                        )}
+                        
+                        {isRegistered && (
+                          <div className="text-center py-4">
+                            <div className="inline-flex items-center space-x-2 text-green-600">
+                              <div className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                              <span className="font-medium">You're registered for this event!</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </DialogContent>
                   </Dialog>
