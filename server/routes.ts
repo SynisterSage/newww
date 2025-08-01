@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertTeetimeSchema, insertOrderSchema, insertRoundSchema } from "@shared/schema";
+import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Tee time routes
@@ -154,6 +155,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(user);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Admin authentication routes
+  const adminLoginSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(1),
+  });
+
+  app.post("/api/admin/auth", async (req, res) => {
+    try {
+      const { email, password } = adminLoginSchema.parse(req.body);
+      const adminUser = await storage.authenticateAdmin(email, password);
+      
+      if (!adminUser) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // Return admin user without password
+      const { password: _, ...adminData } = adminUser;
+      res.json(adminData);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid login data" });
+    }
+  });
+
+  app.get("/api/admin/verify/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const adminUser = await storage.getAdminUser(id);
+      
+      if (!adminUser || !adminUser.isActive) {
+        return res.status(404).json({ message: "Admin not found" });
+      }
+      
+      // Return admin user without password
+      const { password: _, ...adminData } = adminUser;
+      res.json(adminData);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to verify admin" });
     }
   });
 

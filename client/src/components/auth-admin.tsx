@@ -2,31 +2,51 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, Lock, Eye, EyeOff, Shield } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Shield, AlertCircle } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import type { AdminUser } from "@shared/schema";
 
 interface AuthAdminProps {
-  onLogin: (email: string) => void;
+  onLogin: (adminData: AdminUser) => void;
 }
 
 export function AuthAdmin({ onLogin }: AuthAdminProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const loginMutation = useMutation({
+    mutationFn: async (credentials: { email: string; password: string }) => {
+      try {
+        const data = await apiRequest("/api/admin/auth", {
+          method: "POST",
+          body: JSON.stringify(credentials),
+        });
+        return data as AdminUser;
+      } catch (error) {
+        throw new Error("Invalid credentials");
+      }
+    },
+    onSuccess: (adminData) => {
+      setError("");
+      onLogin(adminData);
+    },
+    onError: (error: Error) => {
+      setError(error.message);
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim() || !password.trim()) return;
     
-    setIsLoading(true);
-    
-    // Simulate login delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    onLogin(email);
+    setError("");
+    loginMutation.mutate({ email, password });
   };
 
-  if (isLoading) {
+  if (loginMutation.isPending) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center">
         <div className="text-center">
@@ -63,6 +83,13 @@ export function AuthAdmin({ onLogin }: AuthAdminProps) {
         </CardHeader>
         
         <CardContent>
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2">
+              <AlertCircle className="w-4 h-4 text-red-600" />
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Admin Email</label>
@@ -104,14 +131,18 @@ export function AuthAdmin({ onLogin }: AuthAdminProps) {
             <Button 
               type="submit" 
               className="w-full h-12 bg-slate-700 hover:bg-slate-800 text-white font-semibold"
-              disabled={!email.trim()}
+              disabled={!email.trim() || !password.trim() || loginMutation.isPending}
             >
-              Admin Login
+              {loginMutation.isPending ? "Authenticating..." : "Admin Login"}
             </Button>
             
             <div className="text-center text-sm text-muted-foreground">
               <p>Staff access only</p>
               <p className="font-medium text-slate-700">Contact IT for assistance</p>
+              <div className="mt-3 text-xs text-gray-600">
+                <p>Demo credentials:</p>
+                <p>admin@packanackgolf.com / admin123</p>
+              </div>
             </div>
           </form>
         </CardContent>

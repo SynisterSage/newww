@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type TeeTime, type InsertTeeTime, type MenuItem, type InsertMenuItem, type Order, type InsertOrder, type CourseHole, type InsertCourseHole, type Round, type InsertRound } from "@shared/schema";
+import { type User, type InsertUser, type AdminUser, type InsertAdminUser, type TeeTime, type InsertTeeTime, type MenuItem, type InsertMenuItem, type Order, type InsertOrder, type CourseHole, type InsertCourseHole, type Round, type InsertRound } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -6,6 +6,12 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  
+  // Admin user methods
+  getAdminUser(id: string): Promise<AdminUser | undefined>;
+  getAdminUserByEmail(email: string): Promise<AdminUser | undefined>;
+  createAdminUser(adminUser: InsertAdminUser): Promise<AdminUser>;
+  authenticateAdmin(email: string, password: string): Promise<AdminUser | null>;
   
   // Tee time methods
   getTeetimes(date?: string): Promise<TeeTime[]>;
@@ -37,6 +43,7 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
+  private adminUsers: Map<string, AdminUser>;
   private teetimes: Map<string, TeeTime>;
   private menuItems: Map<string, MenuItem>;
   private orders: Map<string, Order>;
@@ -45,6 +52,7 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.users = new Map();
+    this.adminUsers = new Map();
     this.teetimes = new Map();
     this.menuItems = new Map();
     this.orders = new Map();
@@ -67,6 +75,23 @@ export class MemStorage implements IStorage {
       accountBalance: "285.00"
     };
     this.users.set(defaultUser.id, defaultUser);
+
+    // Initialize admin users
+    const adminData = [
+      { email: "admin@packanackgolf.com", password: "admin123", name: "John Admin", role: "admin" },
+      { email: "manager@packanackgolf.com", password: "manager123", name: "Sarah Manager", role: "manager" },
+      { email: "staff@packanackgolf.com", password: "staff123", name: "Mike Staff", role: "staff" },
+      { email: "kitchen@packanackgolf.com", password: "kitchen123", name: "Kitchen Staff", role: "staff" },
+    ];
+
+    adminData.forEach(data => {
+      const adminUser: AdminUser = {
+        id: randomUUID(),
+        isActive: true,
+        ...data
+      };
+      this.adminUsers.set(adminUser.id, adminUser);
+    });
 
     // Initialize tee times
     const today = new Date().toISOString().split('T')[0];
@@ -160,6 +185,36 @@ export class MemStorage implements IStorage {
     const user: User = { ...insertUser, id };
     this.users.set(id, user);
     return user;
+  }
+
+  // Admin user methods
+  async getAdminUser(id: string): Promise<AdminUser | undefined> {
+    return this.adminUsers.get(id);
+  }
+
+  async getAdminUserByEmail(email: string): Promise<AdminUser | undefined> {
+    return Array.from(this.adminUsers.values()).find(admin => admin.email === email);
+  }
+
+  async createAdminUser(insertAdminUser: InsertAdminUser): Promise<AdminUser> {
+    const id = randomUUID();
+    const adminUser: AdminUser = { ...insertAdminUser, id };
+    this.adminUsers.set(id, adminUser);
+    return adminUser;
+  }
+
+  async authenticateAdmin(email: string, password: string): Promise<AdminUser | null> {
+    const adminUser = await this.getAdminUserByEmail(email);
+    if (!adminUser || !adminUser.isActive) {
+      return null;
+    }
+    
+    // In a real app, you'd use proper password hashing (bcrypt, etc.)
+    if (adminUser.password === password) {
+      return adminUser;
+    }
+    
+    return null;
   }
 
   // Tee time methods

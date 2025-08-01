@@ -14,6 +14,15 @@ export const users = pgTable("users", {
   accountBalance: decimal("account_balance", { precision: 10, scale: 2 }).default("285.00"),
 });
 
+export const adminUsers = pgTable("admin_users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  name: text("name").notNull(),
+  role: text("role").notNull().default("staff"), // staff, manager, admin
+  isActive: boolean("is_active").default(true),
+});
+
 export const teetimes = pgTable("teetimes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id),
@@ -71,6 +80,10 @@ export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
 });
 
+export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({
+  id: true,
+});
+
 export const insertTeetimeSchema = createInsertSchema(teetimes).omit({
   id: true,
 });
@@ -96,6 +109,8 @@ export const insertRoundSchema = createInsertSchema(rounds).omit({
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type AdminUser = typeof adminUsers.$inferSelect;
+export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
 export type TeeTime = typeof teetimes.$inferSelect;
 export type InsertTeeTime = z.infer<typeof insertTeetimeSchema>;
 export type MenuItem = typeof menuItems.$inferSelect;
