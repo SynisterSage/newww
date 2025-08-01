@@ -74,7 +74,7 @@ export default function Conditions() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F8F6F0]">
-        <div className="p-6 space-y-6">
+        <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold text-golf-green">Course Conditions</h1>
           <div className="animate-pulse space-y-4">
             <div className="h-64 bg-gray-300 rounded-lg"></div>
@@ -90,7 +90,7 @@ export default function Conditions() {
 
   return (
     <div className="min-h-screen bg-[#F8F6F0]">
-      <div className="p-6 space-y-6">
+      <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
       <div>
         <h1 className="text-3xl font-bold text-golf-green">Course Conditions</h1>
         <p className="text-muted-foreground mt-1">
