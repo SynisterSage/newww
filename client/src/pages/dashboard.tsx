@@ -87,7 +87,7 @@ export default function Dashboard() {
 
         <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 shadow-sm">
           <CardContent className="p-6 text-center">
-            <Link href="/gps">
+            <Link href="/conditions">
               <div className="w-14 h-14 bg-golf-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                 <MapPin className="w-7 h-7 text-golf-blue" />
               </div>
@@ -99,11 +99,13 @@ export default function Dashboard() {
 
         <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 shadow-sm">
           <CardContent className="p-6 text-center">
-            <div className="w-14 h-14 bg-golf-purple/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-              <Trophy className="w-7 h-7 text-golf-purple" />
-            </div>
-            <h3 className="font-semibold text-foreground mb-1">Club Events</h3>
-            <p className="text-sm text-muted-foreground">View tournament schedule</p>
+            <Link href="/events">
+              <div className="w-14 h-14 bg-golf-purple/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Trophy className="w-7 h-7 text-golf-purple" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-1">Club Events</h3>
+              <p className="text-sm text-muted-foreground">View tournament schedule</p>
+            </Link>
           </CardContent>
         </Card>
       </div>
