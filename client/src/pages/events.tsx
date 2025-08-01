@@ -115,7 +115,6 @@ export default function Events() {
         <h1 className="text-2xl sm:text-3xl font-bold text-golf-green mb-2">Events & Tournaments</h1>
         <p className="text-muted-foreground text-sm sm:text-base">View the full schedule of club happenings and sign up for tournaments.</p>
       </div>
-
       {/* Events Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
         {events.map((event) => (
@@ -170,7 +169,7 @@ export default function Events() {
                         <DialogTitle className="text-xl sm:text-2xl font-bold text-golf-green pr-4">
                           {selectedEvent?.title}
                         </DialogTitle>
-                        <Badge className={`text-xs font-medium flex-shrink-0 ${getEventBadgeColor(selectedEvent?.type || '')}`}>
+                        <Badge className="inline-flex items-center rounded-full border px-2.5 py-0.5 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 text-xs font-medium flex-shrink-0 bg-blue-100 text-blue-700 mt-[8px] mb-[8px] ml-[21px] mr-[21px]">
                           {getEventTypeName(selectedEvent?.type || '')}
                         </Badge>
                       </div>
@@ -278,7 +277,6 @@ export default function Events() {
           </Card>
         ))}
       </div>
-
       {/* Empty State */}
       {events.length === 0 && (
         <div className="text-center py-12">
