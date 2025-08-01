@@ -20,7 +20,7 @@ export function AuthAdmin({ onLogin }: AuthAdminProps) {
   const loginMutation = useMutation({
     mutationFn: async (credentials: { email: string; password: string }) => {
       try {
-        const response = await fetch("/api/admin/auth", {
+        const response = await fetch("/api/auth/admin", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -33,7 +33,11 @@ export function AuthAdmin({ onLogin }: AuthAdminProps) {
         }
 
         const data = await response.json();
-        return data as AdminUser;
+        // Store session token in localStorage
+        if (data.sessionToken) {
+          localStorage.setItem('sessionToken', data.sessionToken);
+        }
+        return data as AdminUser & { sessionToken?: string };
       } catch (error) {
         throw new Error("Invalid credentials");
       }

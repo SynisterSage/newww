@@ -32,7 +32,11 @@ export function AuthLogin({ onLogin }: AuthLoginProps) {
         }
 
         const data = await response.json();
-        return data as User;
+        // Store session token in localStorage
+        if (data.sessionToken) {
+          localStorage.setItem('sessionToken', data.sessionToken);
+        }
+        return data as User & { sessionToken?: string };
       } catch (error: any) {
         throw new Error(error.message || "Authentication failed");
       }

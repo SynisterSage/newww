@@ -89,6 +89,16 @@ export const rounds = pgTable("rounds", {
   status: text("status").notNull().default("in_progress"), // in_progress, completed
 });
 
+// Sessions table for persistent login
+export const sessions = pgTable("sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  adminUserId: varchar("admin_user_id").references(() => adminUsers.id),
+  sessionToken: text("session_token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
 });
@@ -120,6 +130,11 @@ export const insertRoundSchema = createInsertSchema(rounds).omit({
   endTime: true,
 });
 
+export const insertSessionSchema = createInsertSchema(sessions).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type AdminUser = typeof adminUsers.$inferSelect;
@@ -134,3 +149,5 @@ export type CourseHole = typeof courseHoles.$inferSelect;
 export type InsertCourseHole = z.infer<typeof insertCourseHoleSchema>;
 export type Round = typeof rounds.$inferSelect;
 export type InsertRound = z.infer<typeof insertRoundSchema>;
+export type Session = typeof sessions.$inferSelect;
+export type InsertSession = z.infer<typeof insertSessionSchema>;

@@ -1,10 +1,15 @@
-import { type User, type InsertUser, type AdminUser, type InsertAdminUser, type TeeTime, type InsertTeeTime, type MenuItem, type InsertMenuItem, type Order, type InsertOrder, type CourseHole, type InsertCourseHole, type Round, type InsertRound } from "@shared/schema";
+import { type User, type InsertUser, type AdminUser, type InsertAdminUser, type TeeTime, type InsertTeeTime, type MenuItem, type InsertMenuItem, type Order, type InsertOrder, type CourseHole, type InsertCourseHole, type Round, type InsertRound, type Session, type InsertSession } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { db } from "./db";
+import { users, adminUsers, teetimes, menuItems, orders, courseHoles, rounds, sessions } from "@shared/schema";
+import { eq, and, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  authenticateMember(email: string, phone: string): Promise<User | null>;
   getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   
@@ -13,6 +18,12 @@ export interface IStorage {
   getAdminUserByEmail(email: string): Promise<AdminUser | undefined>;
   createAdminUser(adminUser: InsertAdminUser): Promise<AdminUser>;
   authenticateAdmin(email: string, password: string): Promise<AdminUser | null>;
+  
+  // Session methods
+  createSession(session: InsertSession): Promise<Session>;
+  getSessionByToken(token: string): Promise<Session | undefined>;
+  deleteSession(token: string): Promise<void>;
+  cleanExpiredSessions(): Promise<void>;
   
   // Tee time methods
   getTeetimes(date?: string): Promise<TeeTime[]>;
@@ -26,7 +37,7 @@ export interface IStorage {
   createMenuItem(item: InsertMenuItem): Promise<MenuItem>;
   
   // Order methods
-  getOrders(userId: string): Promise<Order[]>;
+  getOrders(userId?: string): Promise<Order[]>;
   getOrderById(id: string): Promise<Order | undefined>;
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrder(id: string, updates: Partial<Order>): Promise<Order | undefined>;
@@ -490,4 +501,177 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// DatabaseStorage implementation
+export class DatabaseStorage implements IStorage {
+  // User methods
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async authenticateMember(email: string, phone: string): Promise<User | null> {
+    const [user] = await db.select().from(users)
+      .where(and(eq(users.email, email), eq(users.phone, phone)));
+    return user || null;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    const [newUser] = await db.insert(users).values(user).returning();
+    return newUser;
+  }
+
+  // Admin user methods
+  async getAdminUser(id: string): Promise<AdminUser | undefined> {
+    const [admin] = await db.select().from(adminUsers).where(eq(adminUsers.id, id));
+    return admin || undefined;
+  }
+
+  async getAdminUserByEmail(email: string): Promise<AdminUser | undefined> {
+    const [admin] = await db.select().from(adminUsers).where(eq(adminUsers.email, email));
+    return admin || undefined;
+  }
+
+  async createAdminUser(adminUser: InsertAdminUser): Promise<AdminUser> {
+    const [newAdmin] = await db.insert(adminUsers).values(adminUser).returning();
+    return newAdmin;
+  }
+
+  async authenticateAdmin(email: string, password: string): Promise<AdminUser | null> {
+    const [admin] = await db.select().from(adminUsers)
+      .where(and(eq(adminUsers.email, email), eq(adminUsers.password, password)));
+    return admin || null;
+  }
+
+  // Session methods
+  async createSession(session: InsertSession): Promise<Session> {
+    const [newSession] = await db.insert(sessions).values(session).returning();
+    return newSession;
+  }
+
+  async getSessionByToken(token: string): Promise<Session | undefined> {
+    const [session] = await db.select().from(sessions).where(eq(sessions.sessionToken, token));
+    return session || undefined;
+  }
+
+  async deleteSession(token: string): Promise<void> {
+    await db.delete(sessions).where(eq(sessions.sessionToken, token));
+  }
+
+  async cleanExpiredSessions(): Promise<void> {
+    await db.delete(sessions).where(sql`expires_at < NOW()`);
+  }
+
+  // Tee time methods
+  async getTeetimes(date?: string): Promise<TeeTime[]> {
+    if (date) {
+      return await db.select().from(teetimes).where(eq(teetimes.date, date));
+    }
+    return await db.select().from(teetimes);
+  }
+
+  async getTeetimeById(id: string): Promise<TeeTime | undefined> {
+    const [teetime] = await db.select().from(teetimes).where(eq(teetimes.id, id));
+    return teetime || undefined;
+  }
+
+  async createTeetime(teetime: InsertTeeTime): Promise<TeeTime> {
+    const [newTeetime] = await db.insert(teetimes).values(teetime).returning();
+    return newTeetime;
+  }
+
+  async updateTeetime(id: string, updates: Partial<TeeTime>): Promise<TeeTime | undefined> {
+    const [updated] = await db.update(teetimes).set(updates).where(eq(teetimes.id, id)).returning();
+    return updated || undefined;
+  }
+
+  // Menu methods
+  async getMenuItems(category?: string): Promise<MenuItem[]> {
+    if (category) {
+      return await db.select().from(menuItems).where(eq(menuItems.category, category));
+    }
+    return await db.select().from(menuItems);
+  }
+
+  async getMenuItemById(id: string): Promise<MenuItem | undefined> {
+    const [item] = await db.select().from(menuItems).where(eq(menuItems.id, id));
+    return item || undefined;
+  }
+
+  async createMenuItem(item: InsertMenuItem): Promise<MenuItem> {
+    const [newItem] = await db.insert(menuItems).values(item).returning();
+    return newItem;
+  }
+
+  // Order methods
+  async getOrders(userId?: string): Promise<Order[]> {
+    if (userId) {
+      return await db.select().from(orders).where(eq(orders.userId, userId));
+    }
+    return await db.select().from(orders);
+  }
+
+  async getOrderById(id: string): Promise<Order | undefined> {
+    const [order] = await db.select().from(orders).where(eq(orders.id, id));
+    return order || undefined;
+  }
+
+  async createOrder(order: InsertOrder): Promise<Order> {
+    const [newOrder] = await db.insert(orders).values(order).returning();
+    return newOrder;
+  }
+
+  async updateOrder(id: string, updates: Partial<Order>): Promise<Order | undefined> {
+    const [updated] = await db.update(orders).set(updates).where(eq(orders.id, id)).returning();
+    return updated || undefined;
+  }
+
+  // Course methods
+  async getCourseHoles(course?: string): Promise<CourseHole[]> {
+    if (course) {
+      return await db.select().from(courseHoles).where(eq(courseHoles.course, course));
+    }
+    return await db.select().from(courseHoles);
+  }
+
+  async getCourseHoleById(id: string): Promise<CourseHole | undefined> {
+    const [hole] = await db.select().from(courseHoles).where(eq(courseHoles.id, id));
+    return hole || undefined;
+  }
+
+  // Round methods
+  async getRounds(userId: string): Promise<Round[]> {
+    return await db.select().from(rounds).where(eq(rounds.userId, userId));
+  }
+
+  async getCurrentRound(userId: string): Promise<Round | undefined> {
+    const [round] = await db.select().from(rounds)
+      .where(and(eq(rounds.userId, userId), eq(rounds.status, "in_progress")));
+    return round || undefined;
+  }
+
+  async createRound(round: InsertRound): Promise<Round> {
+    const [newRound] = await db.insert(rounds).values(round).returning();
+    return newRound;
+  }
+
+  async updateRound(id: string, updates: Partial<Round>): Promise<Round | undefined> {
+    const [updated] = await db.update(rounds).set(updates).where(eq(rounds.id, id)).returning();
+    return updated || undefined;
+  }
+}
+
+export const storage = new DatabaseStorage();

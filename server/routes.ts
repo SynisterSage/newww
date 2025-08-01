@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertTeetimeSchema, insertOrderSchema, insertRoundSchema, insertUserSchema } from "@shared/schema";
 import { z } from "zod";
+import { randomUUID } from "crypto";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Tee time routes
@@ -160,12 +161,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!member.isActive) {
         return res.status(401).json({ message: "Member account is inactive. Please contact the club office." });
       }
+
+      // Create session token
+      const sessionToken = randomUUID();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
+
+      const session = await storage.createSession({
+        userId: member.id,
+        sessionToken,
+        expiresAt,
+        adminUserId: null
+      });
       
-      // Return member data without password
+      // Return member data without password plus session token
       const { password: _, ...memberData } = member;
-      res.json(memberData);
+      res.json({ ...memberData, sessionToken: session.sessionToken });
     } catch (error) {
       res.status(400).json({ message: "Invalid authentication data" });
+    }
+  });
+
+  app.post("/api/auth/admin", async (req, res) => {
+    try {
+      const { email, password } = adminLoginSchema.parse(req.body);
+      const adminUser = await storage.authenticateAdmin(email, password);
+      
+      if (!adminUser) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Create session token
+      const sessionToken = randomUUID();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 1); // 1 day for admin
+
+      const session = await storage.createSession({
+        adminUserId: adminUser.id,
+        sessionToken,
+        expiresAt,
+        userId: null
+      });
+      
+      // Return admin user without password plus session token
+      const { password: _, ...adminData } = adminUser;
+      res.json({ ...adminData, sessionToken: session.sessionToken });
+    } catch (error) {
+      res.status(400).json({ message: "Invalid login data" });
+    }
+  });
+
+  app.post("/api/auth/verify", async (req, res) => {
+    try {
+      const { sessionToken } = req.body;
+      
+      if (!sessionToken) {
+        return res.status(401).json({ message: "No session token provided" });
+      }
+
+      const session = await storage.getSessionByToken(sessionToken);
+      
+      if (!session || session.expiresAt < new Date()) {
+        return res.status(401).json({ message: "Invalid or expired session" });
+      }
+
+      // Get user or admin based on session
+      if (session.userId) {
+        const user = await storage.getUser(session.userId);
+        if (user && user.isActive) {
+          const { password: _, ...userData } = user;
+          return res.json({ ...userData, sessionToken, type: 'member' });
+        }
+      } else if (session.adminUserId) {
+        const admin = await storage.getAdminUser(session.adminUserId);
+        if (admin && admin.isActive) {
+          const { password: _, ...adminData } = admin;
+          return res.json({ ...adminData, sessionToken, type: 'admin' });
+        }
+      }
+
+      return res.status(401).json({ message: "Session user not found or inactive" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to verify session" });
+    }
+  });
+
+  app.post("/api/auth/logout", async (req, res) => {
+    try {
+      const { sessionToken } = req.body;
+      
+      if (sessionToken) {
+        await storage.deleteSession(sessionToken);
+      }
+      
+      res.json({ message: "Logged out successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Logout failed" });
     }
   });
 

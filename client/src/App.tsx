@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -28,7 +28,53 @@ function Router() {
   const [isAdminView, setIsAdminView] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isSwitchingToMember, setIsSwitchingToMember] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [location] = useLocation();
+
+  // Check for existing session on load
+  useEffect(() => {
+    const verifySession = async () => {
+      const sessionToken = localStorage.getItem('sessionToken');
+      
+      if (!sessionToken) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth/verify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ sessionToken }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.type === 'member') {
+            setUserData(data);
+            setUserEmail(data.email);
+            setIsAuthenticated(true);
+          } else if (data.type === 'admin') {
+            setAdminData(data);
+            setIsAdminAuthenticated(true);
+          }
+        } else {
+          // Clear invalid session
+          localStorage.removeItem('sessionToken');
+        }
+      } catch (error) {
+        // Clear invalid session on error
+        localStorage.removeItem('sessionToken');
+      }
+      
+      setIsLoading(false);
+    };
+
+    verifySession();
+  }, []);
 
   const handleLogin = (email: string, user?: User) => {
     setUserEmail(email);
@@ -97,6 +143,32 @@ function Router() {
     );
   }
 
+  // Show loading while verifying session
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-golf-green-soft via-white to-golf-green-light flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative w-24 h-24 mx-auto mb-8">
+            <div className="absolute inset-0 border-4 border-golf-green border-t-transparent rounded-full animate-spin"></div>
+            <div className="absolute inset-2 border-4 border-golf-green-light border-r-transparent rounded-full animate-spin animation-delay-200"></div>
+            <div className="absolute inset-4 border-4 border-gold border-b-transparent rounded-full animate-spin animation-delay-400"></div>
+            
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-8 h-8 bg-white rounded-full border-2 border-golf-green shadow-lg">
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-white to-gray-100 flex items-center justify-center">
+                  <div className="w-1 h-1 bg-golf-green rounded-full"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <h3 className="text-xl font-semibold text-golf-green mb-2">Loading...</h3>
+          <p className="text-muted-foreground">Verifying your session</p>
+        </div>
+      </div>
+    );
+  }
+
   // Check if current path is admin route
   const isAdminRoute = location.startsWith('/admin');
 
@@ -133,12 +205,31 @@ function Router() {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     
+    // Call logout API
+    const sessionToken = localStorage.getItem('sessionToken');
+    if (sessionToken) {
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ sessionToken }),
+        });
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+      localStorage.removeItem('sessionToken');
+    }
+    
     // Show logout animation for 1.5 seconds
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     setIsAuthenticated(false);
+    setIsAdminAuthenticated(false);
     setUserEmail("");
     setUserData(null);
+    setAdminData(null);
     setIsAdminView(false);
     setIsLoggingOut(false);
   };
