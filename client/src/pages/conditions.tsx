@@ -81,41 +81,37 @@ export default function ConditionsPage() {
         {/* Weather Section */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-[#08452e] mb-4">Current Weather</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="border-0 shadow-sm bg-white">
-              <CardContent className="p-6 text-center">
-                <div className="text-4xl mb-3">{getWeatherIcon(conditions?.weather || 'sunny')}</div>
-                <p className="font-semibold text-gray-900 capitalize">
-                  {conditions?.weather?.replace('-', ' ') || 'Sunny'}
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">Conditions</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-0 shadow-sm bg-white">
-              <CardContent className="p-6 text-center">
-                <Thermometer className="h-8 w-8 text-red-500 mx-auto mb-3" />
-                <p className="text-2xl font-bold text-gray-900 mb-1">{conditions?.temperature || 72}°F</p>
-                <p className="text-sm text-muted-foreground">Temperature</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-0 shadow-sm bg-white">
-              <CardContent className="p-6 text-center">
-                <Wind className="h-8 w-8 text-blue-500 mx-auto mb-3" />
-                <p className="text-2xl font-bold text-gray-900 mb-1">{conditions?.windSpeed || 5} mph</p>
-                <p className="text-sm text-muted-foreground">Wind Speed</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-0 shadow-sm bg-white">
-              <CardContent className="p-6 text-center">
-                <Droplets className="h-8 w-8 text-blue-600 mx-auto mb-3" />
-                <p className="text-2xl font-bold text-gray-900 mb-1">{conditions?.humidity || 45}%</p>
-                <p className="text-sm text-muted-foreground">Humidity</p>
-              </CardContent>
-            </Card>
-          </div>
+          <Card className="border-0 shadow-sm bg-white">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="text-4xl mb-3">{getWeatherIcon(conditions?.weather || 'sunny')}</div>
+                  <p className="font-semibold text-gray-900 capitalize">
+                    {conditions?.weather?.replace('-', ' ') || 'Sunny'}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">Conditions</p>
+                </div>
+                
+                <div className="text-center">
+                  <Thermometer className="h-8 w-8 text-red-500 mx-auto mb-3" />
+                  <p className="text-2xl font-bold text-gray-900 mb-1">{conditions?.temperature || 72}°F</p>
+                  <p className="text-sm text-muted-foreground">Temperature</p>
+                </div>
+                
+                <div className="text-center">
+                  <Wind className="h-8 w-8 text-blue-500 mx-auto mb-3" />
+                  <p className="text-2xl font-bold text-gray-900 mb-1">{conditions?.windSpeed || 5} mph</p>
+                  <p className="text-sm text-muted-foreground">Wind Speed</p>
+                </div>
+                
+                <div className="text-center">
+                  <Droplets className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+                  <p className="text-2xl font-bold text-gray-900 mb-1">{conditions?.humidity || 45}%</p>
+                  <p className="text-sm text-muted-foreground">Humidity</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Course Information */}
@@ -175,29 +171,33 @@ export default function ConditionsPage() {
         {/* Course Notices */}
         {(conditions?.hazardNotes || conditions?.maintenanceNotes) && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-[#08452e] mb-4">Course Notices</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="text-xl font-semibold text-[#08452e] mb-4">Important Notices</h2>
+            <div className="space-y-4">
               {conditions?.hazardNotes && (
-                <Card className="border-0 shadow-sm bg-white border-l-4 border-red-400">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-3">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
                       <AlertCircle className="h-6 w-6 text-red-600" />
-                      <h4 className="font-semibold text-red-800">Hazard Alert</h4>
                     </div>
-                    <p className="text-gray-700">{conditions.hazardNotes}</p>
-                  </CardContent>
-                </Card>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-red-800 mb-2">Hazard Alert</h4>
+                      <p className="text-red-700 leading-relaxed">{conditions.hazardNotes}</p>
+                    </div>
+                  </div>
+                </div>
               )}
               {conditions?.maintenanceNotes && (
-                <Card className="border-0 shadow-sm bg-white border-l-4 border-orange-400">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-3">
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
                       <Wrench className="h-6 w-6 text-orange-600" />
-                      <h4 className="font-semibold text-orange-800">Maintenance Notice</h4>
                     </div>
-                    <p className="text-gray-700">{conditions.maintenanceNotes}</p>
-                  </CardContent>
-                </Card>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-orange-800 mb-2">Maintenance Notice</h4>
+                      <p className="text-orange-700 leading-relaxed">{conditions.maintenanceNotes}</p>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           </div>
