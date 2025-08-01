@@ -48,29 +48,29 @@ export default function Navigation({ userEmail, userData, isAdminView, onSwitchT
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block w-64 text-white min-h-screen fixed left-0 top-0 z-40 bg-[#032617]">
         <div className="p-6">
-          <div className="flex items-center space-x-3 mb-8">
-            <div className="w-10 h-10 bg-golf-gold rounded-xl flex items-center justify-center">
-              <Trophy className="w-6 h-6 text-golf-green" />
+          <div className="flex items-center space-x-3 mb-8 pb-6 border-b border-white/10">
+            <div className="w-8 h-8 bg-golf-gold rounded-md flex items-center justify-center">
+              <Trophy className="w-5 h-5 text-golf-green" />
             </div>
             <div>
-              <h1 className="font-bold text-lg">PGC</h1>
-              <p className="text-xs text-white/70">Private App</p>
+              <h1 className="font-semibold text-lg">PGC</h1>
+              <p className="text-xs text-white/60">Member Portal</p>
             </div>
           </div>
           
-          <nav className="space-y-2">
+          <nav className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location === item.path;
               
               return (
                 <Link key={item.path} href={item.path}>
-                  <a className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  <a className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                     isActive 
-                      ? "bg-white/10 text-white shadow-sm" 
-                      : "text-white/70 hover:bg-white/5 hover:text-white"
+                      ? "bg-white/15 text-white border-l-3 border-golf-gold ml-0 pl-3" 
+                      : "text-white/70 hover:bg-white/8 hover:text-white hover:pl-5"
                   }`}>
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-5 h-5 flex-shrink-0" />
                     <span className="font-medium">{item.label}</span>
                   </a>
                 </Link>
@@ -83,31 +83,31 @@ export default function Navigation({ userEmail, userData, isAdminView, onSwitchT
             <div className="absolute bottom-20 left-6 right-6">
               <button
                 onClick={onSwitchToAdmin}
-                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-golf-gold/10 border border-golf-gold/20 text-golf-gold hover:bg-golf-gold/20 transition-all duration-200 group"
+                className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-md bg-golf-gold/15 border border-golf-gold/30 text-golf-gold hover:bg-golf-gold/25 hover:border-golf-gold/40 transition-all duration-200 text-sm font-medium"
               >
-                <Shield className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                <span className="font-medium">Back to Admin</span>
+                <Shield className="w-4 h-4" />
+                <span>Back to Admin</span>
               </button>
             </div>
           )}
 
           <div className="absolute bottom-6 left-6 right-6">
             {/* Logout Menu - appears above profile when expanded */}
-            <div className={`mb-2 transition-all duration-300 ease-in-out ${
+            <div className={`mb-3 transition-all duration-300 ease-in-out ${
               showLogoutMenu 
                 ? 'opacity-100 transform translate-y-0' 
                 : 'opacity-0 transform translate-y-4 pointer-events-none'
             }`}>
-              <div className="bg-white/15 backdrop-blur-sm rounded-xl p-2 border border-white/20">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
                 <button
                   onClick={() => {
                     setShowLogoutMenu(false);
                     onLogout?.();
                   }}
-                  className="w-full flex items-center space-x-3 px-3 py-3 rounded-lg bg-red-500/10 border border-red-400/20 text-red-200 hover:bg-red-500/20 hover:border-red-400/40 transition-all duration-200 group"
+                  className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-md bg-red-500/15 border border-red-400/30 text-red-200 hover:bg-red-500/25 hover:border-red-400/40 transition-all duration-200 text-sm font-medium"
                 >
-                  <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                  <span className="font-medium text-sm">Log Out</span>
+                  <LogOut className="w-4 h-4" />
+                  <span>Log Out</span>
                 </button>
               </div>
             </div>
@@ -115,11 +115,11 @@ export default function Navigation({ userEmail, userData, isAdminView, onSwitchT
             {/* Profile Section - clickable */}
             <button
               onClick={() => setShowLogoutMenu(!showLogoutMenu)}
-              className="w-full bg-white/10 rounded-xl p-4 hover:bg-white/15 transition-all duration-200 border border-transparent hover:border-white/20"
+              className="w-full bg-white/8 rounded-lg p-4 hover:bg-white/12 transition-all duration-200 border border-white/10 hover:border-white/20"
             >
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-golf-gold rounded-full flex items-center justify-center">
-                  <span className="text-golf-green font-bold text-sm">
+                <div className="w-9 h-9 bg-golf-gold rounded-md flex items-center justify-center">
+                  <span className="text-golf-green font-semibold text-sm">
                     {userData?.firstName && userData?.lastName 
                       ? `${userData.firstName.charAt(0)}${userData.lastName.charAt(0)}`.toUpperCase()
                       : userEmail ? userEmail.substring(0, 2).toUpperCase() 
@@ -132,10 +132,10 @@ export default function Navigation({ userEmail, userData, isAdminView, onSwitchT
                       ? `${userData.firstName} ${userData.lastName}`
                       : userEmail || "Member"}
                   </h3>
-                  <p className="text-xs text-white/70">Member</p>
+                  <p className="text-xs text-white/60">Golf Member</p>
                 </div>
                 <div className={`transition-transform duration-200 ${showLogoutMenu ? 'rotate-180' : ''}`}>
-                  <svg className="w-4 h-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
                   </svg>
                 </div>
