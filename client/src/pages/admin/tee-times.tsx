@@ -127,7 +127,7 @@ export default function AdminTeeTimesPage() {
       <div className="p-6 lg:p-8 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#08452e] mb-2">Tee Time Management</h1>
+          <h1 className="text-3xl font-bold text-blue-800 mb-2">Tee Time Management</h1>
           <p className="text-muted-foreground">View and manage member tee time bookings • 16-minute intervals from 7 AM to 7 PM</p>
         </div>
 
@@ -136,7 +136,7 @@ export default function AdminTeeTimesPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Calendar className="w-4 h-4 text-golf-green" />
+                <Calendar className="w-4 h-4 text-blue-600" />
                 <span className="text-sm font-medium text-foreground">Select Date</span>
               </div>
               
@@ -258,7 +258,7 @@ export default function AdminTeeTimesPage() {
                           <div key={index} className="flex items-center space-x-2 text-sm">
                             <UserIcon className="w-4 h-4 text-golf-green" />
                             <span className="text-foreground">
-                              {member.firstName} {member.lastName}
+                              {member?.firstName} {member?.lastName}
                             </span>
                           </div>
                         ))}

@@ -83,14 +83,14 @@ export default function AdminMembers() {
         {/* Header Section */}
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6 mb-8">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-[#08452e]">Member Management</h1>
+            <h1 className="text-3xl font-bold text-blue-800">Member Management</h1>
             <p className="text-muted-foreground">Manage club members and their information</p>
           </div>
           
           <div className="flex flex-wrap gap-3">
             <Button 
               size="sm"
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-blue-600 hover:bg-blue-700"
               onClick={() => syncMembersMutation.mutate()}
               disabled={syncMembersMutation.isPending}
             >

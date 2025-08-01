@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, UtensilsCrossed, Users, Clock, CheckCircle, AlertCircle, TrendingUp } from "lucide-react";
+import { Calendar, UtensilsCrossed, Users, Clock, CheckCircle, AlertCircle, TrendingUp, Trophy } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 import type { TeeTime, Order, User } from "@shared/schema";
@@ -63,7 +63,7 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-3xl font-bold text-[#08452e]">Admin Dashboard{adminEmail ? `, ${adminEmail}` : ""}</h1>
+            <h1 className="text-3xl font-bold text-blue-800">Admin Dashboard{adminEmail ? `, ${adminEmail}` : ""}</h1>
             <div className="text-sm text-muted-foreground">
               {new Date().toLocaleDateString('en-US', { 
                 weekday: 'long', 
@@ -117,8 +117,8 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
                   <p className="text-sm font-medium text-muted-foreground">Total Members</p>
                   <p className="text-2xl font-bold text-slate-800">{members.length}</p>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Users className="w-6 h-6 text-blue-600" />
                 </div>
               </div>
             </CardContent>
@@ -154,8 +154,8 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
           <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 shadow-sm">
             <CardContent className="p-6 text-center">
               <Link href="/admin/members">
-                <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <Users className="w-7 h-7 text-green-600" />
+                <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Users className="w-7 h-7 text-blue-600" />
                 </div>
                 <h3 className="font-semibold text-foreground mb-1">Member Management</h3>
                 <p className="text-sm text-muted-foreground">View member profiles</p>
@@ -166,8 +166,8 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
           <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 shadow-sm">
             <CardContent className="p-6 text-center">
               <Link href="/admin/events">
-                <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <Calendar className="w-7 h-7 text-purple-600" />
+                <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Trophy className="w-7 h-7 text-blue-600" />
                 </div>
                 <h3 className="font-semibold text-foreground mb-1">Events</h3>
                 <p className="text-sm text-muted-foreground">Manage tournaments</p>

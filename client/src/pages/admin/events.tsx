@@ -220,13 +220,13 @@ export default function AdminEvents() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#08452e]">Event Management</h1>
+          <h1 className="text-3xl font-bold text-blue-800">Event Management</h1>
           <p className="text-muted-foreground">Create and manage club events and view member registrations</p>
         </div>
         
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#08452e] hover:bg-[#08452e]/90">
+            <Button className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-2" />
               Create Event
             </Button>

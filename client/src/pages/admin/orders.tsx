@@ -156,7 +156,7 @@ export default function AdminOrdersPage() {
       <div className="p-6 lg:p-8 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#08452e] mb-2">Order Management</h1>
+          <h1 className="text-3xl font-bold text-blue-800 mb-2">Order Management</h1>
           <p className="text-muted-foreground">Manage member food and beverage orders</p>
         </div>
 

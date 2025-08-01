@@ -103,11 +103,11 @@ export default function CourseConditionsPage() {
       <div className="min-h-screen bg-[#F8F6F0]">
         <div className="p-6 lg:p-8 max-w-7xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
-            <CloudSun className="h-8 w-8 text-[#08452e]" />
-            <h1 className="text-3xl font-bold text-[#08452e]">Course Conditions</h1>
+            <CloudSun className="h-8 w-8 text-blue-600" />
+            <h1 className="text-3xl font-bold text-blue-800">Course Conditions</h1>
           </div>
           <div className="text-center py-12">
-            <div className="animate-spin h-8 w-8 border-2 border-golf-green border-t-transparent rounded-full mx-auto"></div>
+            <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
             <p className="mt-4 text-muted-foreground">Loading course conditions...</p>
           </div>
         </div>
@@ -120,8 +120,8 @@ export default function CourseConditionsPage() {
       <div className="p-6 lg:p-8 max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <CloudSun className="h-8 w-8 text-[#08452e]" />
-            <h1 className="text-3xl font-bold text-[#08452e]">Course Conditions</h1>
+            <CloudSun className="h-8 w-8 text-blue-600" />
+            <h1 className="text-3xl font-bold text-blue-800">Course Conditions</h1>
           </div>
           <div className="text-sm text-muted-foreground">
             Last updated: {conditions?.lastUpdated ? new Date(conditions.lastUpdated).toLocaleString() : "Never"}
@@ -138,7 +138,7 @@ export default function CourseConditionsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="space-y-2 pl-[0px] pr-[0px] mt-[-8px] mb-[-8px] ml-[0px] mr-[0px] pt-[-14px] pb-[-14px]">
+              <div className="space-y-2">
                 <Label htmlFor="weather">Weather</Label>
                 <Select 
                   value={formData.weather || conditions?.weather || ""} 
