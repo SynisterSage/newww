@@ -1,6 +1,6 @@
 # Overview
 
-This is a golf club management system built as a full-stack web application. The system provides comprehensive functionality for golf club members including tee time booking, dining ordering, course GPS tracking, and user dashboard features. It serves as a digital platform to enhance the golf club experience with features like real-time tee time availability, restaurant menu ordering, GPS-enabled course hole information, and member account management.
+This is a premium golf club management system built for Packanack Golf Club as a full-stack web application. The system provides comprehensive functionality for golf club members including member authentication, tee time booking, dining ordering, course GPS tracking, and user dashboard features. It serves as a digital platform to enhance the golf club experience with real member verification, tee time availability, restaurant menu ordering, GPS-enabled course hole information, and member account management using authentic membership data from the club's 2025 roster.
 
 # User Preferences
 
@@ -37,6 +37,8 @@ Preferred communication style: Simple, everyday language.
 - **Code Organization**: Monorepo structure with shared types between client and server
 
 ## Key Features Architecture
+- **Member Authentication**: Email and phone verification against real Packanack Golf Club 2025 membership roster (259 members)
+- **Admin Management**: Separate admin authentication system for staff with member database access
 - **Tee Time Management**: CRUD operations with availability tracking and booking system
 - **Dining System**: Menu management with category filtering and order processing
 - **GPS Course Tracking**: Hole-by-hole course information with scoring capabilities  
