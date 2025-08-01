@@ -15,6 +15,7 @@ export default function Dining() {
   const [deliveryOption, setDeliveryOption] = useState("Clubhouse Pickup");
   const [selectedHole, setSelectedHole] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCartClosing, setIsCartClosing] = useState(false);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   const { data: menuItems = [], isLoading } = useQuery<MenuItem[]>({
@@ -28,7 +29,7 @@ export default function Dining() {
     },
     onSuccess: () => {
       setCurrentOrder({});
-      setIsCartOpen(false);
+      closeCart();
       toast({
         title: "Order Placed",
         description: "Your order has been sent to the kitchen!",
@@ -77,6 +78,14 @@ export default function Dining() {
 
   const clearOrder = () => {
     setCurrentOrder({});
+  };
+
+  const closeCart = () => {
+    setIsCartClosing(true);
+    setTimeout(() => {
+      setIsCartOpen(false);
+      setIsCartClosing(false);
+    }, 300); // Match animation duration
   };
 
   const calculateTotal = () => {
@@ -146,7 +155,11 @@ export default function Dining() {
             
             {/* View Cart Button */}
             <Button 
-              onClick={() => setIsCartOpen(true)}
+              onClick={() => {
+                if (!isCartClosing) {
+                  setIsCartOpen(true);
+                }
+              }}
               className="bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black font-medium w-full sm:w-auto"
             >
               <ShoppingCart className="w-4 h-4 mr-2" />
@@ -223,15 +236,23 @@ export default function Dining() {
 
       {/* Mobile Cart Modal */}
       {isCartOpen && (
-        <div className="fixed inset-0 z-50 animate-in fade-in duration-200">
-          <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl animate-in slide-in-from-right duration-300">
+        <div 
+          className={`fixed inset-0 z-50 ${isCartClosing ? 'animate-out fade-out duration-200' : 'animate-in fade-in duration-200'}`}
+          onClick={() => closeCart()}
+        >
+          <div 
+            className={`fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl ${
+              isCartClosing ? 'animate-out slide-out-to-right duration-300' : 'animate-in slide-in-from-right duration-300'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex h-full flex-col">
               <div className="flex items-center justify-between p-4 border-b">
                 <h2 className="text-lg font-semibold">Your Order</h2>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setIsCartOpen(false)}
+                  onClick={closeCart}
                   className="h-8 w-8 p-0"
                 >
                   <X className="h-4 w-4" />

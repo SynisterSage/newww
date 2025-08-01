@@ -97,6 +97,15 @@
     }
   }
   
+  @keyframes slide-out-to-right {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+  
   @keyframes fade-in {
     from {
       opacity: 0;
@@ -106,7 +115,20 @@
     }
   }
   
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  
   .animate-in {
+    animation-fill-mode: both;
+  }
+  
+  .animate-out {
     animation-fill-mode: both;
   }
   
@@ -114,8 +136,16 @@
     animation-name: slide-in-from-right;
   }
   
+  .slide-out-to-right {
+    animation-name: slide-out-to-right;
+  }
+  
   .fade-in {
     animation-name: fade-in;
+  }
+  
+  .fade-out {
+    animation-name: fade-out;
   }
   
   .duration-200 {
