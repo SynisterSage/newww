@@ -91,7 +91,7 @@ export class MemStorage implements IStorage {
       fairwaysCondition: "good",
       hazardNotes: "",
       maintenanceNotes: "",
-      lastUpdated: new Date().toISOString(),
+      lastUpdated: new Date(),
       updatedBy: "System"
     };
     
@@ -284,14 +284,16 @@ export class MemStorage implements IStorage {
       baseTimeSlots.forEach((time, slotIndex) => {
         const teetime: TeeTime = {
           id: randomUUID(),
-          userId: null,
           date: date,
           time: time,
           course: "Packanack Golf Course",
-          holes: 9, // 9-hole course as specified
-          spotsAvailable: 4,
+          holes: 18,
+          maxPlayers: 4,
+          bookedBy: [],
+          playerNames: [],
           status: "available",
-          isPremium: false // No premium tee times
+          isPremium: false,
+          price: "85.00"
         };
 
         this.teetimes.set(teetime.id, teetime);
@@ -477,15 +479,16 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const teetime: TeeTime = { 
       id,
-      userId: insertTeetime.userId || null,
       date: insertTeetime.date,
       time: insertTeetime.time,
       course: insertTeetime.course || "Packanack Golf Course",
       holes: insertTeetime.holes || 18,
-      spotsAvailable: insertTeetime.spotsAvailable || 4,
-      price: insertTeetime.price,
+      maxPlayers: insertTeetime.maxPlayers || 4,
+      bookedBy: insertTeetime.bookedBy || [],
+      playerNames: insertTeetime.playerNames || [],
       status: insertTeetime.status || "available",
-      isPremium: insertTeetime.isPremium || null
+      isPremium: insertTeetime.isPremium || false,
+      price: insertTeetime.price || "85.00"
     };
     this.teetimes.set(id, teetime);
     return teetime;
@@ -658,7 +661,7 @@ export class MemStorage implements IStorage {
     this.currentConditions = {
       ...this.currentConditions,
       ...updates,
-      lastUpdated: new Date().toISOString(),
+      lastUpdated: new Date(),
     };
     return this.currentConditions;
   }
