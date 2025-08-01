@@ -460,6 +460,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin order management routes
+  app.patch("/api/admin/orders/:id/status", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      if (!status || !['pending', 'preparing', 'ready', 'delivered'].includes(status)) {
+        return res.status(400).json({ message: "Valid status is required" });
+      }
+      
+      const order = await storage.updateOrder(id, { status });
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+
   // Admin member data synchronization route
   app.post("/api/admin/members/sync", async (req, res) => {
     try {
