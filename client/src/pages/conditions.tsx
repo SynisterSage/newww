@@ -12,11 +12,11 @@ export default function ConditionsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-golf-green-soft via-white to-golf-green-light p-6">
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-stone-100 to-stone-200 p-6">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
             <CloudSun className="h-8 w-8 text-golf-green" />
-            <h1 className="text-3xl font-bold text-gray-900">Course Conditions</h1>
+            <h1 className="text-3xl font-bold text-golf-green">Course Conditions</h1>
           </div>
           <div className="text-center py-12">
             <div className="animate-spin h-8 w-8 border-2 border-golf-green border-t-transparent rounded-full mx-auto"></div>
@@ -67,7 +67,7 @@ export default function ConditionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-golf-green-soft via-white to-golf-green-light px-4 py-6 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-stone-100 to-stone-200 px-4 py-6 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-10">
@@ -77,7 +77,7 @@ export default function ConditionsPage() {
                 <CloudSun className="h-8 w-8 text-golf-green" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Course Conditions</h1>
+                <h1 className="text-4xl font-bold text-golf-green tracking-tight">Course Conditions</h1>
                 <p className="text-gray-600 mt-1">Packanack Golf Club - 9 Hole Course</p>
               </div>
             </div>
