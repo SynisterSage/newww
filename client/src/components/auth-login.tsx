@@ -113,9 +113,7 @@ export function AuthLogin({ onLogin }: AuthLoginProps) {
               type="submit" 
               className="w-full h-12 bg-golf-green hover:bg-golf-green-light text-white font-semibold"
               disabled={!email.trim()}
-            >
-              Sign In to Member Portal
-            </Button>
+            >PGC Private Access</Button>
             
             <div className="text-center text-sm text-muted-foreground">
               <p>For assistance, contact the pro shop</p>
