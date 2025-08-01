@@ -58,7 +58,7 @@ export default function Events() {
       participants: 12,
       maxParticipants: 16,
       location: "Practice Range",
-      description: "A weekend clinic for young golfers aged 8-16 to learn the fundamentals from our club...",
+      description: "A weekend clinic for young golfers aged 8-16 to learn the funA weekend clinic for young golfers aged 8-16 to learn the fundamentals from our club..damentals from our club..A weekend clinic for young golfers aged 8-16 to learn the fundamentals from our club..",
       registrationOpen: true
     }
   ];
