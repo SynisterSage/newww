@@ -26,7 +26,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto bg-[#fffdf5]">
+    <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto bg-[#fffdf500]">
       {/* Modern Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
