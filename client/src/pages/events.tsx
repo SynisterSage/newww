@@ -40,7 +40,7 @@ export default function Events({ userData }: EventsProps) {
   // Register for event mutation
   const registerMutation = useMutation({
     mutationFn: async ({ eventId, notes }: { eventId: string; notes?: string }) => {
-      return await apiRequest(`/api/events/${eventId}/register`, "POST", { userId: currentUserId, notes });
+      return await apiRequest("POST", `/api/events/${eventId}/register`, { userId: currentUserId, notes });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
@@ -63,7 +63,7 @@ export default function Events({ userData }: EventsProps) {
   // Unregister from event mutation
   const unregisterMutation = useMutation({
     mutationFn: async (eventId: string) => {
-      return await apiRequest(`/api/events/${eventId}/register/${currentUserId}`, "DELETE");
+      return await apiRequest("DELETE", `/api/events/${eventId}/register/${currentUserId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
