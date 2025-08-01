@@ -48,7 +48,7 @@ export default function Dashboard() {
       {/* Modern Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-4xl font-bold text-foreground">Welcome Back</h1>
+          <h1 className="text-4xl font-bold text-[#08452e]">Welcome Back</h1>
           <div className="text-sm text-muted-foreground">
             {new Date().toLocaleDateString('en-US', { 
               weekday: 'long', 
@@ -307,7 +307,6 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
-
     </div>
   );
 }
