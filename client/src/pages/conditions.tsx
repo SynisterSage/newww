@@ -290,8 +290,8 @@ export default function Conditions() {
       <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[#08452e] mb-2">Course Conditions</h1>
-          <p className="text-muted-foreground text-lg">
+          <h1 className="text-3xl font-bold text-[#08452e] mb-2">Course Conditions</h1>
+          <p className="text-muted-foreground">
             Live weather and course updates for {weather?.location || 'Packanack Golf Course'}
           </p>
         </div>

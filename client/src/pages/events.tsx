@@ -113,9 +113,9 @@ export default function Events() {
   return (
     <div className="min-h-screen bg-[#F8F6F0]">
       <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold text-golf-green">Club Events</h1>
-        <p className="text-muted-foreground mt-1">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-[#08452e] mb-2">Club Events</h1>
+        <p className="text-muted-foreground">
           Tournaments, social events, and special activities
         </p>
       </div>

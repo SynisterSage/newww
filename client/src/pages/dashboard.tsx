@@ -109,7 +109,7 @@ export default function Dashboard() {
       {/* Modern Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-4xl font-bold text-[#08452e]">Welcome Back</h1>
+          <h1 className="text-3xl font-bold text-[#08452e]">Welcome Back</h1>
           <div className="text-sm text-muted-foreground">
             {new Date().toLocaleDateString('en-US', { 
               weekday: 'long', 
@@ -119,6 +119,7 @@ export default function Dashboard() {
             })}
           </div>
         </div>
+        <p className="text-muted-foreground">Your personalized golf club dashboard</p>
       </div>
       {/* Quick Actions Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

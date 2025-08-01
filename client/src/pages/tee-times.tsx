@@ -195,8 +195,8 @@ export default function TeeTimes() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-golf-green mb-2">Tee Times</h1>
-          <p className="text-muted-foreground text-sm sm:text-base">Book and manage your golf reservations</p>
+          <h1 className="text-3xl font-bold text-[#08452e] mb-2">Tee Times</h1>
+          <p className="text-muted-foreground">Book and manage your golf reservations</p>
         </div>
         
         <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>

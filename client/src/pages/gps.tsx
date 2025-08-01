@@ -60,14 +60,17 @@ export default function GPS() {
   }
 
   return (
-    <div className="p-4 lg:p-8 space-y-8">
+    <div className="min-h-screen bg-[#F8F6F0]">
+      <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-[#08452e] mb-2">Course GPS & Navigation</h1>
+          <p className="text-muted-foreground">Advanced GPS tracking with hole-by-hole guidance</p>
+        </div>
+        
       <Card>
         <CardContent className="p-6 lg:p-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-golf-green mb-2">Course GPS & Navigation</h1>
-              <p className="text-gray-600">Advanced GPS tracking with hole-by-hole guidance</p>
-            </div>
             <div className="mt-4 lg:mt-0 flex flex-col sm:flex-row gap-4">
               <Button 
                 onClick={() => startRoundMutation.mutate()}
@@ -275,6 +278,7 @@ export default function GPS() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
