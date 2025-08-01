@@ -69,15 +69,15 @@ export default function CourseConditionsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-golf-green-soft via-white to-golf-green-light p-6">
-        <div className="max-w-6xl mx-auto">
+      <div className="min-h-screen bg-[#F8F6F0]">
+        <div className="p-6 lg:p-8 max-w-7xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
-            <CloudSun className="h-8 w-8 text-golf-green" />
-            <h1 className="text-3xl font-bold text-gray-900">Course Conditions</h1>
+            <CloudSun className="h-8 w-8 text-[#08452e]" />
+            <h1 className="text-3xl font-bold text-[#08452e]">Course Conditions</h1>
           </div>
           <div className="text-center py-12">
             <div className="animate-spin h-8 w-8 border-2 border-golf-green border-t-transparent rounded-full mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading course conditions...</p>
+            <p className="mt-4 text-muted-foreground">Loading course conditions...</p>
           </div>
         </div>
       </div>
@@ -85,14 +85,14 @@ export default function CourseConditionsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-golf-green-soft via-white to-golf-green-light p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-[#F8F6F0]">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <CloudSun className="h-8 w-8 text-golf-green" />
-            <h1 className="text-3xl font-bold text-gray-900">Course Conditions</h1>
+            <CloudSun className="h-8 w-8 text-[#08452e]" />
+            <h1 className="text-3xl font-bold text-[#08452e]">Course Conditions</h1>
           </div>
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-muted-foreground">
             Last updated: {conditions ? new Date(conditions.lastUpdated).toLocaleString() : "Never"}
           </div>
         </div>

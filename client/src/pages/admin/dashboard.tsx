@@ -55,12 +55,12 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
   ].slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#F8F6F0]">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-3xl font-bold text-slate-800">Admin Dashboard{adminEmail ? `, ${adminEmail}` : ""}</h1>
+            <h1 className="text-3xl font-bold text-[#08452e]">Admin Dashboard{adminEmail ? `, ${adminEmail}` : ""}</h1>
             <div className="text-sm text-muted-foreground">
               {new Date().toLocaleDateString('en-US', { 
                 weekday: 'long', 

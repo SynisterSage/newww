@@ -54,7 +54,8 @@ export default function AdminMembers() {
 
   if (isLoading) {
     return (
-      <div className="p-6 lg:p-8 space-y-8">
+      <div className="min-h-screen bg-[#F8F6F0]">
+        <div className="p-6 lg:p-8 max-w-7xl mx-auto">
         <div className="animate-pulse space-y-8">
           {/* Header skeleton */}
           <div className="space-y-4">
@@ -71,21 +72,23 @@ export default function AdminMembers() {
           {/* Table skeleton */}
           <div className="h-96 bg-gray-200 rounded-lg"></div>
         </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-8">
-      {/* Header Section */}
-      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Member Management</h1>
-          <p className="text-gray-600">Manage club members and their information</p>
+    <div className="min-h-screen bg-[#F8F6F0]">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-[#08452e] mb-2">Member Management</h1>
+          <p className="text-muted-foreground">Manage club members and their information</p>
         </div>
-        
-        <div className="flex flex-wrap gap-3">
-          <Button 
+
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+          <div className="flex flex-wrap gap-3">
+            <Button 
             size="sm"
             className="bg-green-600 hover:bg-green-700"
             onClick={() => syncMembersMutation.mutate()}
@@ -95,14 +98,12 @@ export default function AdminMembers() {
             {syncMembersMutation.isPending ? "Syncing..." : "Sync Data"}
           </Button>
           
-          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-            <Download className="w-4 h-4 mr-2" />
-            Export Data
-          </Button>
-          
-          
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+              <Download className="w-4 h-4 mr-2" />
+              Export Data
+            </Button>
+          </div>
         </div>
-      </div>
 
       {/* Search and Stats Section */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -217,6 +218,7 @@ export default function AdminMembers() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
