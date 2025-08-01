@@ -307,6 +307,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin member management routes
+  app.patch("/api/admin/members/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const user = await storage.updateUser(id, updates);
+      if (!user) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update member" });
+    }
+  });
+
+  app.patch("/api/admin/members/bulk", async (req, res) => {
+    try {
+      const { memberIds, status, handicap } = req.body;
+      
+      if (!memberIds || !Array.isArray(memberIds) || memberIds.length === 0) {
+        return res.status(400).json({ message: "Member IDs are required" });
+      }
+      
+      const updates: any = {};
+      if (status) updates.memberStatus = status;
+      if (handicap !== undefined) updates.handicap = handicap;
+      
+      const updatedMembers = [];
+      for (const memberId of memberIds) {
+        const updatedMember = await storage.updateUser(memberId, updates);
+        if (updatedMember) {
+          updatedMembers.push(updatedMember);
+        }
+      }
+      
+      res.json({ updated: updatedMembers.length, members: updatedMembers });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to bulk update members" });
+    }
+  });
+
   // Admin authentication routes
   const adminLoginSchema = z.object({
     email: z.string().email(),

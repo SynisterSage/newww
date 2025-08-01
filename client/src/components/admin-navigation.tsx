@@ -8,7 +8,8 @@ import {
   Trophy,
   Settings,
   Shield,
-  Eye
+  Eye,
+  ClipboardCheck
 } from "lucide-react";
 
 interface AdminNavigationProps {
@@ -25,6 +26,7 @@ export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminN
     { path: "/admin/tee-times", label: "Tee Times", icon: Calendar },
     { path: "/admin/orders", label: "Orders", icon: UtensilsCrossed },
     { path: "/admin/members", label: "Members", icon: Users },
+    { path: "/admin/conditions", label: "Conditions", icon: ClipboardCheck },
     { path: "/admin/events", label: "Events", icon: Trophy },
   ];
 

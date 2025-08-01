@@ -12,6 +12,7 @@ import AdminNavigation from "@/components/admin-navigation";
 import Dashboard from "@/pages/dashboard";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminMembers from "@/pages/admin/members";
+import AdminConditions from "@/pages/admin/conditions";
 import TeeTimes from "@/pages/tee-times";
 import Dining from "@/pages/dining";
 import Conditions from "@/pages/conditions";
@@ -248,6 +249,7 @@ function Router() {
             <Route path="/admin/tee-times">{() => <div>Admin Tee Times</div>}</Route>
             <Route path="/admin/orders">{() => <div>Admin Orders</div>}</Route>
             <Route path="/admin/members">{() => <AdminMembers />}</Route>
+            <Route path="/admin/conditions">{() => <AdminConditions userData={adminData || undefined} />}</Route>
             <Route path="/admin/events">{() => <div>Admin Events</div>}</Route>
             <Route component={NotFound} />
           </Switch>
@@ -268,9 +270,9 @@ function Router() {
       />
       <main className="flex-1 lg:ml-64 pb-16 lg:pb-0">
         <Switch>
-          <Route path="/">{() => <Dashboard userEmail={userEmail} user={userData} />}</Route>
-          <Route path="/tee-times">{() => <TeeTimes userData={userData} />}</Route>
-          <Route path="/dining">{() => <Dining userData={userData} />}</Route>
+          <Route path="/">{() => <Dashboard userEmail={userEmail} user={userData || undefined} />}</Route>
+          <Route path="/tee-times">{() => <TeeTimes userData={userData || undefined} />}</Route>
+          <Route path="/dining">{() => <Dining userData={userData || undefined} />}</Route>
           <Route path="/conditions" component={Conditions} />
           <Route path="/events" component={Events} />
           <Route component={NotFound} />

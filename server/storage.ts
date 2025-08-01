@@ -362,6 +362,15 @@ export class MemStorage implements IStorage {
     return user;
   }
 
+  async updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { ...user, ...updates };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
   async authenticateMember(email: string, phone: string): Promise<User | null> {
     // Clean phone number for matching (remove formatting)
     const cleanPhone = phone.replace(/\D/g, '');
