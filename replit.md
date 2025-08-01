@@ -22,6 +22,8 @@ This is a premium golf club management system built for Packanack Golf Club as a
 - Implemented API routes for fetching and updating course conditions
 - Added course conditions to admin navigation with proper UI components and form validation
 - System allows admins to manage all course information that members can view
+- Redesigned member conditions page with clean grid layout and proper 9-hole course information
+- Real-time sync between admin updates and member view with weather icons and status badges
 
 # User Preferences
 
