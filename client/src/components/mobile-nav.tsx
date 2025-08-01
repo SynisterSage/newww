@@ -27,7 +27,7 @@ export default function MobileNav() {
           
           return (
             <Link key={item.path} href={item.path}>
-              <a className={`flex flex-col items-center space-y-1 py-2 px-3 transition-colors ${
+              <div className={`flex flex-col items-center space-y-1 py-2 px-3 transition-colors cursor-pointer ${
                 isActive ? "text-golf-green" : "text-muted-foreground"
               }`}>
                 <div className={`p-2 rounded-xl transition-colors ${
@@ -36,7 +36,7 @@ export default function MobileNav() {
                   <Icon className="w-5 h-5" />
                 </div>
                 <span className="text-xs font-medium">{item.label}</span>
-              </a>
+              </div>
             </Link>
           );
         })}
