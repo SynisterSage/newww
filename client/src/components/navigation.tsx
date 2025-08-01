@@ -41,7 +41,7 @@ export default function Navigation() {
             </div>
             <div>
               <h1 className="font-bold text-lg">PGC</h1>
-              <p className="text-xs text-white/70">Members Only</p>
+              <p className="text-xs text-white/70">Private App</p>
             </div>
           </div>
           
