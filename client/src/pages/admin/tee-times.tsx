@@ -15,13 +15,20 @@ export default function AdminTeeTimesPage() {
   });
 
   const getTodayDate = () => {
-    return new Date().toISOString().split('T')[0];
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const getTomorrowDate = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
+    const year = tomorrow.getFullYear();
+    const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    const day = String(tomorrow.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const isToday = selectedDate === getTodayDate();
@@ -154,7 +161,11 @@ export default function AdminTeeTimesPage() {
                 >
                   Tomorrow
                   <span className="ml-2 text-xs opacity-75">
-                    {format(new Date(getTomorrowDate()), 'M/d')}
+                    {(() => {
+                      const tomorrow = new Date();
+                      tomorrow.setDate(tomorrow.getDate() + 1);
+                      return format(tomorrow, 'M/d');
+                    })()}
                   </span>
                 </Button>
               </div>
