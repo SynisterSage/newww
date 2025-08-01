@@ -9,7 +9,8 @@ import {
   Settings,
   Shield,
   Eye,
-  ClipboardCheck
+  ClipboardCheck,
+  Trash2
 } from "lucide-react";
 
 interface AdminNavigationProps {
@@ -83,7 +84,7 @@ export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminN
                 ? 'opacity-100 transform translate-y-0' 
                 : 'opacity-0 transform translate-y-4 pointer-events-none'
             }`}>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 space-y-2">
                 <button
                   onClick={() => {
                     setShowSwitchMenu(false);
@@ -93,6 +94,23 @@ export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminN
                 >
                   <Eye className="w-4 h-4" />
                   <span>Member View</span>
+                </button>
+                
+                <button
+                  onClick={() => {
+                    // Clear cache data
+                    localStorage.removeItem('memberOrders');
+                    localStorage.removeItem('memberTeetimes');
+                    localStorage.removeItem('memberBookings');
+                    sessionStorage.clear();
+                    
+                    // Force page refresh to clear React Query cache
+                    window.location.reload();
+                  }}
+                  className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-md bg-red-600/15 border border-red-500/30 text-red-200 hover:bg-red-600/25 hover:border-red-500/40 transition-all duration-200 text-sm font-medium"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Clear Cache</span>
                 </button>
               </div>
             </div>
