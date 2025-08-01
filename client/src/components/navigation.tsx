@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import { useState } from "react";
 import { 
   Home, 
   Calendar, 
@@ -6,7 +7,8 @@ import {
   Info,
   User,
   Trophy,
-  Shield
+  Shield,
+  LogOut
 } from "lucide-react";
 import type { User as UserType } from "@shared/schema";
 
@@ -15,10 +17,12 @@ interface NavigationProps {
   userData?: UserType | null;
   isAdminView?: boolean;
   onSwitchToAdmin?: () => void;
+  onLogout?: () => void;
 }
 
-export default function Navigation({ userEmail, userData, isAdminView, onSwitchToAdmin }: NavigationProps) {
+export default function Navigation({ userEmail, userData, isAdminView, onSwitchToAdmin, onLogout }: NavigationProps) {
   const [location] = useLocation();
+  const [showLogoutMenu, setShowLogoutMenu] = useState(false);
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: Home },
@@ -88,7 +92,31 @@ export default function Navigation({ userEmail, userData, isAdminView, onSwitchT
           )}
 
           <div className="absolute bottom-6 left-6 right-6">
-            <div className="bg-white/10 rounded-xl p-4">
+            {/* Logout Menu - appears above profile when expanded */}
+            <div className={`mb-2 transition-all duration-300 ease-in-out ${
+              showLogoutMenu 
+                ? 'opacity-100 transform translate-y-0' 
+                : 'opacity-0 transform translate-y-4 pointer-events-none'
+            }`}>
+              <div className="bg-white/15 backdrop-blur-sm rounded-xl p-2 border border-white/20">
+                <button
+                  onClick={() => {
+                    setShowLogoutMenu(false);
+                    onLogout?.();
+                  }}
+                  className="w-full flex items-center space-x-3 px-3 py-3 rounded-lg bg-red-500/10 border border-red-400/20 text-red-200 hover:bg-red-500/20 hover:border-red-400/40 transition-all duration-200 group"
+                >
+                  <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <span className="font-medium text-sm">Log Out</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Profile Section - clickable */}
+            <button
+              onClick={() => setShowLogoutMenu(!showLogoutMenu)}
+              className="w-full bg-white/10 rounded-xl p-4 hover:bg-white/15 transition-all duration-200 border border-transparent hover:border-white/20"
+            >
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-golf-gold rounded-full flex items-center justify-center">
                   <span className="text-golf-green font-bold text-sm">
@@ -98,7 +126,7 @@ export default function Navigation({ userEmail, userData, isAdminView, onSwitchT
                       : "JD"}
                   </span>
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 text-left">
                   <h3 className="font-medium text-white text-sm truncate">
                     {userData?.firstName && userData?.lastName 
                       ? `${userData.firstName} ${userData.lastName}`
@@ -106,8 +134,13 @@ export default function Navigation({ userEmail, userData, isAdminView, onSwitchT
                   </h3>
                   <p className="text-xs text-white/70">Member</p>
                 </div>
+                <div className={`transition-transform duration-200 ${showLogoutMenu ? 'rotate-180' : ''}`}>
+                  <svg className="w-4 h-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                  </svg>
+                </div>
               </div>
-            </div>
+            </button>
           </div>
         </div>
       </aside>

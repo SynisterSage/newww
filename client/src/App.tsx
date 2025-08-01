@@ -66,6 +66,13 @@ function Router() {
     window.location.href = "/admin";
   };
 
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setUserEmail("");
+    setUserData(null);
+    setIsAdminView(false);
+  };
+
   // Admin interface
   if (isAdminRoute && isAdminAuthenticated) {
     return (
@@ -96,6 +103,7 @@ function Router() {
         userData={userData}
         isAdminView={isAdminView}
         onSwitchToAdmin={handleSwitchToAdmin}
+        onLogout={handleLogout}
       />
       <main className="flex-1 lg:ml-64 pb-16 lg:pb-0">
         <Switch>
