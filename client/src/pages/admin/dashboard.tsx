@@ -33,11 +33,14 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
     return orderDate.toDateString() === today.toDateString();
   }).length;
 
+  // Filter tee times with actual bookings (playerNames array has entries)
+  const bookedTeetimes = teetimes.filter(t => t.playerNames && t.playerNames.length > 0);
+  
   const recentActivity = [
-    ...teetimes.slice(0, 3).map(t => ({
+    ...bookedTeetimes.slice(0, 3).map(t => ({
       type: 'tee-time',
       title: `Tee Time Booking - ${t.time}`,
-      subtitle: `${t.holes} holes`,
+      subtitle: `${t.playerNames?.join(', ') || 'No players'} • ${t.holes} holes`,
       time: format(new Date(t.date), 'MMM dd'),
       status: 'booked'
     })),
