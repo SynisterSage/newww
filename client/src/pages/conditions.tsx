@@ -169,10 +169,10 @@ export default function ConditionsPage() {
         </div>
 
         {/* Course Notices */}
-        {(conditions?.hazardNotes || conditions?.maintenanceNotes) && (
+        {(conditions?.hazardNotes || (conditions?.maintenanceNotes && conditions.maintenanceNotes.length > 0)) && (
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-[#08452e] mb-4">Important Notices</h2>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {conditions?.hazardNotes && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-6">
                   <div className="flex items-start gap-4">
@@ -186,19 +186,21 @@ export default function ConditionsPage() {
                   </div>
                 </div>
               )}
-              {conditions?.maintenanceNotes && (
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0">
-                      <Wrench className="h-6 w-6 text-orange-600" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-orange-800 mb-2">Maintenance Notice</h4>
-                      <p className="text-orange-700 leading-relaxed">{conditions.maintenanceNotes}</p>
+              {conditions?.maintenanceNotes && conditions.maintenanceNotes.length > 0 && 
+                conditions.maintenanceNotes.map((note, index) => (
+                  <div key={index} className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0">
+                        <Wrench className="h-6 w-6 text-orange-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-orange-800 mb-2">Maintenance Notice</h4>
+                        <p className="text-orange-700 leading-relaxed">{note}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                ))
+              }
             </div>
           </div>
         )}

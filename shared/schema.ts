@@ -101,7 +101,7 @@ export const courseConditions = pgTable("course_conditions", {
   greensCondition: text("greens_condition").notNull(),
   fairwaysCondition: text("fairways_condition").notNull(),
   hazardNotes: text("hazard_notes"),
-  maintenanceNotes: text("maintenance_notes"), 
+  maintenanceNotes: text("maintenance_notes").array().default([]), 
   lastUpdated: timestamp("last_updated").defaultNow(),
   updatedBy: text("updated_by").notNull()
 });

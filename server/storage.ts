@@ -854,7 +854,7 @@ export class DatabaseStorage implements IStorage {
         greensCondition: "excellent",
         fairwaysCondition: "good",
         hazardNotes: "",
-        maintenanceNotes: "",
+        maintenanceNotes: [],
         updatedBy: "System"
       };
       const [newConditions] = await db.insert(courseConditions).values(defaultConditions).returning();

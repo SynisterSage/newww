@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CloudSun, Thermometer, Wind, Droplets, AlertCircle, CheckCircle, Wrench } from "lucide-react";
+import { CloudSun, Thermometer, Wind, Droplets, AlertCircle, CheckCircle, Wrench, Plus, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { CourseConditions, InsertCourseConditions } from "@shared/schema";
@@ -22,6 +22,15 @@ export default function CourseConditionsPage() {
   });
 
   const [formData, setFormData] = useState<Partial<InsertCourseConditions>>({});
+  const [maintenanceNotes, setMaintenanceNotes] = useState<string[]>([]);
+  const [newMaintenanceNote, setNewMaintenanceNote] = useState("");
+
+  // Initialize maintenance notes when conditions are loaded
+  useEffect(() => {
+    if (conditions?.maintenanceNotes) {
+      setMaintenanceNotes(Array.isArray(conditions.maintenanceNotes) ? conditions.maintenanceNotes : []);
+    }
+  }, [conditions]);
 
   const updateConditionsMutation = useMutation({
     mutationFn: (data: Partial<InsertCourseConditions>) => 
@@ -43,9 +52,31 @@ export default function CourseConditionsPage() {
     },
   });
 
+  const addMaintenanceNote = () => {
+    if (newMaintenanceNote.trim()) {
+      const updatedNotes = [...maintenanceNotes, newMaintenanceNote.trim()];
+      setMaintenanceNotes(updatedNotes);
+      setFormData(prev => ({ ...prev, maintenanceNotes: updatedNotes }));
+      setNewMaintenanceNote("");
+    }
+  };
+
+  const removeMaintenanceNote = (index: number) => {
+    const updatedNotes = maintenanceNotes.filter((_, i) => i !== index);
+    setMaintenanceNotes(updatedNotes);
+    setFormData(prev => ({ ...prev, maintenanceNotes: updatedNotes }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (Object.keys(formData).length === 0) {
+    const submitData = { ...formData };
+    
+    // Include maintenance notes if they were modified
+    if (maintenanceNotes.length > 0 || (conditions?.maintenanceNotes?.length || 0) !== maintenanceNotes.length) {
+      submitData.maintenanceNotes = maintenanceNotes;
+    }
+    
+    if (Object.keys(submitData).length === 0) {
       toast({
         title: "No Changes",
         description: "Please make changes before updating.",
@@ -55,7 +86,7 @@ export default function CourseConditionsPage() {
     }
     
     updateConditionsMutation.mutate({
-      ...formData,
+      ...submitData,
       updatedBy: "Admin User"
     });
   };
@@ -93,7 +124,7 @@ export default function CourseConditionsPage() {
             <h1 className="text-3xl font-bold text-[#08452e]">Course Conditions</h1>
           </div>
           <div className="text-sm text-muted-foreground">
-            Last updated: {conditions ? new Date(conditions.lastUpdated).toLocaleString() : "Never"}
+            Last updated: {conditions?.lastUpdated ? new Date(conditions.lastUpdated).toLocaleString() : "Never"}
           </div>
         </div>
 
@@ -284,14 +315,50 @@ export default function CourseConditionsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="maintenanceNotes">Maintenance Notes</Label>
-                <Textarea
-                  id="maintenanceNotes"
-                  value={formData.maintenanceNotes ?? conditions?.maintenanceNotes ?? ""}
-                  onChange={(e) => handleInputChange("maintenanceNotes", e.target.value)}
-                  placeholder="Enter any maintenance notes or upcoming work..."
-                  rows={3}
-                />
+                <Label>Maintenance Notes</Label>
+                <div className="space-y-3">
+                  {/* Add new maintenance note */}
+                  <div className="flex gap-2">
+                    <Input
+                      value={newMaintenanceNote}
+                      onChange={(e) => setNewMaintenanceNote(e.target.value)}
+                      placeholder="Enter maintenance note..."
+                      onKeyPress={(e) => e.key === 'Enter' && addMaintenanceNote()}
+                    />
+                    <Button 
+                      type="button" 
+                      onClick={addMaintenanceNote}
+                      size="sm"
+                      disabled={!newMaintenanceNote.trim()}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  {/* Display existing maintenance notes */}
+                  {maintenanceNotes.length > 0 && (
+                    <div className="space-y-2">
+                      {maintenanceNotes.map((note, index) => (
+                        <div key={index} className="flex items-center gap-2 p-2 bg-orange-50 border border-orange-200 rounded">
+                          <span className="flex-1 text-sm">{note}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeMaintenanceNote(index)}
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {maintenanceNotes.length === 0 && (
+                    <p className="text-sm text-muted-foreground italic">No maintenance notes added yet.</p>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
