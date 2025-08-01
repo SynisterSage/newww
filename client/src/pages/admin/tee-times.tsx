@@ -1,70 +1,40 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, User as UserIcon, CheckCircle, XCircle, Users, MapPin } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { Calendar, Clock, User as UserIcon, Users, MapPin } from "lucide-react";
 import { useState } from "react";
+import { format } from "date-fns";
 import type { TeeTime, User } from "@shared/schema";
 
 export default function AdminTeeTimesPage() {
-  const { toast } = useToast();
-  const [selectedDate, setSelectedDate] = useState("2025-08-01");
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  });
+
+  const getTodayDate = () => {
+    return new Date().toISOString().split('T')[0];
+  };
+
+  const getTomorrowDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  };
+
+  const isToday = selectedDate === getTodayDate();
+  const isTomorrow = selectedDate === getTomorrowDate();
 
   // Fetch all tee times for the selected date
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', selectedDate],
-    queryFn: () => fetch(`/api/teetimes?date=${selectedDate}`).then(res => res.json()),
   });
 
   // Fetch all members to get user details
   const { data: members = [] } = useQuery<User[]>({
     queryKey: ['/api/admin/members'],
-  });
-
-  // Approve tee time request
-  const approveMutation = useMutation({
-    mutationFn: async (teetimeId: string) => {
-      const response = await apiRequest('PATCH', `/api/admin/teetimes/${teetimeId}/approve`, {});
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
-      toast({
-        title: "Tee Time Approved",
-        description: "The tee time request has been approved successfully.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Approval Failed",
-        description: "Unable to approve the tee time request.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Deny tee time request
-  const denyMutation = useMutation({
-    mutationFn: async (teetimeId: string) => {
-      const response = await apiRequest('PATCH', `/api/admin/teetimes/${teetimeId}/deny`, {});
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
-      toast({
-        title: "Tee Time Denied",
-        description: "The tee time request has been denied.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Denial Failed",
-        description: "Unable to deny the tee time request.",
-        variant: "destructive",
-      });
-    },
   });
 
   // Get member details by user ID
@@ -73,27 +43,60 @@ export default function AdminTeeTimesPage() {
     return members.find(member => member.id === userId);
   };
 
-  // Filter tee times by status
-  const pendingRequests = teetimes.filter(tt => tt.status === "pending" && tt.userId);
-  const approvedTeetimes = teetimes.filter(tt => tt.status === "booked" && tt.userId);
-  const availableTeetimes = teetimes.filter(tt => tt.status === "available");
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'booked': return 'bg-green-100 text-green-800';
-      case 'available': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
+  const getStatusInfo = (teetime: TeeTime) => {
+    const currentPlayers = teetime.bookedBy?.length || 0;
+    const maxPlayers = teetime.maxPlayers || 4;
+    
+    if (currentPlayers === 0) {
+      return { 
+        status: "available", 
+        color: "bg-green-100 text-green-700 border-green-200", 
+        text: "Available",
+        players: `0/${maxPlayers}`
+      };
+    } else if (currentPlayers < maxPlayers) {
+      return { 
+        status: "partial", 
+        color: "bg-blue-100 text-blue-700 border-blue-200", 
+        text: `${currentPlayers}/${maxPlayers} Players`,
+        players: `${currentPlayers}/${maxPlayers}`
+      };
+    } else {
+      return { 
+        status: "full", 
+        color: "bg-red-100 text-red-700 border-red-200", 
+        text: "Full",
+        players: `${currentPlayers}/${maxPlayers}`
+      };
     }
   };
 
-  // Generate date options for today (8/1) and tomorrow (8/2) only
-  const getDateOptions = () => {
-    return [
-      { value: "2025-08-01", label: "Today (8/1)" },
-      { value: "2025-08-02", label: "Tomorrow (8/2)" }
-    ];
+  const formatTime = (time: string) => {
+    // Convert 24-hour format to 12-hour format
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
   };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { 
+      month: 'long', 
+      day: 'numeric', 
+      year: 'numeric' 
+    });
+  };
+
+  // Calculate statistics
+  const availableTeetimes = teetimes.filter(tt => (tt.bookedBy?.length || 0) === 0);
+  const partialTeetimes = teetimes.filter(tt => {
+    const players = tt.bookedBy?.length || 0;
+    return players > 0 && players < (tt.maxPlayers || 4);
+  });
+  const fullTeetimes = teetimes.filter(tt => (tt.bookedBy?.length || 0) >= (tt.maxPlayers || 4));
+  const totalBookedPlayers = teetimes.reduce((sum, tt) => sum + (tt.bookedBy?.length || 0), 0);
 
   if (isLoading) {
     return (
@@ -118,54 +121,60 @@ export default function AdminTeeTimesPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#08452e] mb-2">Tee Time Management</h1>
-          <p className="text-muted-foreground">Manage member tee time requests and bookings</p>
+          <p className="text-muted-foreground">View and manage member tee time bookings • 16-minute intervals from 7 AM to 7 PM</p>
         </div>
 
         {/* Date Selector */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-[#08452e]" />
-              <span className="font-medium text-[#08452e]">Select Date:</span>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {getDateOptions().map(option => (
+        <Card className="border-0 shadow-sm mb-8">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4 text-golf-green" />
+                <span className="text-sm font-medium text-foreground">Select Date</span>
+              </div>
+              
+              <div className="flex items-center space-x-3">
                 <Button
-                  key={option.value}
-                  variant={selectedDate === option.value ? "default" : "outline"}
+                  variant={isToday ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setSelectedDate(option.value)}
-                  className={selectedDate === option.value ? 
-                    "bg-[#08452e] hover:bg-[#08452e]/90" : 
-                    "hover:bg-[#08452e]/10"
-                  }
+                  onClick={() => setSelectedDate(getTodayDate())}
+                  className={isToday ? "bg-golf-green hover:bg-golf-green-light text-white" : ""}
                 >
-                  {option.label}
+                  Today
+                  <span className="ml-2 text-xs opacity-75">
+                    {format(new Date(), 'M/d')}
+                  </span>
                 </Button>
-              ))}
+                
+                <Button
+                  variant={isTomorrow ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedDate(getTomorrowDate())}
+                  className={isTomorrow ? "bg-golf-green hover:bg-golf-green-light text-white" : ""}
+                >
+                  Tomorrow
+                  <span className="ml-2 text-xs opacity-75">
+                    {format(new Date(getTomorrowDate()), 'M/d')}
+                  </span>
+                </Button>
+              </div>
+              
+              <div className="text-sm text-muted-foreground">
+                {formatDate(selectedDate)}
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="border-0 shadow-sm bg-white">
             <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Clock className="h-6 w-6 text-yellow-600" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900">{pendingRequests.length}</p>
-              <p className="text-sm text-muted-foreground">Pending Requests</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm bg-white">
-            <CardContent className="p-6 text-center">
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <CheckCircle className="h-6 w-6 text-green-600" />
+                <Clock className="h-6 w-6 text-green-600" />
               </div>
-              <p className="text-2xl font-bold text-gray-900">{approvedTeetimes.length}</p>
-              <p className="text-sm text-muted-foreground">Approved</p>
+              <p className="text-2xl font-bold text-gray-900">{availableTeetimes.length}</p>
+              <p className="text-sm text-muted-foreground">Available Slots</p>
             </CardContent>
           </Card>
 
@@ -174,138 +183,112 @@ export default function AdminTeeTimesPage() {
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Users className="h-6 w-6 text-blue-600" />
               </div>
-              <p className="text-2xl font-bold text-gray-900">{availableTeetimes.length}</p>
-              <p className="text-sm text-muted-foreground">Available</p>
+              <p className="text-2xl font-bold text-gray-900">{partialTeetimes.length}</p>
+              <p className="text-sm text-muted-foreground">Partially Booked</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-sm bg-white">
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <MapPin className="h-6 w-6 text-red-600" />
+              </div>
+              <p className="text-2xl font-bold text-gray-900">{fullTeetimes.length}</p>
+              <p className="text-sm text-muted-foreground">Full Slots</p>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-sm bg-white">
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <MapPin className="h-6 w-6 text-gray-600" />
+                <UserIcon className="h-6 w-6 text-gray-600" />
               </div>
-              <p className="text-2xl font-bold text-gray-900">{teetimes.length}</p>
-              <p className="text-sm text-muted-foreground">Total Slots</p>
+              <p className="text-2xl font-bold text-gray-900">{totalBookedPlayers}</p>
+              <p className="text-sm text-muted-foreground">Total Players</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Pending Requests Section */}
-        {pendingRequests.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-[#08452e] mb-4">Pending Requests</h2>
-            <div className="space-y-4">
-              {pendingRequests.map((teetime) => {
-                const member = getMemberDetails(teetime.userId);
-                return (
-                  <Card key={teetime.id} className="border-0 shadow-sm bg-white border-l-4 border-yellow-400">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-6">
-                          <div className="text-center">
-                            <div className="w-16 h-16 bg-yellow-50 rounded-lg flex items-center justify-center mb-2">
-                              <Clock className="h-8 w-8 text-yellow-600" />
-                            </div>
-                            <p className="font-bold text-lg text-gray-900">{teetime.time}</p>
-                          </div>
-                          
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <UserIcon className="h-5 w-5 text-gray-500" />
-                              <span className="font-semibold text-gray-900">
-                                {member ? `${member.firstName} ${member.lastName}` : 'Unknown Member'}
-                              </span>
-                              <Badge className={getStatusColor(teetime.status)} >
-                                {teetime.status.charAt(0).toUpperCase() + teetime.status.slice(1)}
-                              </Badge>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
-                              <p><span className="font-medium">Member #:</span> {member?.memberNumber || 'N/A'}</p>
-                              <p><span className="font-medium">Phone:</span> {member?.phone || 'N/A'}</p>
-                              <p><span className="font-medium">Holes:</span> {teetime.holes}</p>
-                              <p><span className="font-medium">Spots:</span> {teetime.spotsAvailable}</p>
-                            </div>
-                          </div>
-                        </div>
+        {/* Tee Time Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {[...teetimes]
+            .sort((a, b) => a.time.localeCompare(b.time))
+            .map((teetime) => {
+            const statusInfo = getStatusInfo(teetime);
+            const bookedMembers = teetime.bookedBy?.map(userId => getMemberDetails(userId)).filter(Boolean) || [];
 
-                        <div className="flex gap-3">
-                          <Button
-                            onClick={() => approveMutation.mutate(teetime.id)}
-                            disabled={approveMutation.isPending}
-                            className="bg-green-600 hover:bg-green-700 text-white"
-                          >
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Approve
-                          </Button>
-                          <Button
-                            onClick={() => denyMutation.mutate(teetime.id)}
-                            disabled={denyMutation.isPending}
-                            variant="destructive"
-                          >
-                            <XCircle className="h-4 w-4 mr-2" />
-                            Deny
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
-        )}
+            return (
+              <Card key={teetime.id} className="border-0 shadow-sm bg-white">
+                <CardContent className="p-6">
+                  <div className="text-center mb-4">
+                    <div className="w-12 h-12 bg-golf-green rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Clock className="h-6 w-6 text-white" />
+                    </div>
+                    <p className="font-bold text-xl text-foreground mb-2">{formatTime(teetime.time)}</p>
+                    <Badge className={`${statusInfo.color} border`}>
+                      {statusInfo.text}
+                    </Badge>
+                  </div>
 
-        {/* All Tee Times Section */}
-        <div>
-          <h2 className="text-xl font-semibold text-[#08452e] mb-4">All Tee Times - {selectedDate === "2025-08-01" ? "8/1/2025" : "8/2/2025"}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {teetimes.map((teetime) => {
-              const member = getMemberDetails(teetime.userId);
-              return (
-                <Card key={teetime.id} className="border-0 shadow-sm bg-white">
-                  <CardContent className="p-6">
-                    <div className="text-center mb-4">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 ${
-                        teetime.status === 'pending' ? 'bg-yellow-100' :
-                        teetime.status === 'booked' ? 'bg-green-100' : 'bg-blue-100'
-                      }`}>
-                        <Clock className={`h-6 w-6 ${
-                          teetime.status === 'pending' ? 'text-yellow-600' :
-                          teetime.status === 'booked' ? 'text-green-600' : 'text-blue-600'
-                        }`} />
-                      </div>
-                      <p className="font-bold text-xl text-gray-900 mb-1">{teetime.time}</p>
-                      <Badge className={getStatusColor(teetime.status)}>
-                        {teetime.status.charAt(0).toUpperCase() + teetime.status.slice(1)}
-                      </Badge>
+                  {/* Player Details */}
+                  <div className="space-y-3">
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Players: {statusInfo.players}
+                      </p>
                     </div>
 
-                    <div className="space-y-2 text-sm">
-                      {member && (
-                        <p className="text-center">
-                          <span className="font-medium text-gray-900">
-                            {member.firstName} {member.lastName}
-                          </span>
+                    {bookedMembers.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Booked Members:
                         </p>
-                      )}
-                      <div className="grid grid-cols-2 gap-2 text-muted-foreground">
-                        <p><span className="font-medium">Holes:</span> {teetime.holes}</p>
-                        <p><span className="font-medium">Spots:</span> {teetime.spotsAvailable}</p>
+                        {bookedMembers.map((member, index) => (
+                          <div key={index} className="flex items-center space-x-2 text-sm">
+                            <UserIcon className="w-4 h-4 text-golf-green" />
+                            <span className="text-foreground">
+                              {member.firstName} {member.lastName}
+                            </span>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                    )}
+
+                    {teetime.playerNames && teetime.playerNames.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Guest Players:
+                        </p>
+                        {teetime.playerNames.map((name, index) => (
+                          <div key={index} className="flex items-center space-x-2 text-sm">
+                            <UserIcon className="w-4 h-4 text-blue-600" />
+                            <span className="text-foreground">{name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {statusInfo.status === "available" && (
+                      <div className="text-center text-sm text-muted-foreground italic">
+                        No bookings yet
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
+        {/* Empty State */}
         {teetimes.length === 0 && (
-          <div className="text-center py-12">
-            <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">No tee times available for {new Date(selectedDate).toLocaleDateString()}</p>
-          </div>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-12 text-center">
+              <Calendar className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">No Tee Times Available</h3>
+              <p className="text-muted-foreground">There are no tee times scheduled for this date.</p>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
