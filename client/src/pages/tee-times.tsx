@@ -54,7 +54,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
         course: "Packanack Golf Course",
         holes: parseInt(bookingData.holes),
         spotsAvailable: parseInt(bookingData.players),
-        price: bookingData.holes === "9" ? 45.00 : 85.00,
+        price: bookingData.holes === "9" ? "45.00" : "85.00",
         status: "booked"
       });
       return response.json();
