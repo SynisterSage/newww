@@ -95,7 +95,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Order routes
+  // Order routes  
+  app.get("/api/orders", async (req, res) => {
+    try {
+      const orders = await storage.getOrders(); // Get all orders
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
   app.get("/api/orders/:userId", async (req, res) => {
     try {
       const { userId } = req.params;

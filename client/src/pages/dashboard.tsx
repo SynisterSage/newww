@@ -91,11 +91,6 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
   // Filter orders for current user only
   const userOrders = allOrders.filter((order: Order) => order.userId === currentUser?.id);
   
-  // Debug logging
-  console.log('Dashboard - All orders:', allOrders);
-  console.log('Dashboard - Current user ID:', currentUser?.id);
-  console.log('Dashboard - User orders:', userOrders);
-  
   // Get recent orders (within last 30 days)
   const recentOrders = userOrders.filter((order: Order) => {
     if (!order.createdAt) return false;
@@ -104,8 +99,6 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     return orderDate >= thirtyDaysAgo;
   }).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-  
-  console.log('Dashboard - Recent orders:', recentOrders);
 
   // Filter for recent tee times (past and upcoming within 30 days)
   const recentTeetimes = userTeetimes.filter((teetime: TeeTime) => {
