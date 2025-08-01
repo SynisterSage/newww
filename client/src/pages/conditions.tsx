@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sun, Wind, Droplets, Thermometer, Eye, Gauge, Calendar, AlertTriangle, CheckCircle, Clock, Scissors, Waves } from "lucide-react";
+import { Sun, Wind, Droplets, Thermometer, Eye, Gauge, Calendar, AlertTriangle, CheckCircle, Clock, Scissors, Waves, CloudRain } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface WeatherData {
@@ -10,6 +10,12 @@ interface WeatherData {
   visibility: number;
   pressure: number;
   location: string;
+}
+
+interface PrecipitationData {
+  time: string;
+  precipitation: number;
+  hour: number;
 }
 
 interface CourseUpdate {
@@ -24,6 +30,7 @@ interface CourseUpdate {
 
 export default function Conditions() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [precipitationData, setPrecipitationData] = useState<PrecipitationData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -80,26 +87,42 @@ export default function Conditions() {
 
         const { latitude, longitude } = position.coords;
         
-        // Fetch weather data from OpenWeatherMap API
-        const response = await fetch(
+        // Fetch current weather data
+        const weatherResponse = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${import.meta.env.VITE_OPENWEATHER_API_KEY}&units=imperial`
         );
 
-        if (!response.ok) {
+        // Fetch precipitation forecast data
+        const forecastResponse = await fetch(
+          `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${import.meta.env.VITE_OPENWEATHER_API_KEY}&units=imperial`
+        );
+
+        if (!weatherResponse.ok) {
           throw new Error('Weather data not available');
         }
 
-        const data = await response.json();
+        const weatherData = await weatherResponse.json();
         
         setWeather({
-          temperature: Math.round(data.main.temp),
-          condition: data.weather[0].description,
-          windSpeed: Math.round(data.wind.speed),
-          humidity: data.main.humidity,
-          visibility: Math.round(data.visibility / 1609.34), // Convert to miles
-          pressure: Math.round(data.main.pressure * 0.02953), // Convert to inHg
-          location: data.name
+          temperature: Math.round(weatherData.main.temp),
+          condition: weatherData.weather[0].description,
+          windSpeed: Math.round(weatherData.wind.speed),
+          humidity: weatherData.main.humidity,
+          visibility: Math.round(weatherData.visibility / 1609.34), // Convert to miles
+          pressure: Math.round(weatherData.main.pressure * 0.02953), // Convert to inHg
+          location: weatherData.name
         });
+
+        // Process forecast data for precipitation
+        if (forecastResponse.ok) {
+          const forecastData = await forecastResponse.json();
+          const precipData = forecastData.list.slice(0, 8).map((item: any, index: number) => ({
+            time: new Date(item.dt * 1000).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
+            precipitation: item.rain ? (item.rain['3h'] || 0) : 0,
+            hour: index
+          }));
+          setPrecipitationData(precipData);
+        }
       } catch (err) {
         console.error('Weather fetch error:', err);
         setError('Unable to fetch weather data. Please check location permissions.');
@@ -113,6 +136,18 @@ export default function Conditions() {
           pressure: 30,
           location: "Golf Course"
         });
+        
+        // Default precipitation data
+        setPrecipitationData([
+          { time: '2PM', precipitation: 0, hour: 0 },
+          { time: '3PM', precipitation: 0.1, hour: 1 },
+          { time: '4PM', precipitation: 0.3, hour: 2 },
+          { time: '5PM', precipitation: 0.2, hour: 3 },
+          { time: '6PM', precipitation: 0, hour: 4 },
+          { time: '7PM', precipitation: 0, hour: 5 },
+          { time: '8PM', precipitation: 0.1, hour: 6 },
+          { time: '9PM', precipitation: 0, hour: 7 }
+        ]);
       } finally {
         setLoading(false);
       }
@@ -157,6 +192,48 @@ export default function Conditions() {
       day: 'numeric',
       year: 'numeric'
     });
+  };
+
+  const PrecipitationChart = () => {
+    const maxPrecip = Math.max(...precipitationData.map(d => d.precipitation), 0.5);
+    
+    return (
+      <div className="mt-4">
+        <div className="flex items-center space-x-2 mb-3">
+          <CloudRain className="w-5 h-5 text-blue-600" />
+          <span className="font-medium text-sm">Precipitation Forecast (Next 24 Hours)</span>
+        </div>
+        
+        <div className="relative h-24 bg-blue-50 rounded-lg px-3 py-2">
+          {/* Chart bars */}
+          <div className="flex items-end justify-between h-16 space-x-1">
+            {precipitationData.map((data, index) => (
+              <div key={index} className="flex-1 flex flex-col items-center">
+                <div 
+                  className="bg-blue-500 rounded-t-sm min-h-[2px] w-full transition-all duration-300"
+                  style={{ 
+                    height: `${(data.precipitation / maxPrecip) * 100}%` 
+                  }}
+                  title={`${data.time}: ${data.precipitation}" rain`}
+                />
+              </div>
+            ))}
+          </div>
+          
+          {/* Time labels */}
+          <div className="flex justify-between text-xs text-muted-foreground mt-1">
+            {precipitationData.map((data, index) => (
+              <span key={index} className="text-center">{data.time}</span>
+            ))}
+          </div>
+        </div>
+        
+        <div className="flex justify-between text-xs text-muted-foreground mt-2">
+          <span>0"</span>
+          <span>{maxPrecip > 0 ? `${maxPrecip.toFixed(1)}"` : '0.5"'}</span>
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
@@ -246,6 +323,9 @@ export default function Conditions() {
                   <p className="text-xs text-muted-foreground">Pressure</p>
                 </div>
               </div>
+              
+              {/* Precipitation Chart */}
+              <PrecipitationChart />
             </CardContent>
           </Card>
 
