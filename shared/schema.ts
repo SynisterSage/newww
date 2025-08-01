@@ -42,10 +42,9 @@ export const teetimes = pgTable("teetimes", {
   date: text("date").notNull(),
   time: text("time").notNull(),
   course: text("course").notNull().default("Packanack Golf Course"),
-  holes: integer("holes").notNull().default(18), // 9 or 18 holes
+  holes: integer("holes").notNull().default(9), // 9-hole course
   spotsAvailable: integer("spots_available").notNull().default(4),
-  price: decimal("price", { precision: 8, scale: 2 }).notNull(),
-  status: text("status").notNull().default("available"), // available, booked, premium
+  status: text("status").notNull().default("available"), // available, booked, pending
   isPremium: boolean("is_premium").default(false),
 });
 

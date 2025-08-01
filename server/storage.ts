@@ -264,60 +264,35 @@ export class MemStorage implements IStorage {
     const today = new Date().toISOString().split('T')[0];
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
-    // Base tee time slots for 9-hole Packanack Golf Course - 30 slots per day
+    // Base tee time slots for 9-hole Packanack Golf Course - exactly 30 slots per day
     const baseTimeSlots = [
-      { time: "6:00 AM", price: "65.00" },
-      { time: "6:15 AM", price: "65.00" },
-      { time: "6:30 AM", price: "65.00" },
-      { time: "6:45 AM", price: "65.00" },
-      { time: "7:00 AM", price: "65.00" },
-      { time: "7:15 AM", price: "65.00" },
-      { time: "7:30 AM", price: "65.00" },
-      { time: "7:45 AM", price: "65.00" },
-      { time: "8:00 AM", price: "65.00" },
-      { time: "8:15 AM", price: "65.00" },
-      { time: "8:30 AM", price: "65.00" },
-      { time: "8:45 AM", price: "65.00" },
-      { time: "9:00 AM", price: "65.00" },
-      { time: "9:15 AM", price: "65.00" },
-      { time: "9:30 AM", price: "65.00" },
-      { time: "9:45 AM", price: "65.00" },
-      { time: "10:00 AM", price: "65.00" },
-      { time: "10:15 AM", price: "65.00" },
-      { time: "10:30 AM", price: "65.00" },
-      { time: "10:45 AM", price: "65.00" },
-      { time: "11:00 AM", price: "65.00" },
-      { time: "11:15 AM", price: "65.00" },
-      { time: "11:30 AM", price: "65.00" },
-      { time: "11:45 AM", price: "65.00" },
-      { time: "12:00 PM", price: "60.00" },
-      { time: "12:15 PM", price: "60.00" },
-      { time: "12:30 PM", price: "60.00" },
-      { time: "12:45 PM", price: "60.00" },
-      { time: "1:00 PM", price: "60.00" },
-      { time: "1:15 PM", price: "60.00" }
+      "6:00 AM", "6:15 AM", "6:30 AM", "6:45 AM", 
+      "7:00 AM", "7:15 AM", "7:30 AM", "7:45 AM",
+      "8:00 AM", "8:15 AM", "8:30 AM", "8:45 AM",
+      "9:00 AM", "9:15 AM", "9:30 AM", "9:45 AM",
+      "10:00 AM", "10:15 AM", "10:30 AM", "10:45 AM",
+      "11:00 AM", "11:15 AM", "11:30 AM", "11:45 AM",
+      "12:00 PM", "12:15 PM", "12:30 PM", "12:45 PM",
+      "1:00 PM", "1:15 PM"
     ];
 
     // Get some real members for bookings
     const realMembers = Array.from(this.users.values()).filter(user => user.isActive).slice(0, 15);
 
-    // Create tee times for today and tomorrow
+    // Create tee times for today and tomorrow - exactly 30 slots each day
     [today, tomorrow].forEach((date, dayIndex) => {
-      baseTimeSlots.forEach((slot, slotIndex) => {
+      baseTimeSlots.forEach((time, slotIndex) => {
         const teetime: TeeTime = {
           id: randomUUID(),
           userId: null,
           date: date,
-          time: slot.time,
+          time: time,
           course: "Packanack Golf Course",
           holes: 9, // 9-hole course as specified
           spotsAvailable: 4,
-          price: slot.price,
           status: "available",
           isPremium: false // No premium tee times
         };
-
-        // All tee times start as available - no pre-existing bookings
 
         this.teetimes.set(teetime.id, teetime);
       });
@@ -892,4 +867,4 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();

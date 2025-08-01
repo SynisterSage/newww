@@ -233,7 +233,7 @@ export default function AdminTeeTimesPage() {
                               <p><span className="font-medium">Member #:</span> {member?.memberNumber || 'N/A'}</p>
                               <p><span className="font-medium">Phone:</span> {member?.phone || 'N/A'}</p>
                               <p><span className="font-medium">Holes:</span> {teetime.holes}</p>
-                              <p><span className="font-medium">Price:</span> ${teetime.price}</p>
+                              <p><span className="font-medium">Spots:</span> {teetime.spotsAvailable}</p>
                             </div>
                           </div>
                         </div>
@@ -300,7 +300,6 @@ export default function AdminTeeTimesPage() {
                       )}
                       <div className="grid grid-cols-2 gap-2 text-muted-foreground">
                         <p><span className="font-medium">Holes:</span> {teetime.holes}</p>
-                        <p><span className="font-medium">Price:</span> ${teetime.price}</p>
                         <p><span className="font-medium">Spots:</span> {teetime.spotsAvailable}</p>
                       </div>
                     </div>
