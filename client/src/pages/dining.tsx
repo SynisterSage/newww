@@ -137,15 +137,13 @@ export default function Dining() {
               </div>
               
               {/* View Cart Button */}
-              {totalItems > 0 && (
-                <Button 
-                  onClick={() => setIsCartOpen(true)}
-                  className="bg-golf-gold hover:bg-golf-gold/90 text-black font-medium w-full sm:w-auto"
-                >
-                  <ShoppingCart className="w-4 h-4 mr-2" />
-                  View Cart ({totalItems})
-                </Button>
-              )}
+              <Button 
+                onClick={() => setIsCartOpen(true)}
+                className="bg-golf-gold hover:bg-golf-gold/90 text-black font-medium w-full sm:w-auto"
+              >
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                View Cart{totalItems > 0 && ` (${totalItems})`}
+              </Button>
             </div>
           </div>
 
