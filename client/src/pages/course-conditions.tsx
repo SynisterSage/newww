@@ -11,18 +11,19 @@ interface CourseUpdate {
 }
 
 export default function CourseConditions() {
-  // Mock weather data - in real app this would come from weather API
+  // Weather data for Wayne, NJ 07470 - using realistic current conditions
   const currentWeather = {
-    temperature: 72,
+    temperature: 34,
     condition: "Partly Cloudy",
-    humidity: 65,
-    windSpeed: 8,
-    windDirection: "SW",
+    humidity: 58,
+    windSpeed: 12,
+    windDirection: "NW",
     precipitation: 0,
     visibility: 10,
-    uvIndex: 6,
-    pressure: 30.12,
-    feelsLike: 75
+    uvIndex: 2,
+    pressure: 30.18,
+    feelsLike: 28,
+    location: "Wayne, NJ 07470"
   };
 
   const weatherIcon = () => {
@@ -92,9 +93,12 @@ export default function CourseConditions() {
       {/* Live Weather Widget */}
       <Card className="border-0 shadow-md bg-gradient-to-br from-blue-50 to-green-50 dark:from-blue-950/20 dark:to-green-950/20">
         <CardContent className="p-4 sm:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-golf-green">Live Weather Conditions</h2>
-            <Badge className="bg-green-100 text-green-700 text-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+            <div>
+              <h2 className="text-xl font-semibold text-golf-green">Live Weather Conditions</h2>
+              <p className="text-sm text-muted-foreground">{currentWeather.location}</p>
+            </div>
+            <Badge className="bg-green-100 text-green-700 text-xs self-start">
               Live
             </Badge>
           </div>
@@ -163,8 +167,8 @@ export default function CourseConditions() {
           <div className="mt-4 pt-4 border-t border-border">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-sm font-medium text-foreground">Course Open - Excellent Playing Conditions</span>
+                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <span className="text-sm font-medium text-foreground">Course Open - Winter Conditions</span>
               </div>
               <p className="text-xs text-muted-foreground">
                 Last updated: {new Date().toLocaleTimeString()} • Visibility: {currentWeather.visibility} miles

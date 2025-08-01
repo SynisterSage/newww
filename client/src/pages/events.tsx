@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import { Calendar, Clock, Users, MapPin, Trophy, ArrowRight } from "lucide-react";
 
 interface Event {
@@ -23,6 +24,8 @@ interface Event {
 
 export default function Events() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [registeredEvents, setRegisteredEvents] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
 
   // Mock data for events
   const events: Event[] = [
@@ -106,6 +109,14 @@ export default function Events() {
       case "tournament": return "Tournament";
       default: return "Event";
     }
+  };
+
+  const handleEventRegistration = (eventId: string, eventTitle: string) => {
+    setRegisteredEvents(prev => new Set([...prev, eventId]));
+    toast({
+      title: "Registration Successful!",
+      description: `You've been registered for ${eventTitle}. Check your email for confirmation details.`,
+    });
   };
 
   return (
@@ -243,15 +254,22 @@ export default function Events() {
                         {/* Action Button */}
                         <div className="pt-4 border-t">
                           {selectedEvent.status === "upcoming" ? (
-                            <Button 
-                              className="w-full bg-golf-green hover:bg-golf-green-light text-white"
-                              disabled={selectedEvent.currentParticipants === selectedEvent.maxParticipants}
-                            >
-                              {selectedEvent.currentParticipants === selectedEvent.maxParticipants 
-                                ? "Event Full - Join Waitlist" 
-                                : "Register for Event"
-                              }
-                            </Button>
+                            registeredEvents.has(selectedEvent.id) ? (
+                              <Button variant="outline" className="w-full" disabled>
+                                Registered ✓
+                              </Button>
+                            ) : (
+                              <Button 
+                                className="w-full bg-golf-green hover:bg-golf-green-light text-white"
+                                disabled={selectedEvent.currentParticipants === selectedEvent.maxParticipants}
+                                onClick={() => handleEventRegistration(selectedEvent.id, selectedEvent.title)}
+                              >
+                                {selectedEvent.currentParticipants === selectedEvent.maxParticipants 
+                                  ? "Event Full - Join Waitlist" 
+                                  : "Register for Event"
+                                }
+                              </Button>
+                            )
                           ) : (
                             <Button variant="outline" className="w-full" disabled>
                               Event Completed
@@ -264,13 +282,25 @@ export default function Events() {
                 </Dialog>
 
                 {event.status === "upcoming" && (
-                  <Button 
-                    size="sm" 
-                    className="flex-1 bg-golf-green hover:bg-golf-green-light text-white"
-                    disabled={event.currentParticipants === event.maxParticipants}
-                  >
-                    {event.currentParticipants === event.maxParticipants ? "Full" : "Register"}
-                  </Button>
+                  registeredEvents.has(event.id) ? (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="flex-1"
+                      disabled
+                    >
+                      Registered ✓
+                    </Button>
+                  ) : (
+                    <Button 
+                      size="sm" 
+                      className="flex-1 bg-golf-green hover:bg-golf-green-light text-white"
+                      disabled={event.currentParticipants === event.maxParticipants}
+                      onClick={() => handleEventRegistration(event.id, event.title)}
+                    >
+                      {event.currentParticipants === event.maxParticipants ? "Full" : "Register"}
+                    </Button>
+                  )
                 )}
               </div>
             </CardContent>

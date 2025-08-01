@@ -27,6 +27,8 @@ export default function TeeTimes() {
     course: "",
     specialRequests: ""
   });
+  const [showBookingCard, setShowBookingCard] = useState(false);
+  const [latestBooking, setLatestBooking] = useState<any>(null);
 
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', selectedDate],
@@ -45,7 +47,20 @@ export default function TeeTimes() {
       });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
+      // Create booking card data
+      const bookingData = {
+        id: data.id || 'temp-id',
+        date: newBooking.date,
+        time: newBooking.time,
+        players: newBooking.players,
+        course: newBooking.course,
+        status: "pending"
+      };
+      
+      setLatestBooking(bookingData);
+      setShowBookingCard(true);
+      
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
       setIsBookingModalOpen(false);
       setNewBooking({ date: "", time: "", players: "1", course: "", specialRequests: "" });
@@ -124,6 +139,74 @@ export default function TeeTimes() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+      {/* Booking Confirmation Card */}
+      {showBookingCard && latestBooking && (
+        <Card className="border-0 shadow-lg bg-white relative">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-golf-green rounded-lg flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg font-semibold">
+                      {new Date(latestBooking.date).toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                      })}
+                    </span>
+                    <Badge className="bg-yellow-100 text-yellow-700 text-xs">
+                      {latestBooking.status}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Tee Time Booking</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowBookingCard(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Clock className="w-4 h-4 mr-3" />
+                <span>{latestBooking.time}</span>
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Users className="w-4 h-4 mr-3" />
+                <span>{latestBooking.players} Players</span>
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <MapPin className="w-4 h-4 mr-3" />
+                <span>{latestBooking.course}</span>
+              </div>
+            </div>
+            
+            <p className="text-sm text-muted-foreground mt-4 mb-4">
+              Tournament preparation
+            </p>
+            
+            <div className="flex space-x-3">
+              <Button variant="outline" size="sm" className="flex items-center">
+                <Edit className="w-4 h-4 mr-1" />
+                Edit
+              </Button>
+              <Button variant="outline" size="sm" className="flex items-center text-red-600 hover:text-red-700">
+                <X className="w-4 h-4 mr-1" />
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
