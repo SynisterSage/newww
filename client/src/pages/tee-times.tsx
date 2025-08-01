@@ -67,6 +67,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes/user', userData?.id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] }); // For dashboard stats
       setIsBookingModalOpen(false);
       setNewBooking({ date: "", time: "", players: "1", holes: "18", cartOption: "walk", cartQuantity: "1", specialRequests: "" });
       toast({
@@ -95,6 +96,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes/user', userData?.id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] }); // For dashboard stats  
       toast({
         title: "Booking Cancelled",
         description: "Your tee time has been cancelled.",

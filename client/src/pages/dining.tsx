@@ -40,6 +40,7 @@ export default function Dining({ userData }: DiningProps) {
       return response.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       setCurrentOrder({});
       setSpecialRequests("");
       closeCart();
