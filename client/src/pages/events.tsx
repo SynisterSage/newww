@@ -177,23 +177,19 @@ export default function Events() {
                   </div>
                 </div>
                 
-                {/* Action Button - Fixed at bottom */}
-                <div className="mt-auto">
-                  <Dialog open={openModal === event.id} onOpenChange={(open) => setOpenModal(open ? event.id : null)}>
-                    <DialogTrigger asChild>
-                      <Button 
-                        variant={isRegistered ? "default" : "outline"}
-                        className={`w-full h-10 justify-between transition-colors ${
-                          isRegistered 
-                            ? "bg-[#1B4332] hover:bg-[#2D5A3D] text-white border-[#1B4332]" 
-                            : "border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white"
-                        }`}
-                        disabled={isRegistered}
-                      >
-                        <span>{isRegistered ? 'Registered' : 'View Details'}</span>
-                        {!isRegistered && <ChevronRight className="w-4 h-4" />}
-                      </Button>
-                    </DialogTrigger>
+                {/* Action Buttons - Fixed at bottom */}
+                <div className="mt-auto space-y-2">
+                  {!isRegistered ? (
+                    <Dialog open={openModal === event.id} onOpenChange={(open) => setOpenModal(open ? event.id : null)}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant="outline"
+                          className="w-full h-10 justify-between border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white transition-colors"
+                        >
+                          <span>View Details</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                      </DialogTrigger>
                     
                     <DialogContent className="max-w-lg">
                       <DialogHeader>
@@ -297,6 +293,25 @@ export default function Events() {
                       </div>
                     </DialogContent>
                   </Dialog>
+                  ) : (
+                    <div className="space-y-2">
+                      <Button 
+                        variant="default"
+                        className="w-full h-10 bg-[#1B4332] hover:bg-[#1B4332] text-white border-[#1B4332] cursor-default opacity-100"
+                        disabled
+                      >
+                        <span>Registered</span>
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        className="w-full h-8 border-red-500 text-red-600 hover:bg-red-50 hover:border-red-600 text-sm"
+                        onClick={() => handleWithdrawal(event)}
+                        disabled={!canWithdraw(event.date)}
+                      >
+                        {canWithdraw(event.date) ? 'Withdraw' : 'Cannot withdraw (< 24h)'}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
