@@ -221,9 +221,9 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
                 </div>
                 <div className="text-3xl font-bold text-golf-green">{recentTeetimes.length}</div>
               </div>
-              <div className="space-y-2">
-                {recentTeetimes.slice(0, 2).map((teetime: TeeTime, index: number) => (
-                  <div key={teetime.id || index} className="flex items-center justify-between text-sm">
+              <div className="max-h-32 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-stone-300 scrollbar-track-stone-100">
+                {recentTeetimes.map((teetime: TeeTime, index: number) => (
+                  <div key={teetime.id || index} className="flex items-center justify-between text-sm py-1">
                     <span className="text-muted-foreground">{format(new Date(teetime.date), 'MMM dd')} • {teetime.time}</span>
                     <span className={`px-2 py-1 rounded text-xs ${
                       teetime.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
@@ -255,9 +255,9 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
                 </div>
                 <div className="text-3xl font-bold text-golf-orange">{recentOrders.length}</div>
               </div>
-              <div className="space-y-2">
-                {recentOrders.slice(0, 2).map((order: Order, index: number) => (
-                  <div key={order.id || index} className="flex items-center justify-between text-sm">
+              <div className="max-h-32 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-stone-300 scrollbar-track-stone-100">
+                {recentOrders.map((order: Order, index: number) => (
+                  <div key={order.id || index} className="flex items-center justify-between text-sm py-1">
                     <span className="text-muted-foreground">${order.total} • Clubhouse</span>
                     <span className={`px-2 py-1 rounded text-xs capitalize ${
                       order.status === 'delivered' ? 'bg-green-100 text-green-700' :
