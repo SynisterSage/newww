@@ -176,7 +176,7 @@ export default function Dining({ userData }: DiningProps) {
         {/* Category Tabs */}
         <div className="mb-8">
           <div className="flex flex-wrap gap-2">
-            {["All", "Mains", "Appetizers", "Desserts", "Beverages", "Wine", "Cocktails"].map((category) => (
+            {["All", "main_course", "appetizers", "desserts", "beverages", "wine", "cocktails"].map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
@@ -186,7 +186,13 @@ export default function Dining({ userData }: DiningProps) {
                     : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
                 }`}
               >
-                {category}
+                {category === "main_course" ? "Mains" : 
+                 category === "appetizers" ? "Appetizers" :
+                 category === "desserts" ? "Desserts" :
+                 category === "beverages" ? "Beverages" :
+                 category === "wine" ? "Wine" :
+                 category === "cocktails" ? "Cocktails" :
+                 category}
               </button>
             ))}
           </div>
