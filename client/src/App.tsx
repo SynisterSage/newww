@@ -15,6 +15,7 @@ import AdminMembers from "@/pages/admin/members";
 import AdminConditions from "@/pages/admin/conditions";
 import AdminTeeTimes from "@/pages/admin/tee-times";
 import AdminOrders from "@/pages/admin/orders";
+import AdminEvents from "@/pages/admin/events";
 import TeeTimes from "@/pages/tee-times";
 import Dining from "@/pages/dining";
 import Conditions from "@/pages/conditions";
@@ -252,7 +253,7 @@ function Router() {
             <Route path="/admin/orders">{() => <AdminOrders />}</Route>
             <Route path="/admin/members">{() => <AdminMembers />}</Route>
             <Route path="/admin/conditions">{() => <AdminConditions />}</Route>
-            <Route path="/admin/events">{() => <div>Admin Events</div>}</Route>
+            <Route path="/admin/events">{() => <AdminEvents />}</Route>
             <Route component={NotFound} />
           </Switch>
         </main>

@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertTeetimeSchema, insertOrderSchema, insertRoundSchema, insertUserSchema, insertCourseConditionsSchema } from "@shared/schema";
+import { insertTeetimeSchema, insertOrderSchema, insertRoundSchema, insertUserSchema, insertCourseConditionsSchema, insertEventSchema, insertEventRegistrationSchema } from "@shared/schema";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 
@@ -591,6 +591,171 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Course conditions validation error:", error);
       res.status(400).json({ message: "Invalid course conditions data", error: error.message });
+    }
+  });
+
+  // Event routes
+  app.get("/api/events", async (req, res) => {
+    try {
+      const events = await storage.getEvents();
+      res.json(events);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch events" });
+    }
+  });
+
+  app.get("/api/events/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const event = await storage.getEventById(id);
+      
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      res.json(event);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch event" });
+    }
+  });
+
+  app.post("/api/events", async (req, res) => {
+    try {
+      const eventData = insertEventSchema.parse(req.body);
+      const event = await storage.createEvent(eventData);
+      res.status(201).json(event);
+    } catch (error: any) {
+      console.error("Event validation error:", error);
+      res.status(400).json({ message: "Invalid event data", error: error.message });
+    }
+  });
+
+  app.patch("/api/events/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const event = await storage.updateEvent(id, updates);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      res.json(event);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update event" });
+    }
+  });
+
+  app.delete("/api/events/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteEvent(id);
+      res.json({ message: "Event deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete event" });
+    }
+  });
+
+  // Event registration routes
+  app.get("/api/events/:id/registrations", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const registrations = await storage.getEventRegistrations(id);
+      
+      // Get user details for each registration
+      const registrationsWithUsers = await Promise.all(
+        registrations.map(async (reg) => {
+          const user = reg.userId ? await storage.getUser(reg.userId) : null;
+          return {
+            ...reg,
+            user: user ? { 
+              id: user.id, 
+              firstName: user.firstName, 
+              lastName: user.lastName, 
+              email: user.email,
+              memberNumber: user.memberNumber
+            } : null
+          };
+        })
+      );
+      
+      res.json(registrationsWithUsers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch event registrations" });
+    }
+  });
+
+  app.post("/api/events/:id/register", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { userId, notes } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      // Check if user is already registered
+      const existingRegistrations = await storage.getEventRegistrations(id);
+      const alreadyRegistered = existingRegistrations.some(reg => reg.userId === userId);
+      
+      if (alreadyRegistered) {
+        return res.status(400).json({ message: "User is already registered for this event" });
+      }
+      
+      // Check event capacity
+      const event = await storage.getEventById(id);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      if (existingRegistrations.length >= event.maxSignups) {
+        return res.status(400).json({ message: "Event is full" });
+      }
+      
+      const registrationData = {
+        eventId: id,
+        userId,
+        notes: notes || null,
+      };
+      
+      const registration = await storage.registerForEvent(registrationData);
+      res.status(201).json(registration);
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      res.status(500).json({ message: "Failed to register for event" });
+    }
+  });
+
+  app.delete("/api/events/:id/register/:userId", async (req, res) => {
+    try {
+      const { id, userId } = req.params;
+      
+      await storage.unregisterFromEvent(id, userId);
+      res.json({ message: "Successfully unregistered from event" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to unregister from event" });
+    }
+  });
+
+  app.get("/api/users/:userId/events", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const registrations = await storage.getUserEventRegistrations(userId);
+      
+      // Get event details for each registration
+      const registrationsWithEvents = await Promise.all(
+        registrations.map(async (reg) => {
+          const event = reg.eventId ? await storage.getEventById(reg.eventId) : null;
+          return {
+            ...reg,
+            event
+          };
+        })
+      );
+      
+      res.json(registrationsWithEvents);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user event registrations" });
     }
   });
 

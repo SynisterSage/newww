@@ -106,6 +106,30 @@ export const courseConditions = pgTable("course_conditions", {
   updatedBy: text("updated_by").notNull()
 });
 
+export const events = pgTable("events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  date: date("date").notNull(),
+  time: text("time").notNull(),
+  location: text("location").notNull().default("Packanack Golf Club"),
+  maxSignups: integer("max_signups").notNull().default(50),
+  price: decimal("price", { precision: 8, scale: 2 }).default("0.00"),
+  category: text("category").notNull(), // tournament, social, lesson, special
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  createdBy: text("created_by").notNull(),
+});
+
+export const eventRegistrations = pgTable("event_registrations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventId: varchar("event_id").references(() => events.id),
+  userId: varchar("user_id").references(() => users.id),
+  registeredAt: timestamp("registered_at").defaultNow(),
+  notes: text("notes"), // Special requests or notes from member
+  status: text("status").notNull().default("confirmed"), // confirmed, waitlist, cancelled
+});
+
 // Sessions table for persistent login
 export const sessions = pgTable("sessions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -157,6 +181,16 @@ export const insertCourseConditionsSchema = createInsertSchema(courseConditions)
   lastUpdated: true,
 });
 
+export const insertEventSchema = createInsertSchema(events).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertEventRegistrationSchema = createInsertSchema(eventRegistrations).omit({
+  id: true,
+  registeredAt: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type AdminUser = typeof adminUsers.$inferSelect;
@@ -175,3 +209,7 @@ export type Session = typeof sessions.$inferSelect;
 export type InsertSession = z.infer<typeof insertSessionSchema>;
 export type CourseConditions = typeof courseConditions.$inferSelect;
 export type InsertCourseConditions = z.infer<typeof insertCourseConditionsSchema>;
+export type Event = typeof events.$inferSelect;
+export type InsertEvent = z.infer<typeof insertEventSchema>;
+export type EventRegistration = typeof eventRegistrations.$inferSelect;
+export type InsertEventRegistration = z.infer<typeof insertEventRegistrationSchema>;

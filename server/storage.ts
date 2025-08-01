@@ -1,7 +1,7 @@
-import { type User, type InsertUser, type AdminUser, type InsertAdminUser, type TeeTime, type InsertTeeTime, type MenuItem, type InsertMenuItem, type Order, type InsertOrder, type CourseHole, type InsertCourseHole, type Round, type InsertRound, type Session, type InsertSession, type CourseConditions, type InsertCourseConditions } from "@shared/schema";
+import { type User, type InsertUser, type AdminUser, type InsertAdminUser, type TeeTime, type InsertTeeTime, type MenuItem, type InsertMenuItem, type Order, type InsertOrder, type CourseHole, type InsertCourseHole, type Round, type InsertRound, type Session, type InsertSession, type CourseConditions, type InsertCourseConditions, type Event, type InsertEvent, type EventRegistration, type InsertEventRegistration } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
-import { users, adminUsers, teetimes, menuItems, orders, courseHoles, rounds, sessions, courseConditions } from "@shared/schema";
+import { users, adminUsers, teetimes, menuItems, orders, courseHoles, rounds, sessions, courseConditions, events, eventRegistrations } from "@shared/schema";
 import { eq, and, sql } from "drizzle-orm";
 
 export interface IStorage {
@@ -55,6 +55,19 @@ export interface IStorage {
   // Course conditions methods
   getCourseConditions(): Promise<CourseConditions>;
   updateCourseConditions(updates: Partial<InsertCourseConditions>): Promise<CourseConditions>;
+  
+  // Event methods
+  getEvents(): Promise<Event[]>;
+  getEventById(id: string): Promise<Event | undefined>;
+  createEvent(event: InsertEvent): Promise<Event>;
+  updateEvent(id: string, updates: Partial<Event>): Promise<Event | undefined>;
+  deleteEvent(id: string): Promise<void>;
+  
+  // Event registration methods
+  getEventRegistrations(eventId: string): Promise<EventRegistration[]>;
+  getUserEventRegistrations(userId: string): Promise<EventRegistration[]>;
+  registerForEvent(registration: InsertEventRegistration): Promise<EventRegistration>;
+  unregisterFromEvent(eventId: string, userId: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -66,6 +79,8 @@ export class MemStorage implements IStorage {
   private courseHoles: Map<string, CourseHole>;
   private rounds: Map<string, Round>;
   private sessions: Map<string, Session>;
+  private events: Map<string, Event>;
+  private eventRegistrations: Map<string, EventRegistration>;
   private currentConditions: CourseConditions;
 
   constructor() {
@@ -73,6 +88,8 @@ export class MemStorage implements IStorage {
     this.adminUsers = new Map();
     this.teetimes = new Map();
     this.menuItems = new Map();
+    this.events = new Map();
+    this.eventRegistrations = new Map();
     this.orders = new Map();
     this.courseHoles = new Map();
     this.rounds = new Map();
@@ -90,7 +107,7 @@ export class MemStorage implements IStorage {
       greensCondition: "excellent",
       fairwaysCondition: "good",
       hazardNotes: "",
-      maintenanceNotes: "",
+      maintenanceNotes: [],
       lastUpdated: new Date(),
       updatedBy: "System"
     };
@@ -351,6 +368,107 @@ export class MemStorage implements IStorage {
         ...data
       };
       this.courseHoles.set(hole.id, hole);
+    });
+
+    // Initialize sample events
+    const eventData = [
+      {
+        title: "Annual Golf Tournament",
+        description: "Join us for our annual championship tournament featuring prizes for all skill levels. Shotgun start with dinner following.",
+        date: "2025-08-15",
+        time: "08:00",
+        location: "Packanack Golf Club",
+        maxSignups: 72,
+        price: "125.00",
+        category: "tournament",
+        createdBy: "Admin"
+      },
+      {
+        title: "Wine Tasting Evening",
+        description: "Enjoy an elegant evening of wine tasting with selections from our premium collection, paired with artisanal appetizers.",
+        date: "2025-08-22",
+        time: "18:00",
+        location: "Clubhouse Main Dining Room",
+        maxSignups: 40,
+        price: "75.00",
+        category: "social",
+        createdBy: "Admin"
+      },
+      {
+        title: "Junior Golf Clinic",
+        description: "Professional instruction for young golfers ages 8-16. All skill levels welcome. Equipment provided.",
+        date: "2025-08-10",
+        time: "10:00",
+        location: "Practice Range",
+        maxSignups: 20,
+        price: "35.00",
+        category: "lesson",
+        createdBy: "Admin"
+      },
+      {
+        title: "Member-Guest Tournament",
+        description: "Bring a guest for this special tournament event. Prizes and cocktail reception included.",
+        date: "2025-08-29",
+        time: "09:00",
+        location: "Packanack Golf Club",
+        maxSignups: 60,
+        price: "200.00",
+        category: "tournament",
+        createdBy: "Admin"
+      },
+      {
+        title: "Ladies' Luncheon & Fashion Show",
+        description: "Special event featuring local fashion designers and a gourmet three-course lunch.",
+        date: "2025-08-18",
+        time: "12:00",
+        location: "Clubhouse Main Dining Room",
+        maxSignups: 50,
+        price: "60.00",
+        category: "social",
+        createdBy: "Admin"
+      },
+      {
+        title: "Pro Shop Golf Clinic",
+        description: "Learn the fundamentals of golf from our PGA professional. Perfect for beginners and intermediate players.",
+        date: "2025-08-12",
+        time: "14:00",
+        location: "Practice Range",
+        maxSignups: 15,
+        price: "45.00",
+        category: "lesson",
+        createdBy: "Admin"
+      },
+      {
+        title: "Sunset Concert Series",
+        description: "Live jazz music on the terrace overlooking the 18th green. Light appetizers and cocktails available.",
+        date: "2025-08-25",
+        time: "19:00",
+        location: "Outdoor Terrace",
+        maxSignups: 100,
+        price: "25.00",
+        category: "special",
+        createdBy: "Admin"
+      },
+      {
+        title: "Charity Golf Scramble",
+        description: "Four-person scramble tournament benefiting the Wayne Community Foundation. Prizes and dinner included.",
+        date: "2025-09-05",
+        time: "08:30",
+        location: "Packanack Golf Club",
+        maxSignups: 80,
+        price: "150.00",
+        category: "tournament",
+        createdBy: "Admin"
+      }
+    ];
+
+    eventData.forEach(data => {
+      const event: Event = {
+        id: randomUUID(),
+        createdAt: new Date(),
+        ...data
+      };
+      this.events.set(event.id, event);
     });
   }
 
@@ -665,6 +783,73 @@ export class MemStorage implements IStorage {
     };
     return this.currentConditions;
   }
+
+  // Event methods (MemStorage)
+  async getEvents(): Promise<Event[]> {
+    return Array.from(this.events.values()).filter(event => event.isActive);
+  }
+
+  async getEventById(id: string): Promise<Event | undefined> {
+    return this.events.get(id);
+  }
+
+  async createEvent(insertEvent: InsertEvent): Promise<Event> {
+    const id = randomUUID();
+    const event: Event = {
+      id,
+      ...insertEvent,
+      isActive: insertEvent.isActive ?? true,
+      createdAt: new Date(),
+    };
+    this.events.set(id, event);
+    return event;
+  }
+
+  async updateEvent(id: string, updates: Partial<Event>): Promise<Event | undefined> {
+    const event = this.events.get(id);
+    if (!event) return undefined;
+    
+    const updatedEvent = { ...event, ...updates };
+    this.events.set(id, updatedEvent);
+    return updatedEvent;
+  }
+
+  async deleteEvent(id: string): Promise<void> {
+    const event = this.events.get(id);
+    if (event) {
+      this.events.set(id, { ...event, isActive: false });
+    }
+  }
+
+  // Event registration methods (MemStorage)
+  async getEventRegistrations(eventId: string): Promise<EventRegistration[]> {
+    return Array.from(this.eventRegistrations.values()).filter(reg => reg.eventId === eventId);
+  }
+
+  async getUserEventRegistrations(userId: string): Promise<EventRegistration[]> {
+    return Array.from(this.eventRegistrations.values()).filter(reg => reg.userId === userId);
+  }
+
+  async registerForEvent(insertRegistration: InsertEventRegistration): Promise<EventRegistration> {
+    const id = randomUUID();
+    const registration: EventRegistration = {
+      id,
+      ...insertRegistration,
+      status: insertRegistration.status || "confirmed",
+      registeredAt: new Date(),
+    };
+    this.eventRegistrations.set(id, registration);
+    return registration;
+  }
+
+  async unregisterFromEvent(eventId: string, userId: string): Promise<void> {
+    const registrationToDelete = Array.from(this.eventRegistrations.entries()).find(
+      ([_, reg]) => reg.eventId === eventId && reg.userId === userId
+    );
+    if (registrationToDelete) {
+      this.eventRegistrations.delete(registrationToDelete[0]);
+    }
+  }
 }
 
 // DatabaseStorage implementation
@@ -870,6 +1055,49 @@ export class DatabaseStorage implements IStorage {
       .where(eq(courseConditions.id, current.id))
       .returning();
     return updated;
+  }
+
+  // Event methods
+  async getEvents(): Promise<Event[]> {
+    return await db.select().from(events).where(eq(events.isActive, true)).orderBy(events.date);
+  }
+
+  async getEventById(id: string): Promise<Event | undefined> {
+    const [event] = await db.select().from(events).where(eq(events.id, id));
+    return event || undefined;
+  }
+
+  async createEvent(event: InsertEvent): Promise<Event> {
+    const [newEvent] = await db.insert(events).values(event).returning();
+    return newEvent;
+  }
+
+  async updateEvent(id: string, updates: Partial<Event>): Promise<Event | undefined> {
+    const [updated] = await db.update(events).set(updates).where(eq(events.id, id)).returning();
+    return updated || undefined;
+  }
+
+  async deleteEvent(id: string): Promise<void> {
+    await db.update(events).set({ isActive: false }).where(eq(events.id, id));
+  }
+
+  // Event registration methods
+  async getEventRegistrations(eventId: string): Promise<EventRegistration[]> {
+    return await db.select().from(eventRegistrations).where(eq(eventRegistrations.eventId, eventId));
+  }
+
+  async getUserEventRegistrations(userId: string): Promise<EventRegistration[]> {
+    return await db.select().from(eventRegistrations).where(eq(eventRegistrations.userId, userId));
+  }
+
+  async registerForEvent(registration: InsertEventRegistration): Promise<EventRegistration> {
+    const [newRegistration] = await db.insert(eventRegistrations).values(registration).returning();
+    return newRegistration;
+  }
+
+  async unregisterFromEvent(eventId: string, userId: string): Promise<void> {
+    await db.delete(eventRegistrations)
+      .where(and(eq(eventRegistrations.eventId, eventId), eq(eventRegistrations.userId, userId)));
   }
 }
 
