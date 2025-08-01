@@ -34,6 +34,16 @@ This is a premium golf club management system built for Packanack Golf Club as a
 - Redesigned member conditions page with clean grid layout and proper 9-hole course information
 - Real-time sync between admin updates and member view with weather icons and status badges
 
+✓ **Tee Times Grid Schedule Complete** (August 1, 2025):
+- Redesigned tee times page to display grid-style schedule from 7 AM to 7 PM with 16-minute intervals
+- Updated database schema to support multiple players per tee time (bookedBy and playerNames arrays)
+- Created JOIN/LEAVE functionality for tee time bookings with 4-player maximum per slot
+- Fixed API endpoints to return proper JSON data for date-specific tee time requests
+- Pre-populated database with 45 tee time slots per day from 7 AM to 7 PM
+- Implemented consistent visual styling - boxes remain in same position when players join/leave
+- Status updates show "Available" → "1/4 Players" → "2/4 Players" etc. without moving boxes
+- Real-time booking system with immediate updates and proper cache invalidation
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

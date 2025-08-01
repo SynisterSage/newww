@@ -231,11 +231,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
             return (
               <Card 
                 key={teetime.id} 
-                className={`border-2 transition-all duration-200 hover:shadow-md ${
-                  isUserBooked 
-                    ? 'border-golf-green bg-golf-green/5' 
-                    : 'border-gray-200 hover:border-golf-green/30'
-                }`}
+                className="border border-gray-200 transition-all duration-200 hover:shadow-md hover:border-golf-green/30"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -246,7 +242,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
                       </CardTitle>
                     </div>
                     {isUserBooked && (
-                      <UserCheck className="w-4 h-4 text-golf-green" />
+                      <UserCheck className="w-4 h-4 text-golf-green" title="You are booked in this tee time" />
                     )}
                   </div>
                 </CardHeader>
