@@ -100,13 +100,7 @@ export default function Events() {
     });
   };
 
-  const canWithdraw = (eventDate: Date) => {
-    const now = new Date();
-    const eventTime = new Date(eventDate);
-    const timeDiff = eventTime.getTime() - now.getTime();
-    const hoursDiff = timeDiff / (1000 * 3600);
-    return hoursDiff > 24;
-  };
+
 
   return (
     <div className="min-h-screen bg-[#F8F6F0]">
@@ -278,16 +272,9 @@ export default function Events() {
                               variant="outline"
                               className="w-full h-10 border-red-500 text-red-600 hover:bg-red-50 hover:border-red-600 hover:text-red-700 transition-all duration-200"
                               onClick={() => handleWithdrawal(event)}
-                              disabled={!canWithdraw(event.date)}
                             >
-                              {canWithdraw(event.date) ? 'Withdraw' : 'Cannot withdraw (< 24h)'}
+                              Withdraw
                             </Button>
-                            
-                            {!canWithdraw(event.date) && (
-                              <p className="text-xs text-muted-foreground text-center">
-                                Withdrawal is not allowed within 24 hours of the event
-                              </p>
-                            )}
                           </div>
                         )}
                       </div>
@@ -307,9 +294,8 @@ export default function Events() {
                         variant="outline"
                         className="w-full h-8 border-red-500 text-red-600 hover:bg-red-50 hover:border-red-600 hover:text-red-700 text-sm transition-all duration-200"
                         onClick={() => handleWithdrawal(event)}
-                        disabled={!canWithdraw(event.date)}
                       >
-                        {canWithdraw(event.date) ? 'Withdraw' : 'Cannot withdraw (< 24h)'}
+                        Withdraw
                       </Button>
                     </div>
                   )}
