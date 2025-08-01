@@ -4,20 +4,29 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Utensils, MapPin, User, Trophy, Clock, TrendingUp, DollarSign, Wind, Droplets, Sun } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
-import type { User as UserType } from "@shared/schema";
+import type { User as UserType, TeeTimes, Order } from "@shared/schema";
 
 export default function Dashboard() {
   const { data: user, isLoading } = useQuery<UserType>({
     queryKey: ['/api/user/user-1'],
   });
 
-  const { data: teetimes = [] } = useQuery({
+  // Get all tee times for the next 7 days to show upcoming bookings
+  const { data: teetimes = [] } = useQuery<TeeTimes[]>({
     queryKey: ['/api/teetimes', format(new Date(), 'yyyy-MM-dd')],
   });
 
-  const { data: orders = [] } = useQuery({
+  // Also get tomorrow's tee times to ensure we see upcoming bookings
+  const { data: tomorrowTeetimes = [] } = useQuery<TeeTimes[]>({
+    queryKey: ['/api/teetimes', format(new Date(Date.now() + 24 * 60 * 60 * 1000), 'yyyy-MM-dd')],
+  });
+
+  const { data: orders = [] } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
   });
+
+  // Combine today's and tomorrow's tee times
+  const allTeetimes = [...teetimes, ...tomorrowTeetimes];
 
   if (isLoading) {
     return (
@@ -107,7 +116,7 @@ export default function Dashboard() {
               <div className="w-12 h-12 bg-golf-green-soft rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <Calendar className="w-6 h-6 text-golf-green" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{teetimes.filter(t => new Date(`${t.date}T${t.time}`) > new Date()).length}</div>
+              <div className="text-2xl font-bold text-foreground mb-1">{allTeetimes.filter((t: TeeTimes) => new Date(`${t.date}T${t.time}`) > new Date()).length}</div>
               <div className="text-sm text-muted-foreground">Upcoming Tee Times</div>
             </CardContent>
           </Card>
@@ -117,7 +126,7 @@ export default function Dashboard() {
               <div className="w-12 h-12 bg-golf-orange/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <Utensils className="w-6 h-6 text-golf-orange" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{orders.filter(o => {
+              <div className="text-2xl font-bold text-foreground mb-1">{orders.filter((o: Order) => {
                 const orderDate = new Date(o.createdAt || Date.now());
                 const weekAgo = new Date();
                 weekAgo.setDate(weekAgo.getDate() - 7);
@@ -132,7 +141,7 @@ export default function Dashboard() {
               <div className="w-12 h-12 bg-golf-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <TrendingUp className="w-6 h-6 text-golf-blue" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{teetimes.filter(t => {
+              <div className="text-2xl font-bold text-foreground mb-1">{allTeetimes.filter((t: TeeTimes) => {
                 const teetimeDate = new Date(t.date);
                 const now = new Date();
                 return teetimeDate.getMonth() === now.getMonth() && teetimeDate.getFullYear() === now.getFullYear();
@@ -164,8 +173,8 @@ export default function Dashboard() {
                 <h3 className="text-lg font-semibold text-foreground">Upcoming Tee Times</h3>
               </div>
               <div className="space-y-3">
-                {teetimes.slice(0, 3).map((teetime, index) => (
-                  <div key={index} className="flex items-center space-x-3">
+                {allTeetimes.filter((t: TeeTimes) => new Date(`${t.date}T${t.time}`) > new Date()).slice(0, 3).map((teetime: TeeTimes, index: number) => (
+                  <div key={teetime.id || index} className="flex items-center space-x-3">
                     <div className="bg-golf-green p-2 rounded-full">
                       <Clock className="h-4 w-4 text-white" />
                     </div>
@@ -178,7 +187,7 @@ export default function Dashboard() {
                     </span>
                   </div>
                 ))}
-                {teetimes.length === 0 && (
+                {allTeetimes.filter((t: TeeTimes) => new Date(`${t.date}T${t.time}`) > new Date()).length === 0 && (
                   <p className="text-muted-foreground text-center py-4">No upcoming tee times</p>
                 )}
               </div>
@@ -193,8 +202,8 @@ export default function Dashboard() {
                 <h3 className="text-lg font-semibold text-foreground">Recent Orders</h3>
               </div>
               <div className="space-y-3">
-                {orders.slice(0, 3).map((order, index) => (
-                  <div key={index} className="flex items-center space-x-3">
+                {orders.slice(0, 3).map((order: Order, index: number) => (
+                  <div key={order.id || index} className="flex items-center space-x-3">
                     <div className="bg-orange-500 p-2 rounded-full">
                       <Utensils className="h-4 w-4 text-white" />
                     </div>
@@ -203,7 +212,7 @@ export default function Dashboard() {
                       <p className="text-sm text-muted-foreground">{order.location || '19th Hole Bar'}</p>
                     </div>
                     <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                      placed
+                      {order.status || 'placed'}
                     </span>
                   </div>
                 ))}
