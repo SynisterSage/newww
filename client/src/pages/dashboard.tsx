@@ -1,13 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Utensils, MapPin, User, Trophy } from "lucide-react";
+import { Calendar, Utensils, MapPin, User, Trophy, Clock, TrendingUp, DollarSign, Wind, Droplets, Sun } from "lucide-react";
 import { Link } from "wouter";
+import { format } from "date-fns";
 import type { User as UserType } from "@shared/schema";
 
 export default function Dashboard() {
   const { data: user, isLoading } = useQuery<UserType>({
     queryKey: ['/api/user/user-1'],
+  });
+
+  const { data: teetimes = [] } = useQuery({
+    queryKey: ['/api/teetimes', format(new Date(), 'yyyy-MM-dd')],
+  });
+
+  const { data: orders = [] } = useQuery({
+    queryKey: ['/api/orders'],
   });
 
   if (isLoading) {
@@ -98,172 +107,196 @@ export default function Dashboard() {
               <div className="w-12 h-12 bg-golf-green-soft rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <Calendar className="w-6 h-6 text-golf-green" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{user?.handicap || 18}</div>
-              <div className="text-sm text-muted-foreground">Handicap</div>
+              <div className="text-2xl font-bold text-foreground mb-1">{teetimes.filter(t => new Date(`${t.date}T${t.time}`) > new Date()).length}</div>
+              <div className="text-sm text-muted-foreground">Upcoming Tee Times</div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-sm">
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 bg-golf-orange/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <Trophy className="w-6 h-6 text-golf-orange" />
+                <Utensils className="w-6 h-6 text-golf-orange" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{user?.roundsPlayed || 47}</div>
-              <div className="text-sm text-muted-foreground">Rounds Played</div>
+              <div className="text-2xl font-bold text-foreground mb-1">{orders.filter(o => {
+                const orderDate = new Date(o.createdAt || Date.now());
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                return orderDate >= weekAgo;
+              }).length}</div>
+              <div className="text-sm text-muted-foreground">Recent Orders</div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-sm">
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 bg-golf-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <User className="w-6 h-6 text-golf-blue" />
+                <TrendingUp className="w-6 h-6 text-golf-blue" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">${user?.accountBalance || "285"}</div>
-              <div className="text-sm text-muted-foreground">Account Balance</div>
+              <div className="text-2xl font-bold text-foreground mb-1">{teetimes.filter(t => {
+                const teetimeDate = new Date(t.date);
+                const now = new Date();
+                return teetimeDate.getMonth() === now.getMonth() && teetimeDate.getFullYear() === now.getFullYear();
+              }).length} Rounds</div>
+              <div className="text-sm text-muted-foreground">This Month</div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-sm">
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 bg-golf-purple/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <Trophy className="w-6 h-6 text-golf-purple" />
+                <Clock className="w-6 h-6 text-golf-purple" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{user?.memberStatus || "Gold"}</div>
-              <div className="text-sm text-muted-foreground">Member Status</div>
+              <div className="text-2xl font-bold text-foreground mb-1">Par -2</div>
+              <div className="text-sm text-muted-foreground">Best Score</div>
             </CardContent>
           </Card>
         </div>
       </div>
-      {/* Two Column Layout */}
-      <div className="grid lg:grid-cols-2 gap-8">
-        {/* Upcoming Tee Times */}
-        <Card className="border-0 shadow-sm">
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Upcoming Tee Times</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-golf-green-soft rounded-lg flex items-center justify-center">
-                    <Calendar className="w-5 h-5 text-golf-green" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-foreground">Tomorrow 8:20 AM</h4>
-                    <p className="text-sm text-muted-foreground">Championship Course</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-medium text-golf-green">Confirmed</div>
-                </div>
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column - Two sections */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Upcoming Tee Times */}
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <Calendar className="w-5 h-5" />
+                <h3 className="text-lg font-semibold text-foreground">Upcoming Tee Times</h3>
               </div>
-              
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-golf-green-soft rounded-lg flex items-center justify-center">
-                    <Calendar className="w-5 h-5 text-golf-green" />
+              <div className="space-y-3">
+                {teetimes.slice(0, 3).map((teetime, index) => (
+                  <div key={index} className="flex items-center space-x-3">
+                    <div className="bg-golf-green p-2 rounded-full">
+                      <Clock className="h-4 w-4 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">{format(new Date(teetime.date), 'MMM dd')} at {teetime.time}</p>
+                      <p className="text-sm text-muted-foreground">{teetime.players} players</p>
+                    </div>
+                    <span className="text-sm bg-golf-green text-white px-2 py-1 rounded">
+                      {teetime.holes === 18 ? 'Championship Course' : 'Practice Range'}
+                    </span>
                   </div>
-                  <div>
-                    <h4 className="font-medium text-foreground">Saturday 9:00 AM</h4>
-                    <p className="text-sm text-muted-foreground">Championship Course</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-medium text-golf-green">Confirmed</div>
-                </div>
+                ))}
+                {teetimes.length === 0 && (
+                  <p className="text-muted-foreground text-center py-4">No upcoming tee times</p>
+                )}
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Recent Orders */}
-        <Card className="border-0 shadow-sm">
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Recent Orders</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-golf-orange/10 rounded-lg flex items-center justify-center">
-                    <Utensils className="w-5 h-5 text-golf-orange" />
+          {/* Recent Orders */}
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <Utensils className="w-5 h-5" />
+                <h3 className="text-lg font-semibold text-foreground">Recent Orders</h3>
+              </div>
+              <div className="space-y-3">
+                {orders.slice(0, 3).map((order, index) => (
+                  <div key={index} className="flex items-center space-x-3">
+                    <div className="bg-orange-500 p-2 rounded-full">
+                      <Utensils className="h-4 w-4 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">${order.total?.toFixed(2) || '160.00'}</p>
+                      <p className="text-sm text-muted-foreground">{order.location || '19th Hole Bar'}</p>
+                    </div>
+                    <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      placed
+                    </span>
                   </div>
-                  <div>
-                    <h4 className="font-medium text-foreground">Prime Rib Special</h4>
-                    <p className="text-sm text-muted-foreground">Today 12:30 PM</p>
+                ))}
+                {orders.length === 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-orange-500 p-2 rounded-full">
+                        <Utensils className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">$160.00</p>
+                        <p className="text-sm text-muted-foreground">19th Hole Bar</p>
+                      </div>
+                      <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        placed
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-orange-500 p-2 rounded-full">
+                        <Utensils className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">$40.00</p>
+                        <p className="text-sm text-muted-foreground">19th Hole Bar</p>
+                      </div>
+                      <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">
+                        delivered
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-orange-500 p-2 rounded-full">
+                        <Utensils className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">$124.00</p>
+                        <p className="text-sm text-muted-foreground">Clubhouse Dining</p>
+                      </div>
+                      <span className="text-sm bg-orange-100 text-orange-800 px-2 py-1 rounded">
+                        preparing
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-medium text-golf-green">Delivered</div>
-                </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column - Course Conditions */}
+        <div>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-2 mb-6">
+                <Sun className="w-5 h-5" />
+                <h3 className="text-lg font-semibold text-foreground">Course Conditions</h3>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-golf-orange/10 rounded-lg flex items-center justify-center">
-                    <Utensils className="w-5 h-5 text-golf-orange" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-foreground">Coffee & Pastry</h4>
-                    <p className="text-sm text-muted-foreground">Yesterday 8:00 AM</p>
-                  </div>
+              {/* Weather */}
+              <div className="text-center mb-6">
+                <div className="bg-blue-500 p-6 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                  <Sun className="h-8 w-8 text-white" />
                 </div>
-                <div className="text-right">
-                  <div className="text-sm font-medium text-golf-green">Delivered</div>
+                <div className="text-3xl font-bold">75°F</div>
+                <p className="text-muted-foreground">Partly Cloudy</p>
+              </div>
+
+              {/* Conditions */}
+              <div className="grid grid-cols-2 gap-4 text-center mb-6">
+                <div>
+                  <Wind className="h-6 w-6 mx-auto mb-2 text-blue-500" />
+                  <p className="text-sm font-medium">8 mph</p>
+                  <p className="text-xs text-muted-foreground">Wind</p>
+                </div>
+                <div>
+                  <Droplets className="h-6 w-6 mx-auto mb-2 text-blue-500" />
+                  <p className="text-sm font-medium">65%</p>
+                  <p className="text-xs text-muted-foreground">Humidity</p>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+
+              {/* Course Status */}
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center justify-center mb-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                  <p className="font-medium text-green-800">Perfect Golf Weather!</p>
+                </div>
+                <p className="text-sm text-green-700 text-center">Ideal conditions for your round today</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-      {/* Course Conditions Widget */}
-      <Card className="border-0 shadow-sm bg-gradient-to-br from-golf-green-soft to-golf-blue/5">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-foreground">Course Conditions</h3>
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <div className="w-2 h-2 bg-golf-green rounded-full"></div>
-              <span>Live</span>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-golf-blue/20 rounded-2xl flex items-center justify-center mx-auto mb-2">
-                <span className="text-2xl">☀️</span>
-              </div>
-              <div className="text-2xl font-bold text-foreground">75°F</div>
-              <div className="text-sm text-muted-foreground">Partly Cloudy</div>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-golf-green-soft rounded-2xl flex items-center justify-center mx-auto mb-2">
-                <span className="text-2xl">💨</span>
-              </div>
-              <div className="text-2xl font-bold text-foreground">8 mph</div>
-              <div className="text-sm text-muted-foreground">Wind</div>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-golf-blue/20 rounded-2xl flex items-center justify-center mx-auto mb-2">
-                <span className="text-2xl">💧</span>
-              </div>
-              <div className="text-2xl font-bold text-foreground">65%</div>
-              <div className="text-sm text-muted-foreground">Humidity</div>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-golf-green-soft rounded-2xl flex items-center justify-center mx-auto mb-2">
-                <span className="text-2xl">⛳</span>
-              </div>
-              <div className="text-lg font-bold text-golf-green">Perfect!</div>
-              <div className="text-sm text-muted-foreground">Golf Weather</div>
-            </div>
-          </div>
-          
-          <div className="p-3 rounded-lg pt-[11px] pb-[11px] mt-[27px] mb-[27px] bg-[#fafafa]">
-            <p className="text-sm text-golf-green font-medium text-center">
-              Perfect Golf Weather! Ideal conditions for your round today
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+
     </div>
   );
 }
