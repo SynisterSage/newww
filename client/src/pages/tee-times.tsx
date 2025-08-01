@@ -27,6 +27,8 @@ export default function TeeTimes() {
     time: "",
     players: "1",
     holes: "18",
+    cartOption: "walk",
+    cartQuantity: "1",
     specialRequests: ""
   });
   const [userBookings, setUserBookings] = useState<any[]>([]);
@@ -59,6 +61,9 @@ export default function TeeTimes() {
         players: newBooking.players,
         holes: newBooking.holes,
         course: "Packanack Golf Course",
+        cartOption: newBooking.cartOption,
+        cartQuantity: newBooking.cartQuantity,
+        specialRequests: newBooking.specialRequests,
         status: "pending"
       };
       
@@ -66,7 +71,7 @@ export default function TeeTimes() {
       
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
       setIsBookingModalOpen(false);
-      setNewBooking({ date: "", time: "", players: "1", holes: "18", specialRequests: "" });
+      setNewBooking({ date: "", time: "", players: "1", holes: "18", cartOption: "walk", cartQuantity: "1", specialRequests: "" });
       toast({
         title: "Booking Confirmed",
         description: "Your tee time has been successfully booked!",
@@ -118,7 +123,7 @@ export default function TeeTimes() {
       setUserBookings(updatedBookings);
       setEditingBooking(null);
       setIsBookingModalOpen(false);
-      setNewBooking({ date: "", time: "", players: "1", holes: "18", specialRequests: "" });
+      setNewBooking({ date: "", time: "", players: "1", holes: "18", cartOption: "walk", cartQuantity: "1", specialRequests: "" });
       toast({
         title: "Booking Updated",
         description: "Your tee time has been successfully updated!",
@@ -144,7 +149,9 @@ export default function TeeTimes() {
       time: booking.time,
       players: booking.players,
       holes: booking.holes.toString(),
-      specialRequests: ""
+      cartOption: booking.cartOption || "walk",
+      cartQuantity: booking.cartQuantity || "1",
+      specialRequests: booking.specialRequests || ""
     });
     setIsBookingModalOpen(true);
   };
@@ -196,7 +203,7 @@ export default function TeeTimes() {
               className="bg-golf-green hover:bg-golf-green-light text-white w-full lg:w-auto"
               onClick={() => {
                 setEditingBooking(null);
-                setNewBooking({ date: "", time: "", players: "1", holes: "18", specialRequests: "" });
+                setNewBooking({ date: "", time: "", players: "1", holes: "18", cartOption: "walk", cartQuantity: "1", specialRequests: "" });
               }}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -272,6 +279,36 @@ export default function TeeTimes() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 block">Cart Option</label>
+                  <Select value={newBooking.cartOption} onValueChange={(value) => setNewBooking({...newBooking, cartOption: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="walk">Walk</SelectItem>
+                      <SelectItem value="cart">Cart</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {newBooking.cartOption === "cart" && (
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">Number of Carts</label>
+                    <Select value={newBooking.cartQuantity} onValueChange={(value) => setNewBooking({...newBooking, cartQuantity: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 Cart</SelectItem>
+                        <SelectItem value="2">2 Carts</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -389,6 +426,19 @@ export default function TeeTimes() {
                         {booking.holes} Holes
                       </Badge>
                     </div>
+                    {booking.cartOption && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <span className="w-4 h-4 mr-3">🚗</span>
+                        <span>{booking.cartOption === "cart" ? `Cart (${booking.cartQuantity || 1})` : "Walk"}</span>
+                      </div>
+                    )}
+                    {booking.specialRequests && (
+                      <div className="mt-3 p-2 bg-gray-50 rounded-lg border">
+                        <p className="text-sm text-muted-foreground italic">
+                          {booking.specialRequests}
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <div className="flex gap-2 mt-4">
                     <Button 
@@ -536,7 +586,7 @@ export default function TeeTimes() {
                 className="bg-golf-green hover:bg-golf-green-light text-white"
                 onClick={() => {
                   setEditingBooking(null);
-                  setNewBooking({ date: "", time: "", players: "1", holes: "18", specialRequests: "" });
+                  setNewBooking({ date: "", time: "", players: "1", holes: "18", cartOption: "walk", cartQuantity: "1", specialRequests: "" });
                   setIsBookingModalOpen(true);
                 }}
               >
