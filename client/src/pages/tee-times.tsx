@@ -296,7 +296,10 @@ export default function TeeTimes() {
                   disabled={bookingMutation.isPending}
                 >
                   <Calendar className="w-4 h-4 mr-2" />
-                  {bookingMutation.isPending ? "Booking..." : "Book Tee Time"}
+                  {bookingMutation.isPending ? 
+                    (editingBooking ? "Updating..." : "Booking...") : 
+                    (editingBooking ? "Edit Tee Time" : "Book Tee Time")
+                  }
                 </Button>
               </div>
             </div>
@@ -343,11 +346,13 @@ export default function TeeTimes() {
       </Card>
 
       {/* User's Booking Cards - Grid Layout */}
-      {userBookings.length > 0 && (
+      {userBookings.filter(booking => selectedHoles === "All" || booking.holes.toString() === selectedHoles).length > 0 && (
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-foreground mb-4">Your Bookings</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {userBookings.map((booking, index) => (
+            {userBookings
+              .filter(booking => selectedHoles === "All" || booking.holes.toString() === selectedHoles)
+              .map((booking, index) => (
               <Card key={booking.id} className="bg-white border shadow-lg hover:shadow-xl transition-shadow duration-200">
                 <CardHeader className="border-b border-border/20 pb-4">
                   <div className="flex items-center justify-between">
