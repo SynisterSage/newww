@@ -245,7 +245,7 @@ function Router() {
           adminEmail={adminData?.email} 
           onSwitchToMember={handleSwitchToMember}
         />
-        <main className="flex-1 lg:ml-64 pb-16 lg:pb-0">
+        <main className="flex-1 2xl:ml-64 pb-16 2xl:pb-0">
           <Switch>
             <Route path="/admin">{() => <AdminDashboard adminEmail={adminData?.email} />}</Route>
             <Route path="/admin/tee-times">{() => <AdminTeeTimes />}</Route>
@@ -270,7 +270,7 @@ function Router() {
         onSwitchToAdmin={handleSwitchToAdmin}
         onLogout={handleLogout}
       />
-      <main className="flex-1 lg:ml-64 pb-16 lg:pb-0">
+      <main className="flex-1 2xl:ml-64 pb-16 2xl:pb-0">
         <Switch>
           <Route path="/">{() => <Dashboard userEmail={userEmail} user={userData || undefined} />}</Route>
           <Route path="/tee-times">{() => <TeeTimes userData={userData || undefined} />}</Route>
