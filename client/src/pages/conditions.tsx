@@ -1,447 +1,221 @@
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sun, Wind, Droplets, Thermometer, Eye, Gauge, Calendar, AlertTriangle, CheckCircle, Clock, Scissors, Waves, CloudRain } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { CloudSun, Thermometer, Wind, Droplets, AlertCircle, CheckCircle, MapPin, Clock } from "lucide-react";
+import type { CourseConditions } from "@shared/schema";
 
-interface WeatherData {
-  temperature: number;
-  condition: string;
-  windSpeed: number;
-  humidity: number;
-  visibility: number;
-  pressure: number;
-  location: string;
-}
+export default function ConditionsPage() {
+  const { data: conditions, isLoading } = useQuery({
+    queryKey: ["/api/course/conditions"],
+    queryFn: () => fetch("/api/course/conditions").then(res => res.json()) as Promise<CourseConditions>
+  });
 
-interface PrecipitationData {
-  time: string;
-  precipitation: number;
-  hour: number;
-}
-
-interface CourseUpdate {
-  id: string;
-  type: 'aeration' | 'verticutting' | 'closure' | 'maintenance';
-  title: string;
-  description: string;
-  date: string;
-  status: 'upcoming' | 'active' | 'completed';
-  affectedAreas?: string[];
-}
-
-export default function Conditions() {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [precipitationData, setPrecipitationData] = useState<PrecipitationData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Course updates data
-  const courseUpdates: CourseUpdate[] = [
-    {
-      id: '1',
-      type: 'aeration',
-      title: 'Greens Aeration',
-      description: 'Annual greens aeration to improve root growth and drainage. Temporary putting surfaces will be available.',
-      date: '2025-08-15',
-      status: 'upcoming',
-      affectedAreas: ['All Greens']
-    },
-    {
-      id: '2',
-      type: 'verticutting',
-      title: 'Fairway Verticutting',
-      description: 'Routine verticutting to remove thatch and promote healthy turf growth.',
-      date: '2025-08-08',
-      status: 'active',
-      affectedAreas: ['Holes 1-9 Fairways']
-    },
-    {
-      id: '3',
-      type: 'maintenance',
-      title: 'Cart Path Repair',
-      description: 'Resurfacing and repair of cart paths on the back nine.',
-      date: '2025-07-28',
-      status: 'completed',
-      affectedAreas: ['Holes 10-18 Cart Paths']
-    },
-    {
-      id: '4',
-      type: 'closure',
-      title: 'Course Closure - Tournament',
-      description: 'Course closed to members for annual club championship tournament.',
-      date: '2025-08-22',
-      status: 'upcoming',
-      affectedAreas: ['Entire Course']
-    }
-  ];
-
-  useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        // Get user's location
-        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            timeout: 10000,
-            enableHighAccuracy: true
-          });
-        });
-
-        const { latitude, longitude } = position.coords;
-        
-        // Fetch weather data from Open-Meteo (free, no API key required)
-        const weatherResponse = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,surface_pressure,visibility&daily=sunrise,sunset&timezone=auto&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`
-        );
-
-        if (!weatherResponse.ok) {
-          throw new Error('Weather data not available');
-        }
-
-        const weatherData = await weatherResponse.json();
-        const current = weatherData.current_weather;
-        const hourly = weatherData.hourly;
-        const daily = weatherData.daily;
-        
-        // Get current hour index
-        const currentTime = new Date().toISOString().slice(0, 13) + ':00';
-        const currentIndex = hourly.time.findIndex((time: string) => time === currentTime) || 0;
-        
-        // Map weather codes to descriptions
-        const getWeatherDescription = (code: number) => {
-          const weatherCodes: { [key: number]: string } = {
-            0: 'clear sky',
-            1: 'mainly clear',
-            2: 'partly cloudy',
-            3: 'overcast',
-            45: 'fog',
-            48: 'fog',
-            51: 'light drizzle',
-            53: 'moderate drizzle',
-            55: 'dense drizzle',
-            61: 'slight rain',
-            63: 'moderate rain',
-            65: 'heavy rain',
-            80: 'rain showers',
-            95: 'thunderstorm'
-          };
-          return weatherCodes[code] || 'partly cloudy';
-        };
-        
-        setWeather({
-          temperature: Math.round(current.temperature),
-          condition: getWeatherDescription(current.weathercode),
-          windSpeed: Math.round(current.windspeed),
-          humidity: hourly.relative_humidity_2m[currentIndex] || 65,
-          visibility: Math.round((hourly.visibility[currentIndex] || 10000) / 1609.34), // Convert to miles
-          pressure: Math.round((hourly.surface_pressure[currentIndex] || 1013) * 0.02953), // Convert to inHg
-          location: "Golf Course"
-        });
-
-        // Process precipitation forecast (next 8 hours)
-        const precipData = hourly.time.slice(currentIndex, currentIndex + 8).map((time: string, index: number) => {
-          const precipValue = hourly.precipitation[currentIndex + index] || 0;
-          return {
-            time: new Date(time).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
-            precipitation: precipValue,
-            hour: index
-          };
-        });
-        
-        // If no precipitation in forecast, add some sample data to show the chart works
-        const hasRain = precipData.some((d: any) => d.precipitation > 0);
-        if (!hasRain) {
-          precipData[2].precipitation = 0.1; // Add light rain at hour 2
-          precipData[3].precipitation = 0.3; // Add moderate rain at hour 3
-          precipData[4].precipitation = 0.15; // Add light rain at hour 4
-        }
-        
-        setPrecipitationData(precipData);
-        
-      } catch (err) {
-        console.error('Weather fetch error:', err);
-        // Use realistic weather data as fallback
-        setWeather({
-          temperature: 75,
-          condition: "partly cloudy",
-          windSpeed: 8,
-          humidity: 65,
-          visibility: 10,
-          pressure: 30,
-          location: "Packanack Golf Course"
-        });
-        
-        // Generate realistic precipitation data
-        const now = new Date();
-        const precipData = Array.from({ length: 8 }, (_, index) => {
-          const time = new Date(now.getTime() + (index * 60 * 60 * 1000));
-          return {
-            time: time.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
-            precipitation: Math.random() > 0.7 ? Math.random() * 0.3 : 0, // 30% chance of light rain
-            hour: index
-          };
-        });
-        setPrecipitationData(precipData);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchWeather();
-  }, []);
-
-  const getUpdateIcon = (type: CourseUpdate['type']) => {
-    switch (type) {
-      case 'aeration':
-        return <Waves className="w-5 h-5" />;
-      case 'verticutting':
-        return <Scissors className="w-5 h-5" />;
-      case 'closure':
-        return <AlertTriangle className="w-5 h-5" />;
-      case 'maintenance':
-        return <Clock className="w-5 h-5" />;
-      default:
-        return <Calendar className="w-5 h-5" />;
-    }
-  };
-
-  const getStatusColor = (status: CourseUpdate['status']) => {
-    switch (status) {
-      case 'upcoming':
-        return 'text-blue-600 bg-blue-50 border-blue-200';
-      case 'active':
-        return 'text-amber-600 bg-amber-50 border-amber-200';
-      case 'completed':
-        return 'text-green-600 bg-green-50 border-green-200';
-      default:
-        return 'text-gray-600 bg-gray-50 border-gray-200';
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'short',
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-  const PrecipitationChart = () => {
-    const maxPrecip = Math.max(...precipitationData.map(d => d.precipitation), 0.5);
-    
+  if (isLoading) {
     return (
-      <div className="mt-4">
-        <div className="flex items-center space-x-2 mb-3">
-          <CloudRain className="w-5 h-5 text-blue-600" />
-          <span className="font-medium text-sm">Precipitation Forecast (Next 24 Hours)</span>
-        </div>
-        
-        <div className="relative h-24 bg-blue-50 rounded-lg px-3 py-2">
-          {/* Chart bars */}
-          <div className="flex items-end justify-between h-16 space-x-1">
-            {precipitationData.map((data, index) => (
-              <div key={index} className="flex-1 flex flex-col items-center">
-                <div 
-                  className="bg-blue-500 rounded-t-sm min-h-[2px] w-full transition-all duration-300"
-                  style={{ 
-                    height: `${(data.precipitation / maxPrecip) * 100}%` 
-                  }}
-                  title={`${data.time}: ${data.precipitation}" rain`}
-                />
-              </div>
-            ))}
+      <div className="min-h-screen bg-gradient-to-br from-golf-green-soft via-white to-golf-green-light p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center gap-3 mb-8">
+            <CloudSun className="h-8 w-8 text-golf-green" />
+            <h1 className="text-3xl font-bold text-gray-900">Course Conditions</h1>
           </div>
-          
-          {/* Time labels */}
-          <div className="flex justify-between text-xs text-muted-foreground mt-1">
-            {precipitationData.map((data, index) => (
-              <span key={index} className="text-center">{data.time}</span>
-            ))}
-          </div>
-        </div>
-        
-        <div className="flex justify-between text-xs text-muted-foreground mt-2">
-          <span>0"</span>
-          <span>{maxPrecip > 0 ? `${maxPrecip.toFixed(1)}"` : '0.5"'}</span>
-        </div>
-      </div>
-    );
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#F8F6F0]">
-        <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold text-golf-green">Course Conditions</h1>
-          <div className="animate-pulse space-y-4">
-            <div className="h-64 bg-gray-300 rounded-lg"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="h-48 bg-gray-300 rounded-lg"></div>
-              <div className="h-48 bg-gray-300 rounded-lg"></div>
-            </div>
+          <div className="text-center py-12">
+            <div className="animate-spin h-8 w-8 border-2 border-golf-green border-t-transparent rounded-full mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading course conditions...</p>
           </div>
         </div>
       </div>
     );
   }
 
+  const getWeatherIcon = (weather: string) => {
+    switch (weather) {
+      case 'sunny': return '☀️';
+      case 'partly-cloudy': return '⛅';
+      case 'cloudy': return '☁️';
+      case 'overcast': return '☁️';
+      case 'light-rain': return '🌦️';
+      case 'heavy-rain': return '🌧️';
+      case 'thunderstorms': return '⛈️';
+      case 'fog': return '🌫️';
+      case 'snow': return '❄️';
+      case 'windy': return '💨';
+      default: return '☀️';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'open': return 'bg-green-100 text-green-800';
+      case 'closed': return 'bg-red-100 text-red-800';
+      case 'limited': return 'bg-yellow-100 text-yellow-800';
+      case 'maintenance': return 'bg-orange-100 text-orange-800';
+      case 'weather-delay': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getConditionColor = (condition: string) => {
+    switch (condition) {
+      case 'excellent': return 'bg-green-100 text-green-800';
+      case 'good': return 'bg-blue-100 text-blue-800';
+      case 'fair': return 'bg-yellow-100 text-yellow-800';
+      case 'poor': return 'bg-red-100 text-red-800';
+      case 'temporary': return 'bg-purple-100 text-purple-800';
+      case 'overseeded': return 'bg-orange-100 text-orange-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#F8F6F0]">
-      <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#08452e] mb-2">Course Conditions</h1>
-          <p className="text-muted-foreground">
-            Live weather and course updates for {weather?.location || 'Packanack Golf Course'}
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-golf-green-soft via-white to-golf-green-light p-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <CloudSun className="h-8 w-8 text-golf-green" />
+            <h1 className="text-3xl font-bold text-gray-900">Course Conditions</h1>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Clock className="h-4 w-4" />
+            Last updated: {conditions ? new Date(conditions.lastUpdated).toLocaleString() : "Never"}
+          </div>
         </div>
 
-        {error && (
-          <Card className="border-yellow-200 bg-yellow-50">
-            <CardContent className="p-4">
-              <p className="text-yellow-800 text-sm">{error}</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Top Row - Weather and Quick Status */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Current Weather - Takes 2 columns */}
-          <Card className="lg:col-span-2 shadow-sm border-0">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center space-x-2 text-xl">
-                <Sun className="w-6 h-6 text-amber-500" />
-                <span>Current Weather</span>
+        <div className="space-y-6">
+          {/* Current Weather */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CloudSun className="h-5 w-5" />
+                Current Weather
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="text-5xl font-bold text-[#08452e] mb-1">
-                    {weather?.temperature}°F
-                  </div>
-                  <p className="text-lg text-muted-foreground capitalize">
-                    {weather?.condition}
-                  </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="text-4xl mb-2">{getWeatherIcon(conditions?.weather || 'sunny')}</div>
+                  <p className="font-semibold capitalize">{conditions?.weather?.replace('-', ' ') || 'Sunny'}</p>
                 </div>
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3 ml-4">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                    <span className="font-medium text-green-800 text-sm">Perfect Golf Weather!</span>
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-1 mb-2">
+                    <Thermometer className="h-5 w-5 text-red-500" />
+                    <span className="text-2xl font-bold">{conditions?.temperature || 72}°F</span>
                   </div>
-                  <p className="text-xs text-green-700">Ideal conditions for your round</p>
+                  <p className="text-gray-600">Temperature</p>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-1 mb-2">
+                    <Wind className="h-5 w-5 text-blue-500" />
+                    <span className="text-2xl font-bold">{conditions?.windSpeed || 5}</span>
+                  </div>
+                  <p className="text-gray-600">Wind (mph)</p>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-1 mb-2">
+                    <Droplets className="h-5 w-5 text-blue-600" />
+                    <span className="text-2xl font-bold">{conditions?.humidity || 45}%</span>
+                  </div>
+                  <p className="text-gray-600">Humidity</p>
                 </div>
               </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="text-center p-3 bg-blue-50 rounded-lg">
-                  <Wind className="w-5 h-5 mx-auto mb-2 text-blue-600" />
-                  <p className="font-semibold text-lg">{weather?.windSpeed} mph</p>
-                  <p className="text-xs text-muted-foreground">Wind</p>
-                </div>
-                <div className="text-center p-3 bg-cyan-50 rounded-lg">
-                  <Droplets className="w-5 h-5 mx-auto mb-2 text-cyan-600" />
-                  <p className="font-semibold text-lg">{weather?.humidity}%</p>
-                  <p className="text-xs text-muted-foreground">Humidity</p>
-                </div>
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <Eye className="w-5 h-5 mx-auto mb-2 text-gray-600" />
-                  <p className="font-semibold text-lg">{weather?.visibility} mi</p>
-                  <p className="text-xs text-muted-foreground">Visibility</p>
-                </div>
-                <div className="text-center p-3 bg-purple-50 rounded-lg">
-                  <Gauge className="w-5 h-5 mx-auto mb-2 text-purple-600" />
-                  <p className="font-semibold text-lg">{weather?.pressure}"</p>
-                  <p className="text-xs text-muted-foreground">Pressure</p>
-                </div>
-              </div>
-              
-              {/* Precipitation Chart */}
-              <PrecipitationChart />
             </CardContent>
           </Card>
 
-          {/* Course Status - 1 column */}
-          <Card className="shadow-sm border-0">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl">Course Status</CardTitle>
+          {/* Course Status */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5" />
+                Course Status
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                <span className="font-medium">Course Open</span>
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                <span className="font-medium">Cart Path Only</span>
-                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                <span className="font-medium">Greens</span>
-                <span className="font-semibold text-green-600">Excellent</span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                <span className="font-medium">Fairways</span>
-                <span className="font-semibold text-green-600">Good</span>
-              </div>
-              
-              <div className="mt-4 pt-4 border-t border-gray-200 space-y-2 text-sm">
-                <p><strong>Sunrise:</strong> 6:12 AM</p>
-                <p><strong>Sunset:</strong> 7:48 PM</p>
-                <p><strong>UV Index:</strong> Moderate (6)</p>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm text-gray-600 mb-2">Current Status</p>
+                  <Badge className={`${getStatusColor(conditions?.courseStatus || 'open')} text-lg px-4 py-2 capitalize`}>
+                    {conditions?.courseStatus || 'Open'}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-2">Cart Restrictions</p>
+                  <Badge className={`${conditions?.cartPathOnly ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'} text-lg px-4 py-2`}>
+                    {conditions?.cartPathOnly ? 'Cart Path Only' : 'Carts Allowed on Fairways'}
+                  </Badge>
+                </div>
               </div>
             </CardContent>
           </Card>
-        </div>
 
-        {/* Course Updates Section */}
-        <div>
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-[#08452e] mb-2">Course Updates</h2>
-            <p className="text-muted-foreground">Maintenance schedules and course notifications</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {courseUpdates.map((update) => (
-              <Card key={update.id} className="shadow-sm border-0 hover:shadow-md transition-all duration-300 bg-white h-56 flex flex-col">
-                <CardContent className="p-0 flex flex-col h-full">
-                  {/* Header section with icon, title and status */}
-                  <div className="p-6 pb-4 flex-1">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-2.5 rounded-xl ${getStatusColor(update.status)}`}>
-                          {getUpdateIcon(update.type)}
-                        </div>
-                        <h3 className="font-semibold text-lg text-gray-900">{update.title}</h3>
-                      </div>
-                      <span className={`px-3 py-1.5 rounded-full text-xs font-medium uppercase tracking-wider ${getStatusColor(update.status)}`}>
-                        {update.status}
-                      </span>
-                    </div>
-                    
-                    <p className="text-gray-600 text-sm leading-relaxed ml-12">
-                      {update.description}
+          {/* Course Conditions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Course Conditions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm text-gray-600 mb-2">Greens Condition</p>
+                  <Badge className={`${getConditionColor(conditions?.greensCondition || 'excellent')} text-lg px-4 py-2 capitalize`}>
+                    {conditions?.greensCondition || 'Excellent'}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-2">Fairways Condition</p>
+                  <Badge className={`${getConditionColor(conditions?.fairwaysCondition || 'good')} text-lg px-4 py-2 capitalize`}>
+                    {conditions?.fairwaysCondition || 'Good'}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Course Notes */}
+          {(conditions?.hazardNotes || conditions?.maintenanceNotes) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5" />
+                  Course Notices
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {conditions?.hazardNotes && (
+                  <div>
+                    <h4 className="font-semibold text-red-700 mb-2">⚠️ Hazard Notes</h4>
+                    <p className="text-gray-700 bg-red-50 p-3 rounded-lg border-l-4 border-red-200">
+                      {conditions.hazardNotes}
                     </p>
                   </div>
-                  
-                  {/* Footer section with date and affected areas - always at bottom */}
-                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 mt-auto">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-gray-500">
-                        <Calendar className="w-4 h-4" />
-                        <span className="text-sm font-medium">{formatDate(update.date)}</span>
-                      </div>
-                      
-                      {update.affectedAreas && (
-                        <div className="text-xs font-medium text-gray-500 bg-white px-3 py-1.5 rounded-full border">
-                          {update.affectedAreas.join(', ')}
-                        </div>
-                      )}
-                    </div>
+                )}
+                {conditions?.maintenanceNotes && (
+                  <div>
+                    <h4 className="font-semibold text-orange-700 mb-2">🔧 Maintenance Notes</h4>
+                    <p className="text-gray-700 bg-orange-50 p-3 rounded-lg border-l-4 border-orange-200">
+                      {conditions.maintenanceNotes}
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Course Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Packanack Golf Club</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center space-y-2">
+                <p className="text-gray-600">Championship Course - 18 Holes</p>
+                <p className="text-sm text-gray-500">
+                  Course conditions are updated regularly by our grounds crew to ensure the best playing experience.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

@@ -69,14 +69,14 @@ export default function CourseConditionsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-gray-100 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-golf-green-soft via-white to-golf-green-light p-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
-            <CloudSun className="h-8 w-8 text-green-600" />
+            <CloudSun className="h-8 w-8 text-golf-green" />
             <h1 className="text-3xl font-bold text-gray-900">Course Conditions</h1>
           </div>
           <div className="text-center py-12">
-            <div className="animate-spin h-8 w-8 border-2 border-green-600 border-t-transparent rounded-full mx-auto"></div>
+            <div className="animate-spin h-8 w-8 border-2 border-golf-green border-t-transparent rounded-full mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading course conditions...</p>
           </div>
         </div>
@@ -85,11 +85,11 @@ export default function CourseConditionsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-gray-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-golf-green-soft via-white to-golf-green-light p-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <CloudSun className="h-8 w-8 text-green-600" />
+            <CloudSun className="h-8 w-8 text-golf-green" />
             <h1 className="text-3xl font-bold text-gray-900">Course Conditions</h1>
           </div>
           <div className="text-sm text-gray-600">
