@@ -119,7 +119,7 @@ export function AuthLogin({ onLogin }: AuthLoginProps) {
             
             <div className="text-center text-sm text-muted-foreground">
               <p>For assistance, contact the pro shop</p>
-              <p className="font-medium text-golf-green">(555) 123-GOLF</p>
+              <p className="font-medium text-golf-green">(973) 694-9754</p>
             </div>
           </form>
         </CardContent>
