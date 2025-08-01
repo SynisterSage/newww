@@ -9,12 +9,17 @@ import type { User as UserType, TeeTime, Order } from "@shared/schema";
 
 interface DashboardProps {
   userEmail?: string;
+  user?: UserType;
 }
 
-export default function Dashboard({ userEmail }: DashboardProps) {
-  const { data: user, isLoading } = useQuery<UserType>({
+export default function Dashboard({ userEmail, user }: DashboardProps) {
+  const { data: fetchedUser, isLoading } = useQuery<UserType>({
     queryKey: ['/api/user/user-1'],
+    enabled: !user, // Only fetch if user data wasn't passed in
   });
+
+  // Use passed user data or fetched data
+  const currentUser = user || fetchedUser;
 
   // Weather state
   const [weather, setWeather] = useState({
@@ -113,7 +118,11 @@ export default function Dashboard({ userEmail }: DashboardProps) {
       {/* Modern Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl font-bold text-[#08452e]">Welcome Back{userEmail ? `, ${userEmail}` : ""}</h1>
+          <h1 className="text-3xl font-bold text-[#08452e]">
+            Welcome Back{currentUser?.firstName && currentUser?.lastName 
+              ? `, ${currentUser.firstName} ${currentUser.lastName}` 
+              : userEmail ? `, ${userEmail}` : ""}
+          </h1>
           <div className="text-sm text-muted-foreground">
             {new Date().toLocaleDateString('en-US', { 
               weekday: 'long', 

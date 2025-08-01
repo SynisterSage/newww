@@ -8,14 +8,16 @@ import {
   Trophy,
   Shield
 } from "lucide-react";
+import type { User as UserType } from "@shared/schema";
 
 interface NavigationProps {
   userEmail?: string;
+  userData?: UserType | null;
   isAdminView?: boolean;
   onSwitchToAdmin?: () => void;
 }
 
-export default function Navigation({ userEmail, isAdminView, onSwitchToAdmin }: NavigationProps) {
+export default function Navigation({ userEmail, userData, isAdminView, onSwitchToAdmin }: NavigationProps) {
   const [location] = useLocation();
 
   const navItems = [
@@ -90,11 +92,18 @@ export default function Navigation({ userEmail, isAdminView, onSwitchToAdmin }: 
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-golf-gold rounded-full flex items-center justify-center">
                   <span className="text-golf-green font-bold text-sm">
-                    {userEmail ? userEmail.substring(0, 2).toUpperCase() : "JD"}
+                    {userData?.firstName && userData?.lastName 
+                      ? `${userData.firstName.charAt(0)}${userData.lastName.charAt(0)}`.toUpperCase()
+                      : userEmail ? userEmail.substring(0, 2).toUpperCase() 
+                      : "JD"}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-white text-sm truncate">{userEmail || "Member"}</h3>
+                  <h3 className="font-medium text-white text-sm truncate">
+                    {userData?.firstName && userData?.lastName 
+                      ? `${userData.firstName} ${userData.lastName}`
+                      : userEmail || "Member"}
+                  </h3>
                   <p className="text-xs text-white/70">Member</p>
                 </div>
               </div>

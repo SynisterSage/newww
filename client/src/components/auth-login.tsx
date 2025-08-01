@@ -7,7 +7,7 @@ import { Mail, Phone } from "lucide-react";
 import type { User } from "@shared/schema";
 
 interface AuthLoginProps {
-  onLogin: (email: string) => void;
+  onLogin: (email: string, user?: User) => void;
 }
 
 export function AuthLogin({ onLogin }: AuthLoginProps) {
@@ -39,7 +39,7 @@ export function AuthLogin({ onLogin }: AuthLoginProps) {
     },
     onSuccess: (userData) => {
       setError("");
-      onLogin(userData.email || email);
+      onLogin(userData.email || email, userData);
     },
     onError: (error: Error) => {
       setError(error.message);

@@ -17,18 +17,20 @@ import Dining from "@/pages/dining";
 import Conditions from "@/pages/conditions";
 import Events from "@/pages/events";
 import NotFound from "@/pages/not-found";
-import type { AdminUser } from "@shared/schema";
+import type { AdminUser, User } from "@shared/schema";
 
 function Router() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [userData, setUserData] = useState<User | null>(null);
   const [adminData, setAdminData] = useState<AdminUser | null>(null);
   const [isAdminView, setIsAdminView] = useState(false);
   const [location] = useLocation();
 
-  const handleLogin = (email: string) => {
+  const handleLogin = (email: string, user?: User) => {
     setUserEmail(email);
+    setUserData(user || null);
     setIsAuthenticated(true);
   };
 
@@ -90,13 +92,14 @@ function Router() {
   return (
     <div className="flex min-h-screen bg-background">
       <Navigation 
-        userEmail={userEmail} 
+        userEmail={userEmail}
+        userData={userData}
         isAdminView={isAdminView}
         onSwitchToAdmin={handleSwitchToAdmin}
       />
       <main className="flex-1 lg:ml-64 pb-16 lg:pb-0">
         <Switch>
-          <Route path="/">{() => <Dashboard userEmail={userEmail} />}</Route>
+          <Route path="/">{() => <Dashboard userEmail={userEmail} user={userData} />}</Route>
           <Route path="/tee-times" component={TeeTimes} />
           <Route path="/dining" component={Dining} />
           <Route path="/conditions" component={Conditions} />
