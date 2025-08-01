@@ -276,7 +276,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
             return (
               <Card 
                 key={teetime.id} 
-                className="border border-gray-200 transition-all duration-200 hover:shadow-md hover:border-golf-green/30"
+                className="border border-gray-200 transition-all duration-200 hover:shadow-md hover:border-golf-green/30 h-full flex flex-col"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -292,7 +292,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
                   </div>
                 </CardHeader>
                 
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 flex-1 flex flex-col">
                   {/* Status Badge */}
                   <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${statusInfo.color}`}>
                     <Users className="w-3 h-3 mr-1" />
@@ -321,7 +321,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
                   </div>
 
                   {/* Action Button */}
-                  <div className="pt-2">
+                  <div className="pt-2 mt-auto">
                     {isUserBooked ? (
                       <Button
                         variant="outline"
