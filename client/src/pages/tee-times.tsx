@@ -301,10 +301,10 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
                   {teetime.playerNames && teetime.playerNames.length > 0 && (
                     <div className="space-y-2">
                       <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Players</h4>
-                      <div className="space-y-1">
+                      <div className="max-h-20 overflow-y-auto space-y-1 pr-1">
                         {teetime.playerNames.map((name, index) => (
                           <div key={index} className="text-sm text-foreground flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-golf-green"></div>
+                            <div className="w-2 h-2 rounded-full bg-golf-green flex-shrink-0"></div>
                             {name}
                           </div>
                         ))}
