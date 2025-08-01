@@ -212,11 +212,12 @@ export default function Dining() {
                     <span className="text-lg font-bold text-gray-900">${item.price}</span>
                     <Button
                       size="sm"
+                      variant="outline"
                       onClick={(e) => {
                         e.stopPropagation();
                         addToOrder(item.id);
                       }}
-                      className="bg-[#1B4332] hover:bg-[#1B4332]/90 text-white px-3 py-1.5 text-sm font-medium"
+                      className="border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white px-3 py-1.5 text-sm font-medium transition-colors"
                     >
                       <Plus className="w-4 h-4 mr-1" />
                       Add
@@ -283,8 +284,9 @@ export default function Dining() {
                             <span className="w-8 text-center">{quantity}</span>
                             <Button
                               size="sm"
+                              variant="outline"
                               onClick={() => addToOrder(item.id)}
-                              className="h-8 w-8 p-0"
+                              className="h-8 w-8 p-0 border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white transition-colors"
                             >
                               <Plus className="w-4 h-4" />
                             </Button>
