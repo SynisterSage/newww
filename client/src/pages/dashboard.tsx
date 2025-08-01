@@ -84,9 +84,21 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
     enabled: !!currentUser?.id,
   });
 
-  const { data: orders = [] } = useQuery<Order[]>({
+  const { data: allOrders = [] } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
   });
+
+  // Filter orders for current user only
+  const userOrders = allOrders.filter((order: Order) => order.userId === currentUser?.id);
+  
+  // Get recent orders (within last 30 days)
+  const recentOrders = userOrders.filter((order: Order) => {
+    if (!order.createdAt) return false;
+    const orderDate = new Date(order.createdAt);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return orderDate >= thirtyDaysAgo;
+  }).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
 
   // Filter for recent tee times (past and upcoming within 30 days)
   const recentTeetimes = userTeetimes.filter((teetime: TeeTime) => {
@@ -209,12 +221,7 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
               <div className="w-12 h-12 bg-golf-orange/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <Utensils className="w-6 h-6 text-golf-orange" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{orders.filter((o: Order) => {
-                const orderDate = new Date(o.createdAt || Date.now());
-                const weekAgo = new Date();
-                weekAgo.setDate(weekAgo.getDate() - 7);
-                return orderDate >= weekAgo;
-              }).length}</div>
+              <div className="text-2xl font-bold text-foreground mb-1">{recentOrders.length}</div>
               <div className="text-sm text-muted-foreground">Recent Orders</div>
             </CardContent>
           </Card>
@@ -291,59 +298,27 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
                 <h3 className="text-lg font-semibold text-foreground">Recent Orders</h3>
               </div>
               <div className="space-y-3">
-                {orders.slice(0, 3).map((order: Order, index: number) => (
+                {recentOrders.slice(0, 3).map((order: Order, index: number) => (
                   <div key={order.id || index} className="flex items-center space-x-3">
                     <div className="bg-orange-500 p-2 rounded-full">
                       <Utensils className="h-4 w-4 text-white" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium">${typeof order.total === 'string' ? order.total : '160.00'}</p>
-                      <p className="text-sm text-muted-foreground">19th Hole Bar</p>
+                      <p className="font-medium">${order.total}</p>
+                      <p className="text-sm text-muted-foreground">Clubhouse</p>
                     </div>
-                    <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    <span className={`text-sm px-2 py-1 rounded capitalize ${
+                      order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                      order.status === 'preparing' ? 'bg-orange-100 text-orange-800' :
+                      order.status === 'ready' ? 'bg-blue-100 text-blue-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
                       {order.status || 'placed'}
                     </span>
                   </div>
                 ))}
-                {orders.length === 0 && (
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="bg-orange-500 p-2 rounded-full">
-                        <Utensils className="h-4 w-4 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">$160.00</p>
-                        <p className="text-sm text-muted-foreground">19th Hole Bar</p>
-                      </div>
-                      <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                        placed
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="bg-orange-500 p-2 rounded-full">
-                        <Utensils className="h-4 w-4 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">$40.00</p>
-                        <p className="text-sm text-muted-foreground">19th Hole Bar</p>
-                      </div>
-                      <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">
-                        delivered
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="bg-orange-500 p-2 rounded-full">
-                        <Utensils className="h-4 w-4 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">$124.00</p>
-                        <p className="text-sm text-muted-foreground">Clubhouse Dining</p>
-                      </div>
-                      <span className="text-sm bg-orange-100 text-orange-800 px-2 py-1 rounded">
-                        preparing
-                      </span>
-                    </div>
-                  </div>
+                {recentOrders.length === 0 && (
+                  <p className="text-muted-foreground text-center py-4">No recent orders</p>
                 )}
               </div>
             </CardContent>
