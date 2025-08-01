@@ -88,7 +88,8 @@ export class MemStorage implements IStorage {
         id: randomUUID(),
         userId: null,
         date: tomorrow,
-        course: "Championship Course",
+        course: "Packanack Golf Course",
+        holes: 18,
         ...data
       };
       this.teetimes.set(teetime.id, teetime);

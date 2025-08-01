@@ -19,7 +19,8 @@ export const teetimes = pgTable("teetimes", {
   userId: varchar("user_id").references(() => users.id),
   date: text("date").notNull(),
   time: text("time").notNull(),
-  course: text("course").notNull().default("Championship Course"),
+  course: text("course").notNull().default("Packanack Golf Course"),
+  holes: integer("holes").notNull().default(18), // 9 or 18 holes
   spotsAvailable: integer("spots_available").notNull().default(4),
   price: decimal("price", { precision: 8, scale: 2 }).notNull(),
   status: text("status").notNull().default("available"), // available, booked, premium

@@ -25,7 +25,7 @@ export default function TeeTimes() {
     date: "",
     time: "",
     players: "1",
-    course: "",
+    holes: "18",
     specialRequests: ""
   });
   const [showBookingCard, setShowBookingCard] = useState(false);
@@ -41,9 +41,10 @@ export default function TeeTimes() {
         userId: 'user-1',
         date: bookingData.date,
         time: bookingData.time,
-        course: bookingData.course,
+        course: "Packanack Golf Course",
+        holes: parseInt(bookingData.holes),
         spotsAvailable: parseInt(bookingData.players),
-        price: "85.00",
+        price: bookingData.holes === "9" ? "45.00" : "85.00",
         status: "booked"
       });
       return response.json();
@@ -55,7 +56,8 @@ export default function TeeTimes() {
         date: newBooking.date,
         time: newBooking.time,
         players: newBooking.players,
-        course: newBooking.course,
+        holes: newBooking.holes,
+        course: "Packanack Golf Course",
         status: "pending"
       };
       
@@ -64,7 +66,7 @@ export default function TeeTimes() {
       
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
       setIsBookingModalOpen(false);
-      setNewBooking({ date: "", time: "", players: "1", course: "", specialRequests: "" });
+      setNewBooking({ date: "", time: "", players: "1", holes: "18", specialRequests: "" });
       toast({
         title: "Booking Confirmed",
         description: "Your tee time has been successfully booked!",
@@ -97,7 +99,7 @@ export default function TeeTimes() {
   });
 
   const handleBookTeeTime = () => {
-    if (!newBooking.date || !newBooking.time || !newBooking.course) {
+    if (!newBooking.date || !newBooking.time || !newBooking.holes) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
@@ -214,15 +216,14 @@ export default function TeeTimes() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Course</label>
-                  <Select value={newBooking.course} onValueChange={(value) => setNewBooking({...newBooking, course: value})}>
+                  <label className="text-sm font-medium text-foreground mb-2 block">Holes</label>
+                  <Select value={newBooking.holes} onValueChange={(value) => setNewBooking({...newBooking, holes: value})}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select course" />
+                      <SelectValue placeholder="Select holes" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Championship Course">Championship Course</SelectItem>
-                      <SelectItem value="Executive Course">Executive Course</SelectItem>
-                      <SelectItem value="Practice Range">Practice Range</SelectItem>
+                      <SelectItem value="9">9 Holes ($45)</SelectItem>
+                      <SelectItem value="18">18 Holes ($85)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -297,7 +298,7 @@ export default function TeeTimes() {
       </Card>
 
       {/* Tee Time Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {teetimes.map((teetime) => {
           const status = getStatusBadge(teetime);
           const isUserBooking = teetime.userId === 'user-1';
@@ -335,9 +336,15 @@ export default function TeeTimes() {
                   
                   <div className="flex items-center text-sm">
                     <MapPin className="w-4 h-4 text-muted-foreground mr-2" />
-                    <span className={teetime.course === "Championship Course" ? "text-golf-green font-medium" : ""}>
-                      {teetime.course}
+                    <span className="text-golf-green font-medium">
+                      Packanack Golf Course
                     </span>
+                  </div>
+                  
+                  <div className="flex items-center text-sm">
+                    <Badge className="bg-golf-green text-white text-xs px-2 py-1">
+                      {teetime.holes || 18} Holes
+                    </Badge>
                   </div>
                 </div>
 
@@ -423,7 +430,12 @@ export default function TeeTimes() {
               </div>
               <div className="flex items-center text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4 mr-3" />
-                <span>{latestBooking.course}</span>
+                <span>Packanack Golf Course</span>
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Badge className="bg-golf-green text-white text-xs px-2 py-1">
+                  {latestBooking.holes} Holes
+                </Badge>
               </div>
             </div>
             
