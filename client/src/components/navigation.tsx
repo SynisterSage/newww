@@ -34,8 +34,8 @@ export default function Navigation({ userEmail, userData, isAdminView, onSwitchT
 
   return (
     <>
-      {/* Mobile Header */}
-      <nav className="lg:hidden bg-golf-green text-white shadow-lg sticky top-0 z-50 border-b border-golf-green/20">
+      {/* Mobile/Tablet Header */}
+      <nav className="xl:hidden bg-golf-green text-white shadow-lg sticky top-0 z-50 border-b border-golf-green/20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
@@ -46,7 +46,7 @@ export default function Navigation({ userEmail, userData, isAdminView, onSwitchT
         </div>
       </nav>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block w-64 text-white min-h-screen fixed left-0 top-0 z-40 bg-[#032617]">
+      <aside className="hidden xl:block w-64 text-white min-h-screen fixed left-0 top-0 z-40 bg-[#032617]">
         <div className="p-6">
           <div className="flex items-center space-x-3 mb-8 pb-6 border-b border-white/10">
             <div className="w-8 h-8 bg-golf-gold rounded-md flex items-center justify-center">
