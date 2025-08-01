@@ -81,23 +81,23 @@ export default function AdminMembers() {
     <div className="min-h-screen bg-[#F8F6F0]">
       <div className="p-6 lg:p-8 max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#08452e] mb-2">Member Management</h1>
-          <p className="text-muted-foreground">Manage club members and their information</p>
-        </div>
-
-        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6 mb-8">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold text-[#08452e]">Member Management</h1>
+            <p className="text-muted-foreground">Manage club members and their information</p>
+          </div>
+          
           <div className="flex flex-wrap gap-3">
             <Button 
-            size="sm"
-            className="bg-green-600 hover:bg-green-700"
-            onClick={() => syncMembersMutation.mutate()}
-            disabled={syncMembersMutation.isPending}
-          >
-            <Filter className="w-4 h-4 mr-2" />
-            {syncMembersMutation.isPending ? "Syncing..." : "Sync Data"}
-          </Button>
-          
+              size="sm"
+              className="bg-green-600 hover:bg-green-700"
+              onClick={() => syncMembersMutation.mutate()}
+              disabled={syncMembersMutation.isPending}
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              {syncMembersMutation.isPending ? "Syncing..." : "Sync Data"}
+            </Button>
+            
             <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
               <Download className="w-4 h-4 mr-2" />
               Export Data
