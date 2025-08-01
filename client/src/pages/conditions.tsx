@@ -370,14 +370,14 @@ export default function Conditions() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {courseUpdates.map((update) => (
-              <Card key={update.id} className="shadow-sm border-0 hover:shadow-md transition-shadow">
+              <Card key={update.id} className="shadow-sm border-0 hover:shadow-md transition-shadow h-40">
                 <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className={`p-2 rounded-lg ${getStatusColor(update.status)}`}>
+                  <div className="flex items-start space-x-4 h-full">
+                    <div className={`p-2 rounded-lg ${getStatusColor(update.status)} flex-shrink-0`}>
                       {getUpdateIcon(update.type)}
                     </div>
                     
-                    <div className="flex-1">
+                    <div className="flex-1 flex flex-col h-full">
                       <div className="flex items-start justify-between mb-2">
                         <h3 className="font-semibold text-lg pr-2">{update.title}</h3>
                         <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(update.status)} flex-shrink-0`}>
@@ -385,18 +385,20 @@ export default function Conditions() {
                         </span>
                       </div>
                       
-                      <p className="text-muted-foreground text-sm mb-3">
-                        {update.description}
-                      </p>
+                      <div className="flex-1">
+                        <p className="text-muted-foreground text-sm mb-4">
+                          {update.description}
+                        </p>
+                      </div>
                       
-                      <div className="flex items-center justify-between text-sm mt-2">
+                      <div className="flex items-center justify-between text-sm mt-auto">
                         <div className="flex items-center space-x-1 text-muted-foreground">
                           <Calendar className="w-4 h-4" />
                           <span>{formatDate(update.date)}</span>
                         </div>
                         
                         {update.affectedAreas && (
-                          <div className="text-xs text-muted-foreground bg-gray-100 px-2 py-1 rounded">
+                          <div className="text-xs text-muted-foreground bg-gray-100 px-2 py-1 rounded flex-shrink-0">
                             {update.affectedAreas.join(', ')}
                           </div>
                         )}
