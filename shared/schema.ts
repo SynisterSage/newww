@@ -89,6 +89,22 @@ export const rounds = pgTable("rounds", {
   status: text("status").notNull().default("in_progress"), // in_progress, completed
 });
 
+export const courseConditions = pgTable("course_conditions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  weather: text("weather").notNull(),
+  temperature: integer("temperature").notNull(),
+  windSpeed: integer("wind_speed").notNull(),
+  humidity: integer("humidity").notNull(),
+  courseStatus: text("course_status").notNull(),
+  cartPathOnly: boolean("cart_path_only").notNull(),
+  greensCondition: text("greens_condition").notNull(),
+  fairwaysCondition: text("fairways_condition").notNull(),
+  hazardNotes: text("hazard_notes"),
+  maintenanceNotes: text("maintenance_notes"), 
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  updatedBy: text("updated_by").notNull()
+});
+
 // Sessions table for persistent login
 export const sessions = pgTable("sessions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -135,6 +151,11 @@ export const insertSessionSchema = createInsertSchema(sessions).omit({
   createdAt: true,
 });
 
+export const insertCourseConditionsSchema = createInsertSchema(courseConditions).omit({
+  id: true,
+  lastUpdated: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type AdminUser = typeof adminUsers.$inferSelect;
@@ -151,3 +172,5 @@ export type Round = typeof rounds.$inferSelect;
 export type InsertRound = z.infer<typeof insertRoundSchema>;
 export type Session = typeof sessions.$inferSelect;
 export type InsertSession = z.infer<typeof insertSessionSchema>;
+export type CourseConditions = typeof courseConditions.$inferSelect;
+export type InsertCourseConditions = z.infer<typeof insertCourseConditionsSchema>;

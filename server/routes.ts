@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertTeetimeSchema, insertOrderSchema, insertRoundSchema, insertUserSchema } from "@shared/schema";
+import { insertTeetimeSchema, insertOrderSchema, insertRoundSchema, insertUserSchema, insertCourseConditionsSchema } from "@shared/schema";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 
@@ -484,6 +484,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Sync error:', error);
       res.status(500).json({ message: `Sync failed: ${error.message}` });
+    }
+  });
+
+  // Course conditions routes
+  app.get("/api/course/conditions", async (req, res) => {
+    try {
+      const conditions = await storage.getCourseConditions();
+      res.json(conditions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch course conditions" });
+    }
+  });
+
+  app.patch("/api/course/conditions", async (req, res) => {
+    try {
+      const updateData = insertCourseConditionsSchema.partial().parse(req.body);
+      const conditions = await storage.updateCourseConditions(updateData);
+      res.json(conditions);
+    } catch (error: any) {
+      console.error("Course conditions validation error:", error);
+      res.status(400).json({ message: "Invalid course conditions data", error: error.message });
     }
   });
 

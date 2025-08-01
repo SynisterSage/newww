@@ -249,7 +249,7 @@ function Router() {
             <Route path="/admin/tee-times">{() => <div>Admin Tee Times</div>}</Route>
             <Route path="/admin/orders">{() => <div>Admin Orders</div>}</Route>
             <Route path="/admin/members">{() => <AdminMembers />}</Route>
-            <Route path="/admin/conditions">{() => <AdminConditions userData={adminData || undefined} />}</Route>
+            <Route path="/admin/conditions">{() => <AdminConditions />}</Route>
             <Route path="/admin/events">{() => <div>Admin Events</div>}</Route>
             <Route component={NotFound} />
           </Switch>

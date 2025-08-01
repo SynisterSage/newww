@@ -1,7 +1,7 @@
-import { type User, type InsertUser, type AdminUser, type InsertAdminUser, type TeeTime, type InsertTeeTime, type MenuItem, type InsertMenuItem, type Order, type InsertOrder, type CourseHole, type InsertCourseHole, type Round, type InsertRound, type Session, type InsertSession } from "@shared/schema";
+import { type User, type InsertUser, type AdminUser, type InsertAdminUser, type TeeTime, type InsertTeeTime, type MenuItem, type InsertMenuItem, type Order, type InsertOrder, type CourseHole, type InsertCourseHole, type Round, type InsertRound, type Session, type InsertSession, type CourseConditions, type InsertCourseConditions } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
-import { users, adminUsers, teetimes, menuItems, orders, courseHoles, rounds, sessions } from "@shared/schema";
+import { users, adminUsers, teetimes, menuItems, orders, courseHoles, rounds, sessions, courseConditions } from "@shared/schema";
 import { eq, and, sql } from "drizzle-orm";
 
 export interface IStorage {
@@ -51,6 +51,10 @@ export interface IStorage {
   getCurrentRound(userId: string): Promise<Round | undefined>;
   createRound(round: InsertRound): Promise<Round>;
   updateRound(id: string, updates: Partial<Round>): Promise<Round | undefined>;
+  
+  // Course conditions methods
+  getCourseConditions(): Promise<CourseConditions>;
+  updateCourseConditions(updates: Partial<InsertCourseConditions>): Promise<CourseConditions>;
 }
 
 export class MemStorage implements IStorage {
@@ -62,6 +66,7 @@ export class MemStorage implements IStorage {
   private courseHoles: Map<string, CourseHole>;
   private rounds: Map<string, Round>;
   private sessions: Map<string, Session>;
+  private currentConditions: CourseConditions;
 
   constructor() {
     this.users = new Map();
@@ -72,6 +77,23 @@ export class MemStorage implements IStorage {
     this.courseHoles = new Map();
     this.rounds = new Map();
     this.sessions = new Map();
+    
+    // Initialize default course conditions
+    this.currentConditions = {
+      id: "conditions-1",
+      weather: "sunny",
+      temperature: 72,
+      windSpeed: 5,
+      humidity: 45,
+      courseStatus: "open",
+      cartPathOnly: false,
+      greensCondition: "excellent",
+      fairwaysCondition: "good",
+      hazardNotes: "",
+      maintenanceNotes: "",
+      lastUpdated: new Date().toISOString(),
+      updatedBy: "System"
+    };
     
     this.initializeData();
   }
@@ -609,6 +631,20 @@ export class MemStorage implements IStorage {
     this.rounds.set(id, updatedRound);
     return updatedRound;
   }
+
+  // Course conditions methods
+  async getCourseConditions(): Promise<CourseConditions> {
+    return this.currentConditions;
+  }
+
+  async updateCourseConditions(updates: Partial<InsertCourseConditions>): Promise<CourseConditions> {
+    this.currentConditions = {
+      ...this.currentConditions,
+      ...updates,
+      lastUpdated: new Date().toISOString(),
+    };
+    return this.currentConditions;
+  }
 }
 
 // DatabaseStorage implementation
@@ -781,6 +817,39 @@ export class DatabaseStorage implements IStorage {
   async updateRound(id: string, updates: Partial<Round>): Promise<Round | undefined> {
     const [updated] = await db.update(rounds).set(updates).where(eq(rounds.id, id)).returning();
     return updated || undefined;
+  }
+
+  // Course conditions methods
+  async getCourseConditions(): Promise<CourseConditions> {
+    const [conditions] = await db.select().from(courseConditions).limit(1);
+    if (!conditions) {
+      // Create default conditions if none exist
+      const defaultConditions = {
+        weather: "sunny",
+        temperature: 72,
+        windSpeed: 5,
+        humidity: 45,
+        courseStatus: "open",
+        cartPathOnly: false,
+        greensCondition: "excellent",
+        fairwaysCondition: "good",
+        hazardNotes: "",
+        maintenanceNotes: "",
+        updatedBy: "System"
+      };
+      const [newConditions] = await db.insert(courseConditions).values(defaultConditions).returning();
+      return newConditions;
+    }
+    return conditions;
+  }
+
+  async updateCourseConditions(updates: Partial<InsertCourseConditions>): Promise<CourseConditions> {
+    const current = await this.getCourseConditions();
+    const [updated] = await db.update(courseConditions)
+      .set({ ...updates, lastUpdated: new Date() })
+      .where(eq(courseConditions.id, current.id))
+      .returning();
+    return updated;
   }
 }
 
