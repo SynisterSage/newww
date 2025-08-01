@@ -206,8 +206,8 @@ export default function Conditions() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between mb-6">
-                <div>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
                   <div className="text-5xl font-bold text-[#08452e] mb-1">
                     {weather?.temperature}°F
                   </div>
@@ -215,35 +215,35 @@ export default function Conditions() {
                     {weather?.condition}
                   </p>
                 </div>
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 ml-4">
                   <div className="flex items-center space-x-2 mb-1">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <span className="font-medium text-green-800">Perfect Golf Weather!</span>
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <span className="font-medium text-green-800 text-sm">Perfect Golf Weather!</span>
                   </div>
-                  <p className="text-sm text-green-700">Ideal conditions for your round</p>
+                  <p className="text-xs text-green-700">Ideal conditions for your round</p>
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div className="text-center p-3 bg-blue-50 rounded-lg">
-                  <Wind className="w-6 h-6 mx-auto mb-2 text-blue-600" />
+                  <Wind className="w-5 h-5 mx-auto mb-2 text-blue-600" />
                   <p className="font-semibold text-lg">{weather?.windSpeed} mph</p>
-                  <p className="text-sm text-muted-foreground">Wind</p>
+                  <p className="text-xs text-muted-foreground">Wind</p>
                 </div>
                 <div className="text-center p-3 bg-cyan-50 rounded-lg">
-                  <Droplets className="w-6 h-6 mx-auto mb-2 text-cyan-600" />
+                  <Droplets className="w-5 h-5 mx-auto mb-2 text-cyan-600" />
                   <p className="font-semibold text-lg">{weather?.humidity}%</p>
-                  <p className="text-sm text-muted-foreground">Humidity</p>
+                  <p className="text-xs text-muted-foreground">Humidity</p>
                 </div>
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <Eye className="w-6 h-6 mx-auto mb-2 text-gray-600" />
+                  <Eye className="w-5 h-5 mx-auto mb-2 text-gray-600" />
                   <p className="font-semibold text-lg">{weather?.visibility} mi</p>
-                  <p className="text-sm text-muted-foreground">Visibility</p>
+                  <p className="text-xs text-muted-foreground">Visibility</p>
                 </div>
                 <div className="text-center p-3 bg-purple-50 rounded-lg">
-                  <Gauge className="w-6 h-6 mx-auto mb-2 text-purple-600" />
+                  <Gauge className="w-5 h-5 mx-auto mb-2 text-purple-600" />
                   <p className="font-semibold text-lg">{weather?.pressure}"</p>
-                  <p className="text-sm text-muted-foreground">Pressure</p>
+                  <p className="text-xs text-muted-foreground">Pressure</p>
                 </div>
               </div>
             </CardContent>
@@ -298,9 +298,9 @@ export default function Conditions() {
                     </div>
                     
                     <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold text-lg">{update.title}</h3>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(update.status)}`}>
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-semibold text-lg pr-2">{update.title}</h3>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(update.status)} flex-shrink-0`}>
                           {update.status}
                         </span>
                       </div>
@@ -309,7 +309,7 @@ export default function Conditions() {
                         {update.description}
                       </p>
                       
-                      <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center justify-between text-sm mt-2">
                         <div className="flex items-center space-x-1 text-muted-foreground">
                           <Calendar className="w-4 h-4" />
                           <span>{formatDate(update.date)}</span>
