@@ -302,24 +302,7 @@ export class MemStorage implements IStorage {
           isPremium: slot.isPremium
         };
 
-        // Add some realistic bookings - more bookings for tomorrow
-        const bookingChance = dayIndex === 0 ? 0.3 : 0.5; // 30% today, 50% tomorrow
-        const pendingChance = dayIndex === 0 ? 0.1 : 0.2; // 10% today, 20% tomorrow
-
-        if (Math.random() < bookingChance && realMembers.length > 0) {
-          const randomMember = realMembers[Math.floor(Math.random() * realMembers.length)];
-          const spotsBooked = Math.floor(Math.random() * 3) + 1; // 1-3 spots booked
-          
-          teetime.userId = randomMember.id;
-          teetime.spotsAvailable = 4 - spotsBooked;
-          
-          // Some bookings are pending approval, others are already approved
-          if (Math.random() < pendingChance) {
-            teetime.status = "pending";
-          } else {
-            teetime.status = spotsBooked >= 4 ? "booked" : "available";
-          }
-        }
+        // All tee times start as available - no pre-existing bookings
 
         this.teetimes.set(teetime.id, teetime);
       });
