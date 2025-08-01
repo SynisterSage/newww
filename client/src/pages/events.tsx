@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Clock, ChevronRight } from "lucide-react";
+import { Calendar, Clock, ChevronRight, Users, MapPin } from "lucide-react";
 import { format } from "date-fns";
 
 interface Event {
@@ -20,7 +21,6 @@ interface Event {
 
 export default function Events() {
   const { toast } = useToast();
-  const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   
   const events: Event[] = [
     {
