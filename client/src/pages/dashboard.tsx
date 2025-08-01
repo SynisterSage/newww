@@ -257,7 +257,7 @@ export default function Dashboard() {
             </div>
           </div>
           
-          <div className="p-3 bg-golf-green-soft rounded-lg pt-[11px] pb-[11px] mt-[27px] mb-[27px]">
+          <div className="p-3 rounded-lg pt-[11px] pb-[11px] mt-[27px] mb-[27px] bg-[#fafafa]">
             <p className="text-sm text-golf-green font-medium text-center">
               Perfect Golf Weather! Ideal conditions for your round today
             </p>
