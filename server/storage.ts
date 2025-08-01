@@ -64,8 +64,12 @@ export class MemStorage implements IStorage {
   }
 
   private initializeData() {
-    // Initialize comprehensive Packanack Golf Club member database
+    // Initialize Packanack Golf Club member database based on 2025 membership data
+    // Membership classes from your data: A (104), AG (68), AGG (9), AGG+75 (5), AGH (7), AG-Special (4), A-Special (2), G (20), G+75 (7), H (8), HG (1), HM (20), S (1)
+    // Payment statuses: Paid, Payment Plan, Partial Payment
+    // Total members: 256 (244 Active, 12 Leave)
     const members: User[] = [
+      // A Class Members (Adult Full) - 104 total
       {
         id: "user-1",
         username: "john.wellington",
@@ -74,9 +78,9 @@ export class MemStorage implements IStorage {
         firstName: "John",
         lastName: "Wellington",
         phone: "(973) 335-4567",
-        memberNumber: "0001",
-        memberStatus: "Gold",
-        membershipType: "Full",
+        memberNumber: "A001",
+        memberStatus: "Paid",
+        membershipType: "A",
         address: "15 Packanack Lake Road",
         city: "Wayne",
         state: "NJ",
@@ -85,7 +89,7 @@ export class MemStorage implements IStorage {
         emergencyPhone: "(973) 335-4568",
         handicap: 12,
         roundsPlayed: 47,
-        accountBalance: "285.00",
+        accountBalance: "0.00",
         joinDate: new Date("2015-03-15"),
         isActive: true
       },
@@ -97,9 +101,9 @@ export class MemStorage implements IStorage {
         firstName: "Robert",
         lastName: "Chen",
         phone: "(973) 694-2134",
-        memberNumber: "0003",
-        memberStatus: "Silver",
-        membershipType: "Associate",
+        memberNumber: "A002",
+        memberStatus: "Payment Plan",
+        membershipType: "A",
         address: "42 Mountain View Drive",
         city: "Wayne",
         state: "NJ",
@@ -112,6 +116,7 @@ export class MemStorage implements IStorage {
         joinDate: new Date("2018-07-22"),
         isActive: true
       },
+      // AG Class Members (Adult Guest) - 68 total
       {
         id: "user-3",
         username: "maria.rodriguez",
@@ -120,9 +125,9 @@ export class MemStorage implements IStorage {
         firstName: "Maria",
         lastName: "Rodriguez",
         phone: "(973) 256-7890",
-        memberNumber: "0005",
-        memberStatus: "Gold",
-        membershipType: "Full",
+        memberNumber: "AG001",
+        memberStatus: "Paid",
+        membershipType: "AG",
         address: "128 Lakeshore Drive",
         city: "Wayne",
         state: "NJ",
@@ -131,7 +136,7 @@ export class MemStorage implements IStorage {
         emergencyPhone: "(973) 256-7891",
         handicap: 8,
         roundsPlayed: 89,
-        accountBalance: "476.25",
+        accountBalance: "0.00",
         joinDate: new Date("2012-01-10"),
         isActive: true
       },
@@ -143,9 +148,9 @@ export class MemStorage implements IStorage {
         firstName: "David",
         lastName: "Thompson",
         phone: "(973) 445-3322",
-        memberNumber: "0007",
-        memberStatus: "Bronze",
-        membershipType: "Junior",
+        memberNumber: "AG002",
+        memberStatus: "Payment Plan",
+        membershipType: "AG",
         address: "67 Fairway Circle",
         city: "Wayne",
         state: "NJ",
@@ -158,6 +163,7 @@ export class MemStorage implements IStorage {
         joinDate: new Date("2023-05-18"),
         isActive: true
       },
+      // G Class Members (Golf) - 20 total
       {
         id: "user-5",
         username: "sarah.johnson",
@@ -166,9 +172,9 @@ export class MemStorage implements IStorage {
         firstName: "Sarah",
         lastName: "Johnson",
         phone: "(973) 881-9876",
-        memberNumber: "0009",
-        memberStatus: "Gold",
-        membershipType: "Corporate",
+        memberNumber: "G001",
+        memberStatus: "Paid",
+        membershipType: "G",
         address: "203 Club House Lane",
         city: "Wayne",
         state: "NJ",
@@ -177,7 +183,7 @@ export class MemStorage implements IStorage {
         emergencyPhone: "(973) 881-9877",
         handicap: 15,
         roundsPlayed: 72,
-        accountBalance: "338.90",
+        accountBalance: "0.00",
         joinDate: new Date("2017-09-03"),
         isActive: true
       },
@@ -189,9 +195,9 @@ export class MemStorage implements IStorage {
         firstName: "Michael",
         lastName: "Brown",
         phone: "(973) 542-1188",
-        memberNumber: "0011",
-        memberStatus: "Silver",
-        membershipType: "Associate",
+        memberNumber: "G002",
+        memberStatus: "Payment Plan",
+        membershipType: "G",
         address: "89 Pine Valley Road",
         city: "Wayne",
         state: "NJ",
@@ -204,6 +210,7 @@ export class MemStorage implements IStorage {
         joinDate: new Date("2020-11-12"),
         isActive: true
       },
+      // HM Class Members (House Member) - 20 total
       {
         id: "user-7",
         username: "jennifer.davis",
@@ -212,9 +219,9 @@ export class MemStorage implements IStorage {
         firstName: "Jennifer",
         lastName: "Davis",
         phone: "(973) 778-5544",
-        memberNumber: "0013",
-        memberStatus: "Gold",
-        membershipType: "Full",
+        memberNumber: "HM001",
+        memberStatus: "Paid",
+        membershipType: "HM",
         address: "156 Sunset Boulevard",
         city: "Wayne",
         state: "NJ",
@@ -223,10 +230,11 @@ export class MemStorage implements IStorage {
         emergencyPhone: "(973) 778-5545",
         handicap: 14,
         roundsPlayed: 58,
-        accountBalance: "412.75",
+        accountBalance: "0.00",
         joinDate: new Date("2016-04-20"),
         isActive: true
       },
+      // AGG Class Members (Adult Guest Golf) - 9 total
       {
         id: "user-8",
         username: "thomas.wilson",
@@ -235,9 +243,9 @@ export class MemStorage implements IStorage {
         firstName: "Thomas",
         lastName: "Wilson",
         phone: "(973) 663-7799",
-        memberNumber: "0015",
-        memberStatus: "Bronze",
-        membershipType: "Senior",
+        memberNumber: "AGG001",
+        memberStatus: "Paid",
+        membershipType: "AGG",
         address: "234 Oak Tree Lane",
         city: "Wayne",
         state: "NJ",
@@ -246,10 +254,11 @@ export class MemStorage implements IStorage {
         emergencyPhone: "(973) 663-7800",
         handicap: 22,
         roundsPlayed: 91,
-        accountBalance: "156.30",
+        accountBalance: "0.00",
         joinDate: new Date("2010-08-15"),
         isActive: true
       },
+      // H Class Members (House) - 8 total
       {
         id: "user-9",
         username: "lisa.martinez",
@@ -258,9 +267,9 @@ export class MemStorage implements IStorage {
         firstName: "Lisa",
         lastName: "Martinez",
         phone: "(973) 334-2266",
-        memberNumber: "0017",
-        memberStatus: "Silver",
-        membershipType: "Associate",
+        memberNumber: "H001",
+        memberStatus: "Paid",
+        membershipType: "H",
         address: "78 Birchwood Drive",
         city: "Wayne",
         state: "NJ",
@@ -269,10 +278,11 @@ export class MemStorage implements IStorage {
         emergencyPhone: "(973) 334-2267",
         handicap: 19,
         roundsPlayed: 42,
-        accountBalance: "267.80",
+        accountBalance: "0.00",
         joinDate: new Date("2019-06-08"),
         isActive: true
       },
+      // AGH Class Members (Adult Guest House) - 7 total
       {
         id: "user-10",
         username: "james.garcia",
@@ -281,9 +291,9 @@ export class MemStorage implements IStorage {
         firstName: "James",
         lastName: "Garcia",
         phone: "(973) 445-8811",
-        memberNumber: "0019",
-        memberStatus: "Gold",
-        membershipType: "Full",
+        memberNumber: "AGH001",
+        memberStatus: "Paid",
+        membershipType: "AGH",
         address: "345 Championship Drive",
         city: "Wayne",
         state: "NJ",
@@ -292,10 +302,11 @@ export class MemStorage implements IStorage {
         emergencyPhone: "(973) 445-8812",
         handicap: 6,
         roundsPlayed: 108,
-        accountBalance: "523.60",
+        accountBalance: "0.00",
         joinDate: new Date("2011-02-28"),
         isActive: true
       },
+      // G+75 Class Members (Golf 75+) - 7 total
       {
         id: "user-11",
         username: "patricia.white",
@@ -304,9 +315,9 @@ export class MemStorage implements IStorage {
         firstName: "Patricia",
         lastName: "White",
         phone: "(973) 556-9933",
-        memberNumber: "0021",
-        memberStatus: "Bronze",
-        membershipType: "Junior",
+        memberNumber: "G75001",
+        memberStatus: "Paid",
+        membershipType: "G+75",
         address: "512 Green Valley Court",
         city: "Wayne",
         state: "NJ",
@@ -315,10 +326,11 @@ export class MemStorage implements IStorage {
         emergencyPhone: "(973) 556-9934",
         handicap: 28,
         roundsPlayed: 15,
-        accountBalance: "89.25",
+        accountBalance: "0.00",
         joinDate: new Date("2024-01-15"),
         isActive: true
       },
+      // AGG+75 Class Members (Adult Guest Golf 75+) - 5 total
       {
         id: "user-12",
         username: "christopher.lee",
@@ -327,9 +339,9 @@ export class MemStorage implements IStorage {
         firstName: "Christopher",
         lastName: "Lee",
         phone: "(973) 667-4455",
-        memberNumber: "0023",
-        memberStatus: "Gold",
-        membershipType: "Corporate",
+        memberNumber: "AGG75001",
+        memberStatus: "Paid",
+        membershipType: "AGG+75",
         address: "198 Executive Circle",
         city: "Wayne",
         state: "NJ",
@@ -338,7 +350,7 @@ export class MemStorage implements IStorage {
         emergencyPhone: "(973) 667-4456",
         handicap: 11,
         roundsPlayed: 85,
-        accountBalance: "645.90",
+        accountBalance: "0.00",
         joinDate: new Date("2014-07-11"),
         isActive: true
       }
