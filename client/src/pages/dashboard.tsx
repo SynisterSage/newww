@@ -254,8 +254,8 @@ export default function Dashboard() {
 
         {/* Right Column - Course Conditions */}
         <div>
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
+          <Card className="border-0 shadow-sm h-full">
+            <CardContent className="p-6 h-full flex flex-col">
               <div className="flex items-center space-x-2 mb-6">
                 <Sun className="w-5 h-5" />
                 <h3 className="text-lg font-semibold text-foreground">Course Conditions</h3>
@@ -284,8 +284,8 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Course Status */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              {/* Course Status - Push to bottom */}
+              <div className="mt-auto bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-center justify-center mb-2">
                   <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
                   <p className="font-medium text-green-800">Perfect Golf Weather!</p>
