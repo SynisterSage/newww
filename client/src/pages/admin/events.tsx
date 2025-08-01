@@ -353,33 +353,36 @@ export default function AdminEvents() {
                 )}
               </div>
               
-              <div className="flex gap-2 pt-2">
+              <div className="grid grid-cols-1 gap-2 pt-2">
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={() => fetchRegistrations(event.id)}
-                  className="flex-1"
+                  className="w-full"
                 >
                   <Eye className="w-4 h-4 mr-1" />
                   View Registrations
                 </Button>
                 
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleEditEvent(event)}
-                >
-                  <Edit className="w-4 h-4" />
-                </Button>
-                
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleDeleteEvent(event.id)}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleEditEvent(event)}
+                    className="flex-1"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDeleteEvent(event.id)}
+                    className="flex-1 text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

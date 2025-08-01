@@ -277,7 +277,7 @@ function Router() {
           <Route path="/tee-times">{() => <TeeTimes userData={userData || undefined} />}</Route>
           <Route path="/dining">{() => <Dining userData={userData || undefined} />}</Route>
           <Route path="/conditions" component={Conditions} />
-          <Route path="/events" component={Events} />
+          <Route path="/events">{() => <Events userData={userData || undefined} />}</Route>
           <Route component={NotFound} />
         </Switch>
       </main>

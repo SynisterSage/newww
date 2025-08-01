@@ -10,34 +10,27 @@ import { Calendar, Users, MapPin, DollarSign, Clock, Trophy, Check, X } from "lu
 import { apiRequest } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import type { Event } from "@shared/schema";
+import type { Event, User } from "@shared/schema";
 
 interface EventWithRegistration extends Event {
   isRegistered?: boolean;
   registrationCount?: number;
 }
 
-export default function Events() {
+interface EventsProps {
+  userData?: User;
+}
+
+export default function Events({ userData }: EventsProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isRegisterDialogOpen, setIsRegisterDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [filter, setFilter] = useState<string>("all");
 
-  // Get current user from sessionStorage or context
-  const getCurrentUser = () => {
-    const sessionToken = localStorage.getItem('sessionToken');
-    if (!sessionToken) return null;
-    
-    try {
-      const payload = JSON.parse(atob(sessionToken.split('.')[1]));
-      return payload.userId;
-    } catch {
-      return null;
-    }
-  };
-
-  const currentUserId = getCurrentUser();
+  // Get current user from props
+  const currentUserId = userData?.id;
+  const isAuthenticated = !!userData;
 
   // Fetch events
   const { data: events = [], isLoading } = useQuery({
@@ -89,9 +82,9 @@ export default function Events() {
   });
 
   const handleRegister = (event: Event) => {
-    if (!currentUserId) {
+    if (!isAuthenticated || !currentUserId) {
       toast({
-        title: "Authentication Required",
+        title: "Authentication Required", 
         description: "Please log in to register for events",
         variant: "destructive",
       });
