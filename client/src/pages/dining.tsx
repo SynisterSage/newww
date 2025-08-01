@@ -124,7 +124,7 @@ export default function Dining() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa]">
+    <div className="min-h-screen bg-[#fbfff5]">
       {/* Mobile Cart Overlay */}
       {isCartOpen && (
         <div 
@@ -132,7 +132,6 @@ export default function Dining() {
           onClick={() => setIsCartOpen(false)}
         />
       )}
-      
       {/* Main Content */}
       <div className="p-4 sm:p-6 max-w-6xl mx-auto">
         {/* Header */}
@@ -223,7 +222,6 @@ export default function Dining() {
           })}
         </div>
       </div>
-
       {/* Mobile Cart Modal */}
       {isCartOpen && (
         <div 
