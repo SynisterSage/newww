@@ -88,11 +88,14 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
     queryKey: ['/api/orders'],
   });
 
-  // Filter for upcoming tee times only
-  const upcomingTeetimes = userTeetimes.filter((teetime: TeeTime) => {
+  // Filter for recent tee times (past and upcoming within 30 days)
+  const recentTeetimes = userTeetimes.filter((teetime: TeeTime) => {
     const teetimeDate = new Date(`${teetime.date}T${teetime.time}`);
-    return teetimeDate > new Date();
-  });
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+    const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
+    return teetimeDate >= thirtyDaysAgo && teetimeDate <= thirtyDaysFromNow;
+  }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Sort by most recent first
 
   if (isLoading) {
     return (
@@ -196,8 +199,8 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
               <div className="w-12 h-12 bg-golf-green-soft rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <Calendar className="w-6 h-6 text-golf-green" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{upcomingTeetimes.length}</div>
-              <div className="text-sm text-muted-foreground">Upcoming Tee Times</div>
+              <div className="text-2xl font-bold text-foreground mb-1">{recentTeetimes.length}</div>
+              <div className="text-sm text-muted-foreground">Recent Tee Times</div>
             </CardContent>
           </Card>
 
@@ -221,7 +224,7 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
               <div className="w-12 h-12 bg-golf-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <TrendingUp className="w-6 h-6 text-golf-blue" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{upcomingTeetimes.filter((t: TeeTime) => {
+              <div className="text-2xl font-bold text-foreground mb-1">{recentTeetimes.filter((t: TeeTime) => {
                 const teetimeDate = new Date(t.date);
                 const now = new Date();
                 return teetimeDate.getMonth() === now.getMonth() && teetimeDate.getFullYear() === now.getFullYear();
@@ -250,25 +253,25 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
             <CardContent className="p-6">
               <div className="flex items-center space-x-2 mb-4">
                 <Calendar className="w-5 h-5" />
-                <h3 className="text-lg font-semibold text-foreground">Upcoming Tee Times</h3>
+                <h3 className="text-lg font-semibold text-foreground">Recent Tee Times</h3>
               </div>
               <div className="space-y-3">
-                {upcomingTeetimes.slice(0, 3).map((teetime: TeeTime, index: number) => (
+                {recentTeetimes.slice(0, 3).map((teetime: TeeTime, index: number) => (
                   <div key={teetime.id || index} className="flex items-center space-x-3">
                     <div className="bg-golf-green p-2 rounded-full">
                       <Clock className="h-4 w-4 text-white" />
                     </div>
                     <div className="flex-1">
                       <p className="font-medium">{format(new Date(teetime.date), 'MMM dd')} at {teetime.time}</p>
-                      <p className="text-sm text-muted-foreground">{teetime.spotsAvailable} spots available</p>
+                      <p className="text-sm text-muted-foreground">{teetime.holes} holes • {teetime.status}</p>
                     </div>
-                    <span className="text-sm bg-golf-green text-white px-2 py-1 rounded">
-                      {teetime.holes === 18 ? 'Championship Course' : 'Practice Range'}
+                    <span className={`text-sm px-2 py-1 rounded ${new Date(`${teetime.date}T${teetime.time}`) > new Date() ? 'bg-golf-green text-white' : 'bg-gray-100 text-gray-800'}`}>
+                      {new Date(`${teetime.date}T${teetime.time}`) > new Date() ? 'Upcoming' : 'Completed'}
                     </span>
                   </div>
                 ))}
-                {upcomingTeetimes.length === 0 && (
-                  <p className="text-muted-foreground text-center py-4">No upcoming tee times</p>
+                {recentTeetimes.length === 0 && (
+                  <p className="text-muted-foreground text-center py-4">No recent tee times</p>
                 )}
               </div>
             </CardContent>

@@ -344,14 +344,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin member data synchronization route
   app.post("/api/admin/members/sync", async (req, res) => {
     try {
-      // This endpoint can be used to refresh/reload member data
-      // or sync with external data sources if needed
-      const members = await storage.getAllUsers();
+      // Load all members from the actual CSV file
+      const fs = require('fs');
+      const path = require('path');
+      
+      const csvFilePath = path.join(process.cwd(), 'attached_assets', '2025_Membership List_Working.xlsx - 2025 Master_1754067565407.csv');
+      const csvContent = fs.readFileSync(csvFilePath, 'utf8');
+      
+      const lines = csvContent.split('\n').slice(3); // Skip header rows
+      let syncedCount = 0;
+      let errorCount = 0;
+      let processedCount = 0;
+      let skipCount = 0;
+      
+      for (let index = 0; index < lines.length; index++) {
+        const line = lines[index].trim();
+        
+        // Skip empty lines or lines that are mostly commas
+        if (!line || line.match(/^[,\s]*$/)) continue;
+        
+        // Parse CSV line with quoted fields
+        const csvRegex = /("([^"]*)"|[^,]*)(,|$)/g;
+        const matches = [];
+        let match;
+        while ((match = csvRegex.exec(line)) !== null) {
+          matches.push(match);
+        }
+        
+        if (matches && matches.length >= 4) {
+          const fields = matches.map(m => m[0].replace(/,$/, '').replace(/^"|"$/g, '').trim());
+          const [name, paymentStatus, memberClass, status, yearJoined, birthday, spouse] = fields;
+          
+          if (name && name !== 'Name' && !name.startsWith(' ') && name.includes(',')) {
+            const [lastName, firstName] = name.split(',').map(s => s.trim());
+            
+            if (firstName && lastName) {
+              processedCount++;
+              const cleanFirstName = firstName.replace(/[^a-zA-Z\s]/g, '').trim();
+              const cleanLastName = lastName.replace(/[^a-zA-Z\s]/g, '').trim();
+              
+              if (cleanFirstName && cleanLastName) {
+                const memberData = {
+                  username: `${cleanFirstName.toLowerCase().replace(/\s+/g, '.')}.${cleanLastName.toLowerCase().replace(/\s+/g, '.')}`,
+                  password: "password123",
+                  email: `${cleanFirstName.toLowerCase().replace(/\s+/g, '.')}.${cleanLastName.toLowerCase().replace(/\s+/g, '.')}@email.com`,
+                  firstName: cleanFirstName,
+                  lastName: cleanLastName,
+                  phone: `(973) ${Math.floor(Math.random() * 900 + 100)}-${Math.floor(Math.random() * 9000 + 1000)}`,
+                  memberNumber: `${memberClass || 'A'}${String(processedCount).padStart(3, '0')}`,
+                  memberStatus: paymentStatus || 'Paid',
+                  membershipType: memberClass || 'A',
+                  accountBalance: (paymentStatus === 'Paid' || !paymentStatus) ? '0.00' : `${Math.floor(Math.random() * 400 + 100)}.00`,
+                  isActive: (status === 'Active' || !status)
+                };
+                
+                try {
+                  await storage.createUser(memberData);
+                  syncedCount++;
+                  console.log(`✓ Added: ${memberData.firstName} ${memberData.lastName} (${memberData.memberNumber})`);
+                } catch (error: any) {
+                  if (error.message.includes('UNIQUE constraint failed') || error.message.includes('unique')) {
+                    skipCount++;
+                    // console.log(`~ Skip duplicate: ${memberData.firstName} ${memberData.lastName}`);
+                  } else {
+                    errorCount++;
+                    console.log(`✗ Error syncing member ${memberData.firstName} ${memberData.lastName}:`, error.message);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      const totalMembers = await storage.getAllUsers();
       res.json({ 
         message: "Member data synchronized successfully",
-        count: members.length
+        totalMembers: totalMembers.length,
+        newMembers: syncedCount,
+        processed: processedCount,
+        skipped: skipCount,
+        errors: errorCount
       });
     } catch (error: any) {
+      console.error('Sync error:', error);
       res.status(500).json({ message: `Sync failed: ${error.message}` });
     }
   });
