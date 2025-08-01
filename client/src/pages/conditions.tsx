@@ -370,10 +370,10 @@ export default function Conditions() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {courseUpdates.map((update) => (
-              <Card key={update.id} className="shadow-sm border-0 hover:shadow-md transition-all duration-300 bg-white">
-                <CardContent className="p-0">
+              <Card key={update.id} className="shadow-sm border-0 hover:shadow-md transition-all duration-300 bg-white h-56 flex flex-col">
+                <CardContent className="p-0 flex flex-col h-full">
                   {/* Header section with icon, title and status */}
-                  <div className="p-6 pb-4">
+                  <div className="p-6 pb-4 flex-1">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <div className={`p-2.5 rounded-xl ${getStatusColor(update.status)}`}>
@@ -391,8 +391,8 @@ export default function Conditions() {
                     </p>
                   </div>
                   
-                  {/* Footer section with date and affected areas */}
-                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                  {/* Footer section with date and affected areas - always at bottom */}
+                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 mt-auto">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2 text-gray-500">
                         <Calendar className="w-4 h-4" />
