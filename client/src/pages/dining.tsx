@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useState } from "react";
-import { ShoppingCart, Plus, Minus, Trash2 } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Trash2, X } from "lucide-react";
 import type { MenuItem } from "@shared/schema";
 
 export default function Dining() {
@@ -15,6 +15,7 @@ export default function Dining() {
   const [currentOrder, setCurrentOrder] = useState<{[key: string]: number}>({});
   const [deliveryOption, setDeliveryOption] = useState("Clubhouse Pickup");
   const [selectedHole, setSelectedHole] = useState("");
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const { data: menuItems = [], isLoading } = useQuery<MenuItem[]>({
     queryKey: ['/api/menu', selectedCategory === "All" ? undefined : selectedCategory],
@@ -27,6 +28,7 @@ export default function Dining() {
     },
     onSuccess: () => {
       setCurrentOrder({});
+      setIsCartOpen(false);
       toast({
         title: "Order Placed",
         description: "Your order has been sent to the kitchen!",
@@ -46,6 +48,7 @@ export default function Dining() {
       ...prev,
       [itemId]: (prev[itemId] || 0) + 1
     }));
+    setIsCartOpen(true);
   };
 
   const removeFromOrder = (itemId: string) => {
@@ -114,12 +117,20 @@ export default function Dining() {
 
   return (
     <div className="flex h-screen bg-background">
+      {/* Mobile Cart Overlay */}
+      {isCartOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsCartOpen(false)}
+        />
+      )}
+      
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <div className="p-6 max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Dining Menu</h1>
+            <h1 className="text-3xl font-bold text-golf-green mb-2">Dining Menu</h1>
             <p className="text-muted-foreground">Order from our premium clubhouse restaurant</p>
           </div>
 
@@ -198,23 +209,35 @@ export default function Dining() {
       </div>
 
       {/* Order Sidebar */}
-      <div className="w-96 bg-card border-l border-border flex flex-col">
+      <div className={`w-96 bg-card border-l border-border flex flex-col transition-transform duration-300 ${
+        isCartOpen ? 'translate-x-0' : 'translate-x-full'
+      } fixed right-0 top-0 h-full z-50 lg:relative lg:translate-x-0`}>
         <div className="p-6 border-b border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <ShoppingCart className="w-5 h-5 text-foreground" />
               <h2 className="text-lg font-semibold text-foreground">Your Order</h2>
             </div>
-            {totalItems > 0 && (
+            <div className="flex items-center space-x-2">
+              {totalItems > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearOrder}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={clearOrder}
-                className="text-muted-foreground hover:text-foreground"
+                onClick={() => setIsCartOpen(false)}
+                className="text-muted-foreground hover:text-foreground lg:hidden"
               >
-                <Trash2 className="w-4 h-4" />
+                <X className="w-4 h-4" />
               </Button>
-            )}
+            </div>
           </div>
         </div>
 

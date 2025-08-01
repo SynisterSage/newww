@@ -8,6 +8,7 @@ import MobileNav from "@/components/mobile-nav";
 import Dashboard from "@/pages/dashboard";
 import TeeTimes from "@/pages/tee-times";
 import Dining from "@/pages/dining";
+import CourseConditions from "@/pages/course-conditions";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -19,6 +20,7 @@ function Router() {
           <Route path="/" component={Dashboard} />
           <Route path="/tee-times" component={TeeTimes} />
           <Route path="/dining" component={Dining} />
+          <Route path="/course-conditions" component={CourseConditions} />
           <Route component={NotFound} />
         </Switch>
       </main>

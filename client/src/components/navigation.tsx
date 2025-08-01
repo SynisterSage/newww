@@ -3,7 +3,7 @@ import {
   Home, 
   Calendar, 
   Utensils, 
-  MapPin, 
+  Info,
   User,
   Trophy
 } from "lucide-react";
@@ -15,6 +15,7 @@ export default function Navigation() {
     { path: "/", label: "Dashboard", icon: Home },
     { path: "/tee-times", label: "Tee Times", icon: Calendar },
     { path: "/dining", label: "Dining", icon: Utensils },
+    { path: "/course-conditions", label: "Course Conditions", icon: Info },
   ];
 
   return (

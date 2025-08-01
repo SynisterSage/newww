@@ -3,7 +3,7 @@ import {
   Home, 
   Calendar, 
   Utensils, 
-  MapPin
+  Info
 } from "lucide-react";
 
 export default function MobileNav() {
@@ -13,6 +13,7 @@ export default function MobileNav() {
     { path: "/", label: "Dashboard", icon: Home },
     { path: "/tee-times", label: "Tee Times", icon: Calendar },
     { path: "/dining", label: "Dining", icon: Utensils },
+    { path: "/course-conditions", label: "Conditions", icon: Info },
   ];
 
   return (

@@ -127,7 +127,7 @@ export default function TeeTimes() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Tee Times</h1>
+          <h1 className="text-3xl font-bold text-golf-green mb-2">Tee Times</h1>
           <p className="text-muted-foreground">Book and manage your golf reservations</p>
         </div>
         
