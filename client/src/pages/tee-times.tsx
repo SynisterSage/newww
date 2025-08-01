@@ -19,7 +19,7 @@ export default function TeeTimes() {
     tomorrow.setDate(tomorrow.getDate() + 1);
     return tomorrow.toISOString().split('T')[0];
   });
-  const [selectedCourse, setSelectedCourse] = useState("All Courses");
+  const [selectedHoles, setSelectedHoles] = useState("All");
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [newBooking, setNewBooking] = useState({
     date: "",
@@ -28,8 +28,7 @@ export default function TeeTimes() {
     holes: "18",
     specialRequests: ""
   });
-  const [showBookingCard, setShowBookingCard] = useState(false);
-  const [latestBooking, setLatestBooking] = useState<any>(null);
+  const [userBookings, setUserBookings] = useState<any[]>([]);
 
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', selectedDate],
@@ -50,7 +49,7 @@ export default function TeeTimes() {
       return response.json();
     },
     onSuccess: (data: any) => {
-      // Create booking card data
+      // Add booking to user bookings
       const bookingData = {
         id: data.id || 'temp-id',
         date: newBooking.date,
@@ -61,8 +60,7 @@ export default function TeeTimes() {
         status: "pending"
       };
       
-      setLatestBooking(bookingData);
-      setShowBookingCard(true);
+      setUserBookings(prev => [...prev, bookingData]);
       
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
       setIsBookingModalOpen(false);
@@ -270,15 +268,15 @@ export default function TeeTimes() {
             
             <div className="flex flex-col sm:flex-row gap-4 flex-1">
               <div className="flex-1">
-                <label className="text-sm text-muted-foreground mb-1 block">Course</label>
-                <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                <label className="text-sm text-muted-foreground mb-1 block"># of Holes</label>
+                <Select value={selectedHoles} onValueChange={setSelectedHoles}>
                   <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="All Courses">All Courses</SelectItem>
-                    <SelectItem value="Championship Course">Championship Course</SelectItem>
-                    <SelectItem value="Executive Course">Executive Course</SelectItem>
+                    <SelectItem value="All">All</SelectItem>
+                    <SelectItem value="9">9 Holes</SelectItem>
+                    <SelectItem value="18">18 Holes</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -296,6 +294,66 @@ export default function TeeTimes() {
           </div>
         </CardContent>
       </Card>
+
+      {/* User's Booking Cards - Grid Layout */}
+      {userBookings.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-foreground mb-4">Your Bookings</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {userBookings.map((booking, index) => (
+              <Card key={booking.id} className="bg-background border-2 border-golf-green shadow-md">
+                <CardHeader className="border-b border-border/20 pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Calendar className="w-6 h-6 text-golf-green mr-3" />
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground">
+                          {format(new Date(booking.date), "MMM d, yyyy")}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">Tee Time Booking</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                      {booking.status}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Clock className="w-4 h-4 mr-3" />
+                      <span>{booking.time}</span>
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Users className="w-4 h-4 mr-3" />
+                      <span>{booking.players} Players</span>
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <MapPin className="w-4 h-4 mr-3" />
+                      <span>Packanack Golf Course</span>
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Badge className="bg-golf-green text-white text-xs px-2 py-1">
+                        {booking.holes} Holes
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <Button variant="outline" size="sm" className="flex-1">
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex-1 text-red-600 hover:text-red-700">
+                      <X className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Tee Time Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -384,8 +442,8 @@ export default function TeeTimes() {
         })}
       </div>
 
-      {/* Booking Confirmation Card or No Tee Times Message */}
-      {showBookingCard && latestBooking ? (
+      {/* No Tee Times Message */}
+      {teetimes.length === 0 ? (
         <Card className="border-0 shadow-lg bg-white relative">
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-4">
@@ -396,11 +454,7 @@ export default function TeeTimes() {
                 <div>
                   <div className="flex items-center space-x-2">
                     <span className="text-lg font-semibold">
-                      {new Date(latestBooking.date).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric', 
-                        year: 'numeric' 
-                      })}
+                      No tee times available
                     </span>
                     <Badge className="bg-orange-100 text-orange-700 text-xs font-medium px-2 py-1">
                       pending
@@ -409,66 +463,24 @@ export default function TeeTimes() {
                   <p className="text-sm text-muted-foreground">Tee Time Booking</p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowBookingCard(false)}
-                className="text-muted-foreground hover:text-foreground"
+
+            </div>
+            
+            <div className="text-center py-12">
+              <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">No tee times found</h3>
+              <p className="text-muted-foreground mb-4">Try selecting a different date or course</p>
+              <Button 
+                className="bg-golf-green hover:bg-golf-green-light text-white"
+                onClick={() => setIsBookingModalOpen(true)}
               >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Clock className="w-4 h-4 mr-3" />
-                <span>{latestBooking.time}</span>
-              </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Users className="w-4 h-4 mr-3" />
-                <span>{latestBooking.players} Players</span>
-              </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <MapPin className="w-4 h-4 mr-3" />
-                <span>Packanack Golf Course</span>
-              </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Badge className="bg-golf-green text-white text-xs px-2 py-1">
-                  {latestBooking.holes} Holes
-                </Badge>
-              </div>
-            </div>
-            
-            <p className="text-sm text-muted-foreground mt-4 mb-4">
-              Tournament preparation
-            </p>
-            
-            <div className="flex space-x-3">
-              <Button variant="outline" size="sm" className="flex items-center">
-                <Edit className="w-4 h-4 mr-1" />
-                Edit
-              </Button>
-              <Button variant="outline" size="sm" className="flex items-center text-red-600 hover:text-red-700">
-                <X className="w-4 h-4 mr-1" />
-                Cancel
+                <Plus className="w-4 h-4 mr-2" />
+                Book New Tee Time
               </Button>
             </div>
           </CardContent>
         </Card>
-      ) : teetimes.length === 0 && (
-        <div className="text-center py-12">
-          <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-foreground mb-2">No tee times found</h3>
-          <p className="text-muted-foreground mb-4">Try selecting a different date or course</p>
-          <Button 
-            className="bg-golf-green hover:bg-golf-green-light text-white"
-            onClick={() => setIsBookingModalOpen(true)}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Book New Tee Time
-          </Button>
-        </div>
-      )}
+      ) : null}
     </div>
   );
 }
