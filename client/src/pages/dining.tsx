@@ -323,7 +323,7 @@ export default function Dining() {
                           <SelectValue placeholder="Select Hole" />
                         </SelectTrigger>
                         <SelectContent>
-                          {Array.from({ length: 18 }, (_, i) => (
+                          {Array.from({ length: 9 }, (_, i) => (
                             <SelectItem key={i + 1} value={`${i + 1}`}>
                               Hole {i + 1}
                             </SelectItem>
