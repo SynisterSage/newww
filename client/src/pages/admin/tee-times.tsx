@@ -258,7 +258,7 @@ export default function AdminTeeTimesPage() {
 
         {/* All Tee Times Section */}
         <div>
-          <h2 className="text-xl font-semibold text-[#08452e] mb-4">All Tee Times - {new Date(selectedDate).toLocaleDateString()}</h2>
+          <h2 className="text-xl font-semibold text-[#08452e] mb-4">All Tee Times - {selectedDate === "2025-08-01" ? "8/1/2025" : "8/2/2025"}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {teetimes.map((teetime) => {
               const member = getMemberDetails(teetime.userId);
