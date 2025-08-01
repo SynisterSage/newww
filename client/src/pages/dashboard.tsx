@@ -4,12 +4,70 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Utensils, MapPin, User, Trophy, Clock, TrendingUp, DollarSign, Wind, Droplets, Sun } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
+import { useEffect, useState } from "react";
 import type { User as UserType, TeeTime, Order } from "@shared/schema";
 
 export default function Dashboard() {
   const { data: user, isLoading } = useQuery<UserType>({
     queryKey: ['/api/user/user-1'],
   });
+
+  // Weather state
+  const [weather, setWeather] = useState({
+    temperature: 75,
+    condition: "partly cloudy",
+    windSpeed: 8,
+    humidity: 65
+  });
+
+  // Fetch weather data using Open-Meteo API
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            timeout: 5000,
+            enableHighAccuracy: false
+          });
+        });
+
+        const { latitude, longitude } = position.coords;
+        
+        const response = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=relative_humidity_2m&timezone=auto&temperature_unit=fahrenheit&wind_speed_unit=mph`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          const current = data.current_weather;
+          const hourly = data.hourly;
+          const currentIndex = hourly.time.findIndex((time: string) => time === new Date().toISOString().slice(0, 13) + ':00') || 0;
+          
+          const getWeatherDescription = (code: number) => {
+            const weatherCodes: { [key: number]: string } = {
+              0: 'clear sky', 1: 'mainly clear', 2: 'partly cloudy', 3: 'overcast',
+              45: 'fog', 48: 'fog', 51: 'light drizzle', 53: 'moderate drizzle',
+              55: 'dense drizzle', 61: 'slight rain', 63: 'moderate rain',
+              65: 'heavy rain', 80: 'rain showers', 95: 'thunderstorm'
+            };
+            return weatherCodes[code] || 'partly cloudy';
+          };
+          
+          setWeather({
+            temperature: Math.round(current.temperature),
+            condition: getWeatherDescription(current.weathercode),
+            windSpeed: Math.round(current.windspeed),
+            humidity: hourly.relative_humidity_2m[currentIndex] || 65
+          });
+        }
+      } catch (err) {
+        // Keep default fallback values
+        console.log('Using fallback weather data');
+      }
+    };
+
+    fetchWeather();
+  }, []);
 
   // Get all tee times for the next 7 days to show upcoming bookings
   const { data: teetimes = [] } = useQuery<TeeTime[]>({
@@ -280,20 +338,20 @@ export default function Dashboard() {
                 <div className="bg-blue-500 p-6 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
                   <Sun className="h-8 w-8 text-white" />
                 </div>
-                <div className="text-3xl font-bold">75°F</div>
-                <p className="text-muted-foreground">Partly Cloudy</p>
+                <div className="text-3xl font-bold">{weather.temperature}°F</div>
+                <p className="text-muted-foreground capitalize">{weather.condition}</p>
               </div>
 
               {/* Conditions */}
               <div className="grid grid-cols-2 gap-4 text-center mb-6">
                 <div>
                   <Wind className="h-6 w-6 mx-auto mb-2 text-blue-500" />
-                  <p className="text-sm font-medium">8 mph</p>
+                  <p className="text-sm font-medium">{weather.windSpeed} mph</p>
                   <p className="text-xs text-muted-foreground">Wind</p>
                 </div>
                 <div>
                   <Droplets className="h-6 w-6 mx-auto mb-2 text-blue-500" />
-                  <p className="text-sm font-medium">65%</p>
+                  <p className="text-sm font-medium">{weather.humidity}%</p>
                   <p className="text-xs text-muted-foreground">Humidity</p>
                 </div>
               </div>
