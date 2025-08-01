@@ -24,7 +24,7 @@ export default function Dining() {
   });
 
   const orderMutation = useMutation({
-    mutationFn: async (orderData: { userId: string; items: string[]; total: string; deliveryOption: string; deliveryLocation?: string }) => {
+    mutationFn: async (orderData: { userId: string; items: string[]; total: string; deliveryOption: string; deliveryLocation?: string; specialRequests?: string }) => {
       const response = await apiRequest('POST', '/api/orders', orderData);
       return response.json();
     },
@@ -114,13 +114,15 @@ export default function Dining() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#f8f9fa] p-6">
-        <div className="animate-pulse space-y-6 max-w-6xl mx-auto">
-          <div className="h-20 bg-gray-300 rounded-xl"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="h-48 bg-gray-300 rounded-xl"></div>
-            ))}
+      <div className="min-h-screen bg-[#F8F6F0]">
+        <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+          <div className="animate-pulse space-y-6">
+            <div className="h-20 bg-gray-300 rounded-xl"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <div key={i} className="h-48 bg-gray-300 rounded-xl"></div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -137,7 +139,7 @@ export default function Dining() {
         />
       )}
       {/* Main Content */}
-      <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
