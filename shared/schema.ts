@@ -32,13 +32,8 @@ export const teetimes = pgTable("teetimes", {
   holes: integer("holes").notNull().default(18), // 9 or 18 holes
   spotsAvailable: integer("spots_available").notNull().default(4),
   price: decimal("price", { precision: 8, scale: 2 }).notNull(),
-  status: text("status").notNull().default("available"), // available, booked, premium, confirmed, cancelled
+  status: text("status").notNull().default("available"), // available, booked, premium
   isPremium: boolean("is_premium").default(false),
-  bookedBy: text("booked_by"), // Member name who booked
-  bookedEmail: text("booked_email"), // Member email
-  players: integer("players").default(1), // Number of players
-  notes: text("notes"), // Special requests or notes
-  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const menuItems = pgTable("menu_items", {
@@ -56,13 +51,8 @@ export const orders = pgTable("orders", {
   userId: varchar("user_id").references(() => users.id),
   items: text("items").array().notNull(), // JSON array of item IDs and quantities
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
-  status: text("status").notNull().default("pending"), // pending, confirmed, preparing, ready, delivered, cancelled
-  memberName: text("member_name"), // Member name for the order
-  memberEmail: text("member_email"), // Member email for the order
-  specialRequests: text("special_requests"), // Any special dietary requirements or requests
-  estimatedTime: text("estimated_time"), // Estimated preparation time
+  status: text("status").notNull().default("pending"), // pending, preparing, ready, delivered
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const courseHoles = pgTable("course_holes", {
