@@ -19,7 +19,7 @@ export default function Dining() {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   const { data: menuItems = [], isLoading } = useQuery<MenuItem[]>({
-    queryKey: ['/api/menu', selectedCategory === "All" ? undefined : selectedCategory],
+    queryKey: ['/api/menu'],
   });
 
   const orderMutation = useMutation({
