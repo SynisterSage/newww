@@ -26,6 +26,7 @@ function Router() {
   const [userData, setUserData] = useState<User | null>(null);
   const [adminData, setAdminData] = useState<AdminUser | null>(null);
   const [isAdminView, setIsAdminView] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [location] = useLocation();
 
   const handleLogin = (email: string, user?: User) => {
@@ -38,6 +39,34 @@ function Router() {
     setAdminData(data);
     setIsAdminAuthenticated(true);
   };
+
+  // Show logout animation
+  if (isLoggingOut) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-golf-green-soft via-white to-golf-green-light flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative w-24 h-24 mx-auto mb-8">
+            {/* Rotating rings animation */}
+            <div className="absolute inset-0 border-4 border-golf-green border-t-transparent rounded-full animate-spin"></div>
+            <div className="absolute inset-2 border-4 border-golf-green-light border-r-transparent rounded-full animate-spin animation-delay-200"></div>
+            <div className="absolute inset-4 border-4 border-gold border-b-transparent rounded-full animate-spin animation-delay-400"></div>
+            
+            {/* Golf ball icon in center */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-8 h-8 bg-white rounded-full border-2 border-golf-green shadow-lg">
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-white to-gray-100 flex items-center justify-center">
+                  <div className="w-1 h-1 bg-golf-green rounded-full"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <h3 className="text-xl font-semibold text-golf-green mb-2">Logging Out...</h3>
+          <p className="text-muted-foreground">Thank you for visiting Packanack Golf Club</p>
+        </div>
+      </div>
+    );
+  }
 
   // Check if current path is admin route
   const isAdminRoute = location.startsWith('/admin');
@@ -66,11 +95,17 @@ function Router() {
     window.location.href = "/admin";
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    
+    // Show logout animation for 1.5 seconds
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
     setIsAuthenticated(false);
     setUserEmail("");
     setUserData(null);
     setIsAdminView(false);
+    setIsLoggingOut(false);
   };
 
   // Admin interface
