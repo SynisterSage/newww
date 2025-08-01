@@ -5,14 +5,17 @@ import {
   Utensils, 
   Info,
   User,
-  Trophy
+  Trophy,
+  Shield
 } from "lucide-react";
 
 interface NavigationProps {
   userEmail?: string;
+  isAdminView?: boolean;
+  onSwitchToAdmin?: () => void;
 }
 
-export default function Navigation({ userEmail }: NavigationProps) {
+export default function Navigation({ userEmail, isAdminView, onSwitchToAdmin }: NavigationProps) {
   const [location] = useLocation();
 
   const navItems = [
@@ -68,6 +71,19 @@ export default function Navigation({ userEmail }: NavigationProps) {
               );
             })}
           </nav>
+
+          {/* Admin Switch Button */}
+          {isAdminView && (
+            <div className="absolute bottom-20 left-6 right-6">
+              <button
+                onClick={onSwitchToAdmin}
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-golf-gold/10 border border-golf-gold/20 text-golf-gold hover:bg-golf-gold/20 transition-all duration-200 group"
+              >
+                <Shield className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <span className="font-medium">Back to Admin</span>
+              </button>
+            </div>
+          )}
 
           <div className="absolute bottom-6 left-6 right-6">
             <div className="bg-white/10 rounded-xl p-4">

@@ -6,14 +6,16 @@ import {
   Users,
   Trophy,
   Settings,
-  Shield
+  Shield,
+  Eye
 } from "lucide-react";
 
 interface AdminNavigationProps {
   adminEmail?: string;
+  onSwitchToMember?: () => void;
 }
 
-export default function AdminNavigation({ adminEmail }: AdminNavigationProps) {
+export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminNavigationProps) {
   const [location] = useLocation();
 
   const navItems = [
@@ -70,6 +72,17 @@ export default function AdminNavigation({ adminEmail }: AdminNavigationProps) {
               );
             })}
           </nav>
+
+          {/* Member View Switch */}
+          <div className="absolute bottom-20 left-6 right-6">
+            <button
+              onClick={onSwitchToMember}
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-blue-600/10 border border-blue-600/20 text-blue-300 hover:bg-blue-600/20 hover:text-blue-200 transition-all duration-200 group"
+            >
+              <Eye className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <span className="font-medium">View as Member</span>
+            </button>
+          </div>
 
           <div className="absolute bottom-6 left-6 right-6">
             <div className="bg-white/10 rounded-xl p-4">

@@ -23,6 +23,7 @@ function Router() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [adminData, setAdminData] = useState<AdminUser | null>(null);
+  const [isAdminView, setIsAdminView] = useState(false);
   const [location] = useLocation();
 
   const handleLogin = (email: string) => {
@@ -48,11 +49,28 @@ function Router() {
     return <AuthLogin onLogin={handleLogin} />;
   }
 
+  const handleSwitchToMember = () => {
+    // Set member authentication as true with admin email
+    setUserEmail(adminData?.email || "admin@packanackgolf.com");
+    setIsAuthenticated(true);
+    setIsAdminView(true);
+    // Navigate to member dashboard
+    window.location.href = "/";
+  };
+
+  const handleSwitchToAdmin = () => {
+    setIsAdminView(false);
+    window.location.href = "/admin";
+  };
+
   // Admin interface
   if (isAdminRoute && isAdminAuthenticated) {
     return (
       <div className="flex min-h-screen bg-background">
-        <AdminNavigation adminEmail={adminData?.email} />
+        <AdminNavigation 
+          adminEmail={adminData?.email} 
+          onSwitchToMember={handleSwitchToMember}
+        />
         <main className="flex-1 lg:ml-64 pb-16 lg:pb-0">
           <Switch>
             <Route path="/admin">{() => <AdminDashboard adminEmail={adminData?.email} />}</Route>
@@ -70,7 +88,11 @@ function Router() {
   // Member interface
   return (
     <div className="flex min-h-screen bg-background">
-      <Navigation userEmail={userEmail} />
+      <Navigation 
+        userEmail={userEmail} 
+        isAdminView={isAdminView}
+        onSwitchToAdmin={handleSwitchToAdmin}
+      />
       <main className="flex-1 lg:ml-64 pb-16 lg:pb-0">
         <Switch>
           <Route path="/">{() => <Dashboard userEmail={userEmail} />}</Route>
