@@ -68,6 +68,11 @@ export interface IStorage {
   getUserEventRegistrations(userId: string): Promise<EventRegistration[]>;
   registerForEvent(registration: InsertEventRegistration): Promise<EventRegistration>;
   unregisterFromEvent(eventId: string, userId: string): Promise<void>;
+  
+  // Reset methods for admin
+  resetTeeTimeBookings(): Promise<void>;
+  resetEventRegistrations(): Promise<void>;
+  resetOrders(): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -1098,6 +1103,25 @@ export class DatabaseStorage implements IStorage {
   async unregisterFromEvent(eventId: string, userId: string): Promise<void> {
     await db.delete(eventRegistrations)
       .where(and(eq(eventRegistrations.eventId, eventId), eq(eventRegistrations.userId, userId)));
+  }
+
+  // Reset methods for admin
+  async resetTeeTimeBookings(): Promise<void> {
+    // Clear all playerNames and bookedBy arrays in tee times
+    await db.update(teetimes).set({
+      playerNames: [],
+      bookedBy: []
+    });
+  }
+
+  async resetEventRegistrations(): Promise<void> {
+    // Delete all event registrations
+    await db.delete(eventRegistrations);
+  }
+
+  async resetOrders(): Promise<void> {
+    // Delete all orders
+    await db.delete(orders);
   }
 }
 

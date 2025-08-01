@@ -107,10 +107,34 @@ export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminN
                     // Force page refresh to clear React Query cache
                     window.location.reload();
                   }}
-                  className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-md bg-red-600/15 border border-red-500/30 text-red-200 hover:bg-red-600/25 hover:border-red-500/40 transition-all duration-200 text-sm font-medium"
+                  className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-md bg-orange-600/15 border border-orange-500/30 text-orange-200 hover:bg-orange-600/25 hover:border-orange-500/40 transition-all duration-200 text-sm font-medium"
                 >
                   <Trash2 className="w-4 h-4" />
                   <span>Clear Cache</span>
+                </button>
+                
+                <button
+                  onClick={async () => {
+                    setShowSwitchMenu(false);
+                    if (confirm('This will clear all test bookings and registrations. Continue?')) {
+                      try {
+                        // Call API to reset test data
+                        await fetch('/api/admin/reset-test-data', { 
+                          method: 'POST',
+                          credentials: 'include'
+                        });
+                        
+                        // Refresh page to show updated data
+                        window.location.reload();
+                      } catch (error) {
+                        alert('Failed to reset test data');
+                      }
+                    }
+                  }}
+                  className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-md bg-red-600/15 border border-red-500/30 text-red-200 hover:bg-red-600/25 hover:border-red-500/40 transition-all duration-200 text-sm font-medium"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Reset Test Data</span>
                 </button>
               </div>
             </div>

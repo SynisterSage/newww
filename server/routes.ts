@@ -573,6 +573,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin reset test data route
+  app.post("/api/admin/reset-test-data", async (req, res) => {
+    try {
+      // Reset tee time bookings - clear all playerNames and bookedBy arrays
+      await storage.resetTeeTimeBookings();
+      
+      // Reset event registrations
+      await storage.resetEventRegistrations();
+      
+      // Reset orders
+      await storage.resetOrders();
+      
+      res.json({ message: "Test data reset successfully" });
+    } catch (error) {
+      console.error("Reset test data error:", error);
+      res.status(500).json({ message: "Failed to reset test data" });
+    }
+  });
+
   // Course conditions routes
   app.get("/api/course/conditions", async (req, res) => {
     try {
