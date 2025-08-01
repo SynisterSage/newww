@@ -120,6 +120,10 @@ export default function Dashboard({ userEmail }: DashboardProps) {
               year: 'numeric', 
               month: 'long', 
               day: 'numeric' 
+            })} • {new Date().toLocaleTimeString('en-US', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true
             })}
           </div>
         </div>
