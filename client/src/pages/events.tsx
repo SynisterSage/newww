@@ -119,7 +119,7 @@ export default function Events() {
           const isRegistered = registeredEvents.has(event.id);
           
           return (
-            <Card key={event.id} className="hover:shadow-lg transition-all duration-300 border-0 shadow-sm bg-white h-[480px] flex flex-col">
+            <Card key={event.id} className={`hover:shadow-lg transition-all duration-300 border-0 shadow-sm bg-white flex flex-col ${isRegistered ? 'h-[480px]' : 'h-[420px]'}`}>
               <CardContent className="p-6 flex flex-col h-full">
                 {/* Header with Status and Badge */}
                 <div className="flex items-center justify-between mb-4">
@@ -156,7 +156,7 @@ export default function Events() {
                 </div>
                 
                 {/* Participant Progress Bar - Fixed Height */}
-                <div className="h-12 mb-8">
+                <div className={`h-12 ${isRegistered ? 'mb-8' : 'mb-6'}`}>
                   <div className="flex items-center justify-between text-sm mb-2">
                     <span className="text-muted-foreground">Participants</span>
                     <span className="font-semibold text-foreground">{event.participants} / {event.maxParticipants}</span>
@@ -173,7 +173,7 @@ export default function Events() {
                 
                 {/* Action Buttons - Fixed at bottom with consistent height */}
                 <div className="mt-auto">
-                  <div className="h-[60px] flex flex-col justify-end space-y-2">
+                  <div className={`flex flex-col justify-end space-y-2 ${isRegistered ? 'h-[60px]' : 'h-[40px]'}`}>
                     {!isRegistered ? (
                       <Dialog open={openModal === event.id} onOpenChange={(open) => setOpenModal(open ? event.id : null)}>
                         <DialogTrigger asChild>
