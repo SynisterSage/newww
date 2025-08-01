@@ -26,17 +26,19 @@ export default function MobileNav() {
           const isActive = location === item.path;
           
           return (
-            <Link key={item.path} href={item.path}>
-              <div className={`flex flex-col items-center space-y-1 py-2 px-3 transition-colors cursor-pointer ${
+            <Link 
+              key={item.path} 
+              href={item.path}
+              className={`flex flex-col items-center space-y-1 py-2 px-3 transition-colors cursor-pointer no-underline ${
                 isActive ? "text-golf-green" : "text-muted-foreground"
+              }`}
+            >
+              <div className={`p-2 rounded-xl transition-colors ${
+                isActive ? "bg-golf-green-soft" : "hover:bg-muted"
               }`}>
-                <div className={`p-2 rounded-xl transition-colors ${
-                  isActive ? "bg-golf-green-soft" : "hover:bg-muted"
-                }`}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                <span className="text-xs font-medium">{item.label}</span>
+                <Icon className="w-5 h-5" />
               </div>
+              <span className="text-xs font-medium">{item.label}</span>
             </Link>
           );
         })}

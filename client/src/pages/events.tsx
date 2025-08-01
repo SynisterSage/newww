@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar, Clock, ChevronRight, Users, MapPin } from "lucide-react";
 import { format } from "date-fns";
@@ -79,7 +79,7 @@ export default function Events() {
   };
 
   const handleSignUp = (event: Event) => {
-    setRegisteredEvents(prev => new Set([...prev, event.id]));
+    setRegisteredEvents(prev => new Set(Array.from(prev).concat([event.id])));
     setOpenModal(null); // Close the modal
     toast({
       title: "Event Registration Successful!",
@@ -165,7 +165,7 @@ export default function Events() {
                     <div 
                       className="bg-[#1B4332] h-2 rounded-full transition-all duration-500"
                       style={{ 
-                        width: `${(event.participants / event.maxParticipants!) * 100}%` 
+                        width: `${(event.participants / (event.maxParticipants || 1)) * 100}%` 
                       }}
                     ></div>
                   </div>
@@ -195,6 +195,9 @@ export default function Events() {
                           </span>
                         </div>
                         <DialogTitle className="text-2xl text-[#08452e] text-left mt-[5px] mb-[5px]">{event.title}</DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground">
+                          View complete event details and register for this {getEventTypeDisplay(event.type).label.toLowerCase()} event.
+                        </DialogDescription>
                       </DialogHeader>
                       
                       <div className="space-y-6">
@@ -235,7 +238,7 @@ export default function Events() {
                             <div 
                               className="bg-[#1B4332] h-2 rounded-full transition-all duration-500"
                               style={{ 
-                                width: `${(event.participants / event.maxParticipants!) * 100}%` 
+                                width: `${(event.participants / (event.maxParticipants || 1)) * 100}%` 
                               }}
                             ></div>
                           </div>

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -226,6 +226,9 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
                 <Calendar className="w-6 h-6 inline mr-2" />
                 {editingBooking ? "Edit Tee Time" : "Book New Tee Time"}
               </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
+                {editingBooking ? "Update your existing tee time reservation details." : "Reserve your preferred tee time slot at Packanack Golf Course."}
+              </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-4">

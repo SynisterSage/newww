@@ -64,15 +64,17 @@ export default function Navigation({ userEmail, userData, isAdminView, onSwitchT
               const isActive = location === item.path;
               
               return (
-                <Link key={item.path} href={item.path}>
-                  <div className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer ${
+                <Link 
+                  key={item.path} 
+                  href={item.path}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer no-underline ${
                     isActive 
                       ? "bg-white/15 text-white border-l-3 border-golf-gold ml-0 pl-3" 
                       : "text-white/70 hover:bg-white/8 hover:text-white hover:pl-5"
-                  }`}>
-                    <Icon className="w-5 h-5 flex-shrink-0" />
-                    <span className="font-medium">{item.label}</span>
-                  </div>
+                  }`}
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <span className="font-medium">{item.label}</span>
                 </Link>
               );
             })}
