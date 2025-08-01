@@ -20,10 +20,19 @@ export function AuthAdmin({ onLogin }: AuthAdminProps) {
   const loginMutation = useMutation({
     mutationFn: async (credentials: { email: string; password: string }) => {
       try {
-        const data = await apiRequest("/api/admin/auth", {
+        const response = await fetch("/api/admin/auth", {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify(credentials),
         });
+
+        if (!response.ok) {
+          throw new Error("Invalid credentials");
+        }
+
+        const data = await response.json();
         return data as AdminUser;
       } catch (error) {
         throw new Error("Invalid credentials");
