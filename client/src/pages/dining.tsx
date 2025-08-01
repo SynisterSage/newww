@@ -15,6 +15,7 @@ export default function Dining() {
   const [deliveryOption, setDeliveryOption] = useState("Clubhouse Pickup");
   const [selectedHole, setSelectedHole] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   const { data: menuItems = [], isLoading } = useQuery<MenuItem[]>({
     queryKey: ['/api/menu', selectedCategory === "All" ? undefined : selectedCategory],
@@ -161,33 +162,49 @@ export default function Dining() {
         </div>
 
         {/* Menu Items Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pb-6">
-          {filteredItems.map((item) => (
-            <Card key={item.id} className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow rounded-xl overflow-hidden">
-              <CardContent className="p-6">
-                <div className="mb-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-gray-900 text-lg leading-tight">{item.name}</h3>
-                    <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap ml-2">
-                      {item.category}
-                    </span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pb-6">
+          {filteredItems.map((item) => {
+            const isExpanded = expandedCard === item.id;
+            return (
+              <Card 
+                key={item.id} 
+                className={`bg-white border-0 shadow-sm hover:shadow-lg transition-all duration-200 rounded-lg overflow-hidden cursor-pointer ${
+                  isExpanded ? 'h-auto' : 'h-48'
+                } flex flex-col`}
+                onClick={() => setExpandedCard(isExpanded ? null : item.id)}
+              >
+                <CardContent className="p-4 flex flex-col h-full">
+                  <div className="flex-1 flex flex-col">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold text-gray-900 text-base leading-tight flex-1 pr-2">{item.name}</h3>
+                      <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap">
+                        {item.category}
+                      </span>
+                    </div>
+                    <p className={`text-sm text-gray-600 mb-3 leading-relaxed transition-all duration-200 ${
+                      isExpanded ? 'line-clamp-none' : 'line-clamp-2'
+                    }`}>
+                      {item.description}
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-600 mb-4 leading-relaxed">{item.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xl font-bold text-gray-900">${item.price}</span>
+                  <div className="flex items-center justify-between mt-auto pt-2">
+                    <span className="text-lg font-bold text-gray-900">${item.price}</span>
                     <Button
                       size="sm"
-                      onClick={() => addToOrder(item.id)}
-                      className="bg-[#1B4332] hover:bg-[#1B4332]/90 text-white px-4 py-1.5 text-sm font-medium"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToOrder(item.id);
+                      }}
+                      className="bg-[#1B4332] hover:bg-[#1B4332]/90 text-white px-3 py-1.5 text-sm font-medium"
                     >
                       <Plus className="w-4 h-4 mr-1" />
                       Add
                     </Button>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
 
