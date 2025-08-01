@@ -254,20 +254,6 @@ export default function AdminTeeTimesPage() {
                       </div>
                     )}
 
-                    {teetime.playerNames && teetime.playerNames.length > 0 && (
-                      <div className="space-y-2">
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                          Guest Players:
-                        </p>
-                        {teetime.playerNames.map((name, index) => (
-                          <div key={index} className="flex items-center space-x-2 text-sm">
-                            <UserIcon className="w-4 h-4 text-blue-600" />
-                            <span className="text-foreground">{name}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
                     {statusInfo.status === "available" && (
                       <div className="text-center text-sm text-muted-foreground italic">
                         No bookings yet
