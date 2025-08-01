@@ -302,7 +302,7 @@ export default function TeeTimes() {
           <h3 className="text-lg font-semibold text-foreground mb-4">Your Bookings</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {userBookings.map((booking, index) => (
-              <Card key={booking.id} className="bg-background border-2 border-golf-green shadow-md">
+              <Card key={booking.id} className="bg-white border shadow-lg hover:shadow-xl transition-shadow duration-200">
                 <CardHeader className="border-b border-border/20 pb-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
@@ -444,7 +444,7 @@ export default function TeeTimes() {
       </div>
 
       {/* No Tee Times Message */}
-      {teetimes.length === 0 ? (
+      {teetimes.length === 0 && userBookings.length === 0 ? (
         <Card className="border-0 shadow-lg bg-white relative">
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-4">
