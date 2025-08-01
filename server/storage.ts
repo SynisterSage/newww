@@ -64,18 +64,129 @@ export class MemStorage implements IStorage {
   }
 
   private initializeData() {
-    // Initialize default user
-    const defaultUser: User = {
-      id: "user-1",
-      username: "john.wellington",
-      password: "password123",
-      memberNumber: "0847",
-      memberStatus: "Gold",
-      handicap: 18,
-      roundsPlayed: 47,
-      accountBalance: "285.00"
-    };
-    this.users.set(defaultUser.id, defaultUser);
+    // Initialize comprehensive member database
+    const members: User[] = [
+      {
+        id: "user-1",
+        username: "john.wellington",
+        password: "password123",
+        email: "john.wellington@email.com",
+        firstName: "John",
+        lastName: "Wellington",
+        phone: "(555) 123-4567",
+        memberNumber: "0847",
+        memberStatus: "Gold",
+        membershipType: "Full",
+        address: "123 Oak Street",
+        city: "Westfield",
+        state: "NJ",
+        zipCode: "07090",
+        emergencyContact: "Sarah Wellington",
+        emergencyPhone: "(555) 123-4568",
+        handicap: 18,
+        roundsPlayed: 47,
+        accountBalance: "285.00",
+        joinDate: new Date("2020-03-15"),
+        isActive: true
+      },
+      {
+        id: "user-2",
+        username: "robert.chen",
+        password: "password123",
+        email: "robert.chen@email.com",
+        firstName: "Robert",
+        lastName: "Chen",
+        phone: "(555) 234-5678",
+        memberNumber: "1024",
+        memberStatus: "Silver",
+        membershipType: "Associate",
+        address: "456 Maple Avenue",
+        city: "Wayne",
+        state: "NJ",
+        zipCode: "07470",
+        emergencyContact: "Lisa Chen",
+        emergencyPhone: "(555) 234-5679",
+        handicap: 12,
+        roundsPlayed: 63,
+        accountBalance: "142.50",
+        joinDate: new Date("2019-07-22"),
+        isActive: true
+      },
+      {
+        id: "user-3",
+        username: "maria.rodriguez",
+        password: "password123",
+        email: "maria.rodriguez@email.com",
+        firstName: "Maria",
+        lastName: "Rodriguez",
+        phone: "(555) 345-6789",
+        memberNumber: "1156",
+        memberStatus: "Gold",
+        membershipType: "Full",
+        address: "789 Pine Road",
+        city: "Parsippany",
+        state: "NJ",
+        zipCode: "07054",
+        emergencyContact: "Carlos Rodriguez",
+        emergencyPhone: "(555) 345-6790",
+        handicap: 8,
+        roundsPlayed: 89,
+        accountBalance: "476.25",
+        joinDate: new Date("2018-01-10"),
+        isActive: true
+      },
+      {
+        id: "user-4",
+        username: "david.thompson",
+        password: "password123",
+        email: "david.thompson@email.com",
+        firstName: "David",
+        lastName: "Thompson",
+        phone: "(555) 456-7890",
+        memberNumber: "0923",
+        memberStatus: "Bronze",
+        membershipType: "Junior",
+        address: "321 Birch Lane",
+        city: "Morristown",
+        state: "NJ",
+        zipCode: "07960",
+        emergencyContact: "Patricia Thompson",
+        emergencyPhone: "(555) 456-7891",
+        handicap: 24,
+        roundsPlayed: 23,
+        accountBalance: "95.75",
+        joinDate: new Date("2023-05-18"),
+        isActive: true
+      },
+      {
+        id: "user-5",
+        username: "sarah.johnson",
+        password: "password123",
+        email: "sarah.johnson@email.com",
+        firstName: "Sarah",
+        lastName: "Johnson",
+        phone: "(555) 567-8901",
+        memberNumber: "1387",
+        memberStatus: "Gold",
+        membershipType: "Corporate",
+        address: "654 Cedar Court",
+        city: "Summit",
+        state: "NJ",
+        zipCode: "07901",
+        emergencyContact: "Michael Johnson",
+        emergencyPhone: "(555) 567-8902",
+        handicap: 15,
+        roundsPlayed: 72,
+        accountBalance: "338.90",
+        joinDate: new Date("2021-09-03"),
+        isActive: true
+      }
+    ];
+
+    // Add all members to storage
+    members.forEach(member => {
+      this.users.set(member.id, member);
+    });
 
     // Initialize admin users
     const adminData = [

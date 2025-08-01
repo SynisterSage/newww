@@ -4,60 +4,35 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Upload, UserPlus, Search, Download, Filter } from "lucide-react";
+import { UserPlus, Search, Download, Filter } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
 
 export default function AdminMembers() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const [importResults, setImportResults] = useState<{success: number, errors: string[]} | null>(null);
 
   const { data: members, isLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/members"],
   });
 
-  const importMembersMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await fetch('/api/admin/members/import', {
+  const syncMembersMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/admin/members/sync', {
         method: 'POST',
-        body: formData,
       });
       
       if (!response.ok) {
-        throw new Error('Import failed');
+        throw new Error('Sync failed');
       }
       
       return await response.json();
     },
-    onSuccess: (data) => {
-      setImportResults(data);
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/members"] });
-      setSelectedFile(null);
     },
   });
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || file.name.endsWith('.xlsx'))) {
-      setSelectedFile(file);
-      setImportResults(null);
-    } else {
-      alert('Please select a valid Excel file (.xlsx)');
-    }
-  };
-
-  const handleImport = () => {
-    if (selectedFile) {
-      importMembersMutation.mutate(selectedFile);
-    }
-  };
 
   const filteredMembers = members?.filter(member => 
     member.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -91,94 +66,23 @@ export default function AdminMembers() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Member Management</h1>
-          <p className="text-gray-600 mt-2">Manage club members and import member data</p>
+          <p className="text-gray-600 mt-2">Manage club members and their information</p>
         </div>
         
         <div className="flex space-x-3">
-          <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <Upload className="w-4 h-4 mr-2" />
-                Import Excel
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Import Members from Excel</DialogTitle>
-                <DialogDescription>
-                  Upload an Excel file (.xlsx) with member information. The file should include columns for:
-                  First Name, Last Name, Email, Phone, Member Number, Membership Type, etc.
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="space-y-4">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <input
-                    type="file"
-                    accept=".xlsx"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                    id="file-upload"
-                  />
-                  <label
-                    htmlFor="file-upload"
-                    className="cursor-pointer text-blue-600 hover:text-blue-800 font-medium"
-                  >
-                    Click to select Excel file
-                  </label>
-                  <p className="text-sm text-gray-500 mt-2">Only .xlsx files are supported</p>
-                </div>
-                
-                {selectedFile && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                    <p className="text-sm font-medium text-green-800">Selected: {selectedFile.name}</p>
-                    <p className="text-xs text-green-600">Size: {(selectedFile.size / 1024).toFixed(1)} KB</p>
-                  </div>
-                )}
-                
-                {importResults && (
-                  <div className={`border rounded-lg p-3 ${
-                    importResults.errors.length === 0 ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'
-                  }`}>
-                    <p className="font-medium text-sm">Import Results:</p>
-                    <p className="text-sm">✓ {importResults.success} members imported successfully</p>
-                    {importResults.errors.length > 0 && (
-                      <div className="mt-2">
-                        <p className="text-sm font-medium text-yellow-800">Errors:</p>
-                        {importResults.errors.slice(0, 3).map((error, idx) => (
-                          <p key={idx} className="text-xs text-yellow-700">• {error}</p>
-                        ))}
-                        {importResults.errors.length > 3 && (
-                          <p className="text-xs text-yellow-700">... and {importResults.errors.length - 3} more</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                <div className="flex space-x-2">
-                  <Button
-                    onClick={handleImport}
-                    disabled={!selectedFile || importMembersMutation.isPending}
-                    className="flex-1"
-                  >
-                    {importMembersMutation.isPending ? "Importing..." : "Import Members"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setIsImportDialogOpen(false);
-                      setSelectedFile(null);
-                      setImportResults(null);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button 
+            className="bg-green-600 hover:bg-green-700"
+            onClick={() => syncMembersMutation.mutate()}
+            disabled={syncMembersMutation.isPending}
+          >
+            <Filter className="w-4 h-4 mr-2" />
+            {syncMembersMutation.isPending ? "Syncing..." : "Sync Data"}
+          </Button>
+          
+          <Button className="bg-blue-600 hover:bg-blue-700">
+            <Download className="w-4 h-4 mr-2" />
+            Export Data
+          </Button>
           
           <Button variant="outline">
             <UserPlus className="w-4 h-4 mr-2" />

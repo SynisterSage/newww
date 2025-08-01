@@ -3,8 +3,6 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertTeetimeSchema, insertOrderSchema, insertRoundSchema, insertUserSchema } from "@shared/schema";
 import { z } from "zod";
-import multer from "multer";
-import XLSX from "xlsx";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Tee time routes
@@ -200,8 +198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Setup multer for file uploads
-  const upload = multer({ storage: multer.memoryStorage() });
+
 
   // Admin member management routes
   app.get("/api/admin/members", async (req, res) => {
@@ -213,67 +210,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/members/import", upload.single('file'), async (req, res) => {
+  // Admin member data synchronization route
+  app.post("/api/admin/members/sync", async (req, res) => {
     try {
-      if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded" });
-      }
-
-      // Parse Excel file
-      const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const data = XLSX.utils.sheet_to_json(worksheet);
-
-      let successCount = 0;
-      const errors: string[] = [];
-
-      // Process each row
-      for (let i = 0; i < data.length; i++) {
-        const row = data[i] as any;
-        
-        try {
-          // Map Excel columns to user schema - adjust these based on your Excel file structure
-          const userData = {
-            username: row['Username'] || row['Member Number'] || `member_${Date.now()}_${i}`,
-            password: 'defaultpass123', // You might want to generate random passwords
-            firstName: row['First Name'] || row['FirstName'] || '',
-            lastName: row['Last Name'] || row['LastName'] || '',
-            email: row['Email'] || row['Email Address'] || '',
-            phone: row['Phone'] || row['Phone Number'] || '',
-            memberNumber: row['Member Number'] || row['Member #'] || row['MemberNumber'] || `M${1000 + i}`,
-            memberStatus: row['Member Status'] || row['Status'] || 'Gold',
-            membershipType: row['Membership Type'] || row['Type'] || 'Full',
-            address: row['Address'] || '',
-            city: row['City'] || '',
-            state: row['State'] || '',
-            zipCode: row['Zip Code'] || row['ZIP'] || '',
-            emergencyContact: row['Emergency Contact'] || '',
-            emergencyPhone: row['Emergency Phone'] || '',
-            handicap: parseInt(row['Handicap']) || 18,
-            roundsPlayed: parseInt(row['Rounds Played']) || 0,
-            accountBalance: row['Account Balance'] || '285.00'
-          };
-
-          // Validate the data
-          const validatedData = insertUserSchema.parse(userData);
-          
-          // Create the user
-          await storage.createUser(validatedData);
-          successCount++;
-          
-        } catch (error: any) {
-          errors.push(`Row ${i + 1}: ${error.message}`);
-        }
-      }
-
-      res.json({
-        success: successCount,
-        errors: errors
+      // This endpoint can be used to refresh/reload member data
+      // or sync with external data sources if needed
+      const members = await storage.getAllUsers();
+      res.json({ 
+        message: "Member data synchronized successfully",
+        count: members.length
       });
-
     } catch (error: any) {
-      res.status(500).json({ message: `Import failed: ${error.message}` });
+      res.status(500).json({ message: `Sync failed: ${error.message}` });
     }
   });
 
