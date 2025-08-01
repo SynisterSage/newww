@@ -65,15 +65,31 @@ export default function AdminOrdersPage() {
   const parseOrderItems = (items: string[]) => {
     return items.map(itemStr => {
       try {
-        const parsed = JSON.parse(itemStr);
-        const menuItem = getMenuItemDetails(parsed.id);
+        // Handle double-escaped JSON from database
+        let cleanedStr = itemStr;
+        if (typeof itemStr === 'string' && itemStr.startsWith('{"')) {
+          // Remove extra escaping
+          cleanedStr = itemStr.replace(/\\"/g, '"');
+        }
+        
+        const parsed = JSON.parse(cleanedStr);
+        const itemId = parsed.itemId || parsed.id;
+        const menuItem = getMenuItemDetails(itemId);
+        
         return {
-          ...parsed,
-          name: menuItem?.name || 'Unknown Item',
+          id: itemId,
+          name: menuItem?.name || `Item ${itemId?.slice(0, 8) || 'Unknown'}`,
+          quantity: parsed.quantity || 1,
           price: menuItem?.price || '0.00'
         };
-      } catch {
-        return { id: itemStr, name: 'Unknown Item', quantity: 1, price: '0.00' };
+      } catch (error) {
+        console.error('Error parsing order item:', itemStr, error);
+        return { 
+          id: 'unknown', 
+          name: `Raw: ${itemStr.slice(0, 20)}...`, 
+          quantity: 1, 
+          price: '0.00' 
+        };
       }
     });
   };
