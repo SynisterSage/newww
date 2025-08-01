@@ -257,7 +257,10 @@ export class MemStorage implements IStorage {
       this.adminUsers.set(adminUser.id, adminUser);
     });
 
-    // Initialize tee times for today and tomorrow
+    // Clear existing tee times to start fresh with 30 slots per day
+    this.teetimes.clear();
+    
+    // Initialize tee times for today and tomorrow - exactly 2 days as requested
     const today = new Date().toISOString().split('T')[0];
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
