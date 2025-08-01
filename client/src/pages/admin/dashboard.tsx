@@ -39,7 +39,7 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
       title: `Tee Time Booking - ${t.time}`,
       subtitle: `${t.holes} holes`,
       time: format(new Date(t.date), 'MMM dd'),
-      status: 'pending'
+      status: 'booked'
     })),
     ...orders.slice(0, 3).map(o => {
       const member = members.find(m => m.id === o.userId);
@@ -199,8 +199,13 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
                   </div>
                   <div className="flex items-center space-x-3">
                     <span className="text-sm text-muted-foreground">{activity.time}</span>
-                    <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-md">
-                      Pending
+                    <span className={`px-2 py-1 text-xs rounded-md ${
+                      activity.type === 'tee-time' ? 'bg-green-100 text-green-700' :
+                      activity.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                      activity.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                      'bg-green-100 text-green-700'
+                    }`}>
+                      {activity.type === 'tee-time' ? 'booked' : activity.status}
                     </span>
                   </div>
                 </div>

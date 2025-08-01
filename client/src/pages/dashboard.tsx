@@ -225,12 +225,8 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
                 {recentTeetimes.map((teetime: TeeTime, index: number) => (
                   <div key={teetime.id || index} className="flex items-center justify-between text-sm py-1">
                     <span className="text-muted-foreground">{format(new Date(teetime.date), 'MMM dd')} • {teetime.time}</span>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      teetime.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                      teetime.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                      'bg-blue-100 text-blue-700'
-                    }`}>
-                      {teetime.status}
+                    <span className="px-2 py-1 rounded text-xs bg-green-100 text-green-700">
+                      booked
                     </span>
                   </div>
                 ))}
