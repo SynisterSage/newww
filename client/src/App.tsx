@@ -72,7 +72,7 @@ function Router() {
   // Show switching to member view animation
   if (isSwitchingToMember) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-600 via-slate-400 to-blue-100 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="relative w-24 h-24 mx-auto mb-8">
             {/* Rotating rings animation with admin colors */}
