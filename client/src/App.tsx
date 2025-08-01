@@ -13,6 +13,7 @@ import Dashboard from "@/pages/dashboard";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminMembers from "@/pages/admin/members";
 import AdminConditions from "@/pages/admin/conditions";
+import AdminTeeTimes from "@/pages/admin/tee-times";
 import TeeTimes from "@/pages/tee-times";
 import Dining from "@/pages/dining";
 import Conditions from "@/pages/conditions";
@@ -246,7 +247,7 @@ function Router() {
         <main className="flex-1 lg:ml-64 pb-16 lg:pb-0">
           <Switch>
             <Route path="/admin">{() => <AdminDashboard adminEmail={adminData?.email} />}</Route>
-            <Route path="/admin/tee-times">{() => <div>Admin Tee Times</div>}</Route>
+            <Route path="/admin/tee-times">{() => <AdminTeeTimes />}</Route>
             <Route path="/admin/orders">{() => <div>Admin Orders</div>}</Route>
             <Route path="/admin/members">{() => <AdminMembers />}</Route>
             <Route path="/admin/conditions">{() => <AdminConditions />}</Route>

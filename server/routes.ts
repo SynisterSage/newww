@@ -316,6 +316,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin tee time management routes
+  app.patch("/api/admin/teetimes/:id/approve", async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const teetime = await storage.getTeetimeById(id);
+      if (!teetime) {
+        return res.status(404).json({ message: "Tee time not found" });
+      }
+      
+      if (teetime.status !== "pending") {
+        return res.status(400).json({ message: "Tee time is not pending approval" });
+      }
+      
+      const updatedTeetime = await storage.updateTeetime(id, {
+        status: "booked"
+      });
+      
+      res.json(updatedTeetime);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to approve tee time" });
+    }
+  });
+
+  app.patch("/api/admin/teetimes/:id/deny", async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const teetime = await storage.getTeetimeById(id);
+      if (!teetime) {
+        return res.status(404).json({ message: "Tee time not found" });
+      }
+      
+      if (teetime.status !== "pending") {
+        return res.status(400).json({ message: "Tee time is not pending approval" });
+      }
+      
+      const updatedTeetime = await storage.updateTeetime(id, {
+        status: "available",
+        userId: null,
+        spotsAvailable: teetime.spotsAvailable + 1
+      });
+      
+      res.json(updatedTeetime);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to deny tee time" });
+    }
+  });
+
   // Admin member management routes
   app.patch("/api/admin/members/:id", async (req, res) => {
     try {
