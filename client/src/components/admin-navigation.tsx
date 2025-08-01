@@ -58,14 +58,14 @@ export default function AdminNavigation({ adminEmail }: AdminNavigationProps) {
               
               return (
                 <Link key={item.path} href={item.path}>
-                  <a className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  <div className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer ${
                     isActive 
                       ? "bg-white/10 text-white shadow-sm" 
                       : "text-white/70 hover:bg-white/5 hover:text-white"
                   }`}>
                     <Icon className="w-5 h-5" />
                     <span className="font-medium">{item.label}</span>
-                  </a>
+                  </div>
                 </Link>
               );
             })}

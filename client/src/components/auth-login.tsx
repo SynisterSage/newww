@@ -118,6 +118,14 @@ export function AuthLogin({ onLogin }: AuthLoginProps) {
             <div className="text-center text-sm text-muted-foreground">
               <p>For assistance, contact the pro shop</p>
               <p className="font-medium text-golf-green">(973) 694-9754</p>
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <a 
+                  href="/admin" 
+                  className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  Staff Portal
+                </a>
+              </div>
             </div>
           </form>
         </CardContent>
