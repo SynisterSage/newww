@@ -13,7 +13,7 @@ import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-background">
       <Navigation />
       <main className="flex-1 lg:ml-64 pb-16 lg:pb-0">
         <Switch>

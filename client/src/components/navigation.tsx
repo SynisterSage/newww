@@ -35,39 +35,48 @@ export default function Navigation() {
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block w-64 bg-golf-green text-white min-h-screen fixed left-0 top-0 z-40">
         <div className="p-6">
-          <div className="flex items-center space-x-2 mb-8">
-            <Trophy className="text-golf-gold text-2xl" />
-            <span className="font-bold text-xl">Oakwood Club</span>
+          <div className="flex items-center space-x-3 mb-8">
+            <div className="w-10 h-10 bg-golf-gold rounded-xl flex items-center justify-center">
+              <Trophy className="w-6 h-6 text-golf-green" />
+            </div>
+            <div>
+              <h1 className="font-bold text-lg">Oakwood Club</h1>
+              <p className="text-xs text-white/70">Members Only</p>
+            </div>
           </div>
           
-          <div className="space-y-6">
-            <div className="text-center pb-6 border-b border-golf-green-light">
-              <div className="w-16 h-16 bg-golf-gold rounded-full mx-auto mb-3 flex items-center justify-center">
-                <User className="text-golf-green text-xl" />
+          <nav className="space-y-2">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location === item.path;
+              
+              return (
+                <Link key={item.path} href={item.path}>
+                  <a className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    isActive 
+                      ? "bg-white/10 text-white shadow-sm" 
+                      : "text-white/70 hover:bg-white/5 hover:text-white"
+                  }`}>
+                    <Icon className="w-5 h-5" />
+                    <span className="font-medium">{item.label}</span>
+                  </a>
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="absolute bottom-6 left-6 right-6">
+            <div className="bg-white/10 rounded-xl p-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-golf-gold rounded-full flex items-center justify-center">
+                  <span className="text-golf-green font-bold text-sm">JD</span>
+                </div>
+                <div>
+                  <h3 className="font-medium text-white">John Doe</h3>
+                  <p className="text-xs text-white/70">Premium Member</p>
+                </div>
               </div>
-              <h3 className="font-semibold">John Wellington</h3>
-              <p className="text-sm text-gray-300">Member #0847</p>
             </div>
-            
-            <nav className="space-y-3">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location === item.path;
-                
-                return (
-                  <Link key={item.path} href={item.path}>
-                    <a className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                      isActive 
-                        ? "bg-golf-green-light" 
-                        : "hover:bg-golf-green-light"
-                    }`}>
-                      <Icon className="w-5 h-5" />
-                      <span>{item.label}</span>
-                    </a>
-                  </Link>
-                );
-              })}
-            </nav>
           </div>
         </div>
       </aside>
