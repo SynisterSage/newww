@@ -3,7 +3,8 @@ import {
   Home, 
   Calendar, 
   Utensils, 
-  Info
+  Info,
+  Trophy
 } from "lucide-react";
 
 export default function MobileNav() {
@@ -14,6 +15,7 @@ export default function MobileNav() {
     { path: "/tee-times", label: "Tee Times", icon: Calendar },
     { path: "/dining", label: "Dining", icon: Utensils },
     { path: "/course-conditions", label: "Conditions", icon: Info },
+    { path: "/events", label: "Events", icon: Trophy },
   ];
 
   return (

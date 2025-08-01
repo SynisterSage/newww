@@ -16,6 +16,7 @@ export default function Navigation() {
     { path: "/tee-times", label: "Tee Times", icon: Calendar },
     { path: "/dining", label: "Dining", icon: Utensils },
     { path: "/course-conditions", label: "Course Conditions", icon: Info },
+    { path: "/events", label: "Events & Tournaments", icon: Trophy },
   ];
 
   return (

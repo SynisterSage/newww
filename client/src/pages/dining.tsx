@@ -127,11 +127,11 @@ export default function Dining() {
       
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
-        <div className="p-6 max-w-6xl mx-auto">
+        <div className="p-4 sm:p-6 max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-golf-green mb-2">Dining Menu</h1>
-            <p className="text-muted-foreground">Order from our premium clubhouse restaurant</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-golf-green mb-2">Dining Menu</h1>
+            <p className="text-muted-foreground text-sm sm:text-base">Order from our premium clubhouse restaurant</p>
           </div>
 
           {/* Category Filter */}
@@ -151,14 +151,14 @@ export default function Dining() {
           </div>
 
           {/* Menu Items Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 pb-6">
             {filteredItems.map((item) => (
               <Card key={item.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-3">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col mb-3">
                     <div className="flex-1">
                       <h3 className="font-semibold text-foreground mb-1">{item.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
+                      <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{item.description}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-lg font-bold text-golf-green">${item.price}</span>
                         <Badge variant="secondary" className="text-xs">
@@ -168,7 +168,7 @@ export default function Dining() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-center">
                     {currentOrder[item.id] ? (
                       <div className="flex items-center space-x-2">
                         <Button
@@ -194,7 +194,7 @@ export default function Dining() {
                       <Button
                         size="sm"
                         onClick={() => addToOrder(item.id)}
-                        className="bg-golf-green hover:bg-golf-green-light text-white"
+                        className="bg-golf-green hover:bg-golf-green-light text-white w-full sm:w-auto"
                       >
                         <Plus className="w-4 h-4 mr-1" />
                         Add to Order

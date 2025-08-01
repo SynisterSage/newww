@@ -123,17 +123,17 @@ export default function TeeTimes() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-golf-green mb-2">Tee Times</h1>
-          <p className="text-muted-foreground">Book and manage your golf reservations</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-golf-green mb-2">Tee Times</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Book and manage your golf reservations</p>
         </div>
         
         <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-golf-green hover:bg-golf-green-light text-white mt-4 lg:mt-0">
+            <Button className="bg-golf-green hover:bg-golf-green-light text-white w-full lg:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Book Tee Time
             </Button>
