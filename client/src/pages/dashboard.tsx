@@ -41,7 +41,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
       {/* Quick Actions Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 shadow-sm">
@@ -90,7 +89,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-
       {/* Your Stats Section */}
       <div className="mb-8">
         <h2 className="text-2xl font-semibold text-foreground mb-6">Your Stats</h2>
@@ -136,7 +134,6 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
-
       {/* Two Column Layout */}
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Upcoming Tee Times */}
@@ -215,7 +212,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-
       {/* Course Conditions Widget */}
       <Card className="border-0 shadow-sm bg-gradient-to-br from-golf-green-soft to-golf-blue/5">
         <CardContent className="p-6">
@@ -261,7 +257,7 @@ export default function Dashboard() {
             </div>
           </div>
           
-          <div className="mt-4 p-3 bg-golf-green-soft rounded-lg">
+          <div className="p-3 bg-golf-green-soft rounded-lg pt-[11px] pb-[11px] mt-[27px] mb-[27px]">
             <p className="text-sm text-golf-green font-medium text-center">
               Perfect Golf Weather! Ideal conditions for your round today
             </p>
