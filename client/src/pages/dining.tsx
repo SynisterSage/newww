@@ -111,7 +111,7 @@ export default function Dining({ userData }: DiningProps) {
     if (Object.keys(currentOrder).length === 0) return;
     
     const orderItems = Object.entries(currentOrder).map(([itemId, quantity]) => 
-      ({ itemId, quantity })
+      JSON.stringify({ itemId, quantity })
     );
     
     orderMutation.mutate({

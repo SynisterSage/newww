@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, UtensilsCrossed, Users, Clock, CheckCircle, AlertCircle, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
-import type { TeeTime, Order } from "@shared/schema";
+import type { TeeTime, Order, User } from "@shared/schema";
 
 interface AdminDashboardProps {
   adminEmail?: string;
@@ -19,6 +19,10 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
 
   const { data: orders = [] } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
+  });
+
+  const { data: members = [] } = useQuery<User[]>({
+    queryKey: ['/api/admin/members'],
   });
 
   // Calculate stats
@@ -37,13 +41,17 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
       time: format(new Date(t.date), 'MMM dd'),
       status: 'pending'
     })),
-    ...orders.slice(0, 3).map(o => ({
-      type: 'order',
-      title: 'Food Order',
-      subtitle: `${JSON.parse(o.items[0] || '{}').quantity || 1} items`,
-      time: format(new Date(o.createdAt || Date.now()), 'MMM dd'),
-      status: 'pending'
-    }))
+    ...orders.slice(0, 3).map(o => {
+      const member = members.find(m => m.id === o.userId);
+      const memberName = member ? `${member.firstName} ${member.lastName}` : 'Unknown Member';
+      return {
+        type: 'order',
+        title: `Food Order - ${memberName}`,
+        subtitle: `${o.items.length} items • $${o.total}`,
+        time: format(new Date(o.createdAt || Date.now()), 'MMM dd'),
+        status: o.status
+      };
+    })
   ].slice(0, 5);
 
   return (
@@ -104,7 +112,7 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total Members</p>
-                  <p className="text-2xl font-bold text-slate-800">247</p>
+                  <p className="text-2xl font-bold text-slate-800">{members.length}</p>
                 </div>
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                   <Users className="w-6 h-6 text-green-600" />

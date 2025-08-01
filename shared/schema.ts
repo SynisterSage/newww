@@ -61,7 +61,7 @@ export const menuItems = pgTable("menu_items", {
 export const orders = pgTable("orders", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id),
-  items: text("items").array().notNull(), // JSON array of item IDs and quantities
+  items: text("items").array().notNull(), // Array of serialized order items
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
   status: text("status").notNull().default("pending"), // pending, preparing, ready, delivered
   createdAt: timestamp("created_at").defaultNow(),
