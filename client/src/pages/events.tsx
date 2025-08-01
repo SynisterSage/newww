@@ -111,13 +111,14 @@ export default function Events() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-golf-green">Club Events</h1>
-        <p className="text-muted-foreground mt-1">
-          Tournaments, social events, and special activities
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#f8f9fa]">
+      <div className="p-6 space-y-6 max-w-6xl mx-auto">
+        <div>
+          <h1 className="text-3xl font-bold text-[#1B4332]">Club Events</h1>
+          <p className="text-muted-foreground mt-1">
+            Tournaments, social events, and special activities
+          </p>
+        </div>
 
       {/* Upcoming Events */}
       <div className="space-y-4">
@@ -227,6 +228,7 @@ export default function Events() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

@@ -139,7 +139,7 @@ export default function Dining() {
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Food & Drinks</h1>
+              <h1 className="text-3xl font-bold text-[#1B4332] mb-2">Order Food & Drinks</h1>
               <p className="text-gray-600">From the clubhouse to the course</p>
             </div>
             
