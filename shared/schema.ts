@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, decimal, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, decimal, boolean, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -7,11 +7,24 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  email: text("email"),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  phone: text("phone"),
   memberNumber: text("member_number").notNull(),
   memberStatus: text("member_status").notNull().default("Gold"),
+  membershipType: text("membership_type").default("Full"), // Full, Associate, Junior, Corporate
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  zipCode: text("zip_code"),
+  emergencyContact: text("emergency_contact"),
+  emergencyPhone: text("emergency_phone"),
   handicap: integer("handicap").default(18),
   roundsPlayed: integer("rounds_played").default(0),
   accountBalance: decimal("account_balance", { precision: 10, scale: 2 }).default("285.00"),
+  joinDate: timestamp("join_date").defaultNow(),
+  isActive: boolean("is_active").default(true),
 });
 
 export const adminUsers = pgTable("admin_users", {

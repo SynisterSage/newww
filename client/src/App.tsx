@@ -11,6 +11,7 @@ import { AuthAdmin } from "@/components/auth-admin";
 import AdminNavigation from "@/components/admin-navigation";
 import Dashboard from "@/pages/dashboard";
 import AdminDashboard from "@/pages/admin/dashboard";
+import AdminMembers from "@/pages/admin/members";
 import TeeTimes from "@/pages/tee-times";
 import Dining from "@/pages/dining";
 import Conditions from "@/pages/conditions";
@@ -76,7 +77,7 @@ function Router() {
             <Route path="/admin">{() => <AdminDashboard adminEmail={adminData?.email} />}</Route>
             <Route path="/admin/tee-times">{() => <div>Admin Tee Times</div>}</Route>
             <Route path="/admin/orders">{() => <div>Admin Orders</div>}</Route>
-            <Route path="/admin/members">{() => <div>Admin Members</div>}</Route>
+            <Route path="/admin/members">{() => <AdminMembers />}</Route>
             <Route path="/admin/events">{() => <div>Admin Events</div>}</Route>
             <Route component={NotFound} />
           </Switch>
