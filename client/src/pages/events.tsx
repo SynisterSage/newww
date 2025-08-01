@@ -81,11 +81,6 @@ export default function Events() {
       title: "Event Registration Successful!",
       description: `You've successfully registered for ${event.title}. We'll send you a confirmation email shortly.`,
     });
-    setExpandedEvent(null);
-  };
-
-  const toggleEventDetails = (eventId: string) => {
-    setExpandedEvent(expandedEvent === eventId ? null : eventId);
   };
 
   return (
@@ -102,62 +97,47 @@ export default function Events() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {events.map((event) => {
           const eventType = getEventTypeDisplay(event.type);
-          const isExpanded = expandedEvent === event.id;
           
           return (
-            <Card key={event.id} className="hover:shadow-lg transition-all duration-300 border-0 shadow-sm bg-white h-fit">
-              <CardContent className="p-6">
+            <Card key={event.id} className="hover:shadow-lg transition-all duration-300 border-0 shadow-sm bg-white h-[420px] flex flex-col">
+              <CardContent className="p-6 flex flex-col h-full">
                 {/* Header with Status and Badge */}
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-4">
                   <span className="text-sm text-muted-foreground">Past</span>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${eventType.color}`}>
                     {eventType.label}
                   </span>
                 </div>
                 
-                {/* Event Title */}
-                <h3 className="text-xl font-semibold text-[#08452e] mb-6 leading-tight">{event.title}</h3>
+                {/* Event Title - Fixed Height */}
+                <div className="h-14 mb-4">
+                  <h3 className="text-xl font-semibold text-[#08452e] leading-tight line-clamp-2">{event.title}</h3>
+                </div>
                 
-                {/* Date and Time */}
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center space-x-3 text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4 flex-shrink-0" />
-                    <span>{format(event.date, 'EEEE, MMM dd, yyyy')}</span>
-                  </div>
-                  <div className="flex items-center space-x-3 text-sm text-muted-foreground">
-                    <Clock className="w-4 h-4 flex-shrink-0" />
-                    <span>{event.time}</span>
+                {/* Date and Time - Fixed Height */}
+                <div className="h-12 mb-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                      <Calendar className="w-4 h-4 flex-shrink-0" />
+                      <span>{format(event.date, 'EEEE, MMM dd, yyyy')}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                      <Clock className="w-4 h-4 flex-shrink-0" />
+                      <span>{event.time}</span>
+                    </div>
                   </div>
                 </div>
                 
-                {/* Description */}
-                <div className="mb-6">
-                  <p className="text-sm text-muted-foreground leading-relaxed min-h-[3rem]">
-                    {isExpanded ? event.description : `${event.description.substring(0, 75)}...`}
+                {/* Description - Fixed Height */}
+                <div className="h-16 mb-6">
+                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                    {event.description}
                   </p>
                 </div>
                 
-                {/* Expanded Details */}
-                {isExpanded && (
-                  <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Location:</span>
-                        <span className="text-foreground font-medium">{event.location}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Registration:</span>
-                        <span className={`font-medium ${event.registrationOpen ? 'text-green-600' : 'text-red-600'}`}>
-                          {event.registrationOpen ? 'Open' : 'Closed'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
                 {/* Participant Progress Bar - Fixed Height */}
-                <div className="mb-6 h-16">
-                  <div className="flex items-center justify-between text-sm mb-3">
+                <div className="h-12 mb-6">
+                  <div className="flex items-center justify-between text-sm mb-2">
                     <span className="text-muted-foreground">Participants</span>
                     <span className="font-semibold text-foreground">{event.participants} / {event.maxParticipants}</span>
                   </div>
@@ -171,41 +151,89 @@ export default function Events() {
                   </div>
                 </div>
                 
-                {/* Action Buttons - Fixed Height */}
-                <div className="h-10">
-                  {!isExpanded ? (
-                    <Button 
-                      variant="outline" 
-                      className="w-full h-10 justify-between border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white transition-colors"
-                      onClick={() => toggleEventDetails(event.id)}
-                    >
-                      <span>View Details</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  ) : (
-                    <Button 
-                      className="w-full h-10 bg-[#1B4332] hover:bg-[#2D5A3D] text-white transition-colors"
-                      onClick={() => handleSignUp(event)}
-                      disabled={!event.registrationOpen}
-                    >
-                      {event.registrationOpen ? 'Sign Up for Event' : 'Registration Closed'}
-                    </Button>
-                  )}
+                {/* Action Button - Fixed at bottom */}
+                <div className="mt-auto">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        className="w-full h-10 justify-between border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white transition-colors"
+                      >
+                        <span>View Details</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </DialogTrigger>
+                    
+                    <DialogContent className="max-w-lg">
+                      <DialogHeader>
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="text-sm text-muted-foreground">Past</span>
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${eventType.color}`}>
+                            {eventType.label}
+                          </span>
+                        </div>
+                        <DialogTitle className="text-2xl text-[#08452e] text-left">{event.title}</DialogTitle>
+                      </DialogHeader>
+                      
+                      <div className="space-y-6">
+                        {/* Event Details */}
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-3 text-sm">
+                            <Calendar className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-foreground">{format(event.date, 'EEEE, MMM dd, yyyy')}</span>
+                          </div>
+                          <div className="flex items-center space-x-3 text-sm">
+                            <Clock className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-foreground">{event.time}</span>
+                          </div>
+                          <div className="flex items-center space-x-3 text-sm">
+                            <MapPin className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-foreground">{event.location}</span>
+                          </div>
+                        </div>
+                        
+                        {/* Description */}
+                        <div>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {event.description}
+                          </p>
+                        </div>
+                        
+                        {/* Participants Section */}
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center space-x-2">
+                              <Users className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-sm font-medium">Participants</span>
+                            </div>
+                            <span className="text-sm font-semibold">{event.participants} / {event.maxParticipants}</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+                            <div 
+                              className="bg-[#1B4332] h-2 rounded-full transition-all duration-500"
+                              style={{ 
+                                width: `${(event.participants / event.maxParticipants!) * 100}%` 
+                              }}
+                            ></div>
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Registration: {event.registrationOpen ? 'Open' : 'Closed'}</span>
+                            <span>{event.maxParticipants - event.participants} spots remaining</span>
+                          </div>
+                        </div>
+                        
+                        {/* Sign Up Button */}
+                        <Button 
+                          className="w-full h-12 bg-[#1B4332] hover:bg-[#2D5A3D] text-white font-medium"
+                          onClick={() => handleSignUp(event)}
+                          disabled={!event.registrationOpen}
+                        >
+                          {event.registrationOpen ? 'Sign Up for Event' : 'Registration Closed'}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
-                
-                {/* Hide Details Button (when expanded) */}
-                {isExpanded && (
-                  <div className="mt-3">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="w-full text-xs text-muted-foreground hover:text-foreground"
-                      onClick={() => toggleEventDetails(event.id)}
-                    >
-                      Hide Details
-                    </Button>
-                  </div>
-                )}
               </CardContent>
             </Card>
           );
