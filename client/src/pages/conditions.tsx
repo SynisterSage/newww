@@ -73,15 +73,13 @@ export default function Conditions() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8f9fa]">
-        <div className="p-6 space-y-6 max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold text-[#1B4332]">Course Conditions</h1>
+      <div className="p-6 space-y-6">
+        <h1 className="text-3xl font-bold text-golf-green">Course Conditions</h1>
         <div className="animate-pulse space-y-4">
           <div className="h-64 bg-gray-300 rounded-lg"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="h-48 bg-gray-300 rounded-lg"></div>
             <div className="h-48 bg-gray-300 rounded-lg"></div>
-          </div>
           </div>
         </div>
       </div>
@@ -89,14 +87,13 @@ export default function Conditions() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa]">
-      <div className="p-6 space-y-6 max-w-6xl mx-auto">
-        <div>
-          <h1 className="text-3xl font-bold text-[#1B4332]">Course Conditions</h1>
-          <p className="text-muted-foreground mt-1">
-            Live weather and course updates for {weather?.location || 'your location'}
-          </p>
-        </div>
+    <div className="p-6 space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-golf-green">Course Conditions</h1>
+        <p className="text-muted-foreground mt-1">
+          Live weather and course updates for {weather?.location || 'your location'}
+        </p>
+      </div>
 
       {error && (
         <Card className="border-yellow-200 bg-yellow-50">
@@ -203,7 +200,6 @@ export default function Conditions() {
             </div>
           </CardContent>
         </Card>
-      </div>
       </div>
     </div>
   );

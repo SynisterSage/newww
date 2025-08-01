@@ -44,13 +44,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa]">
-      <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
-        {/* Modern Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-4xl font-bold text-[#1B4332]">Welcome Back</h1>
-          </div>
+    <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto bg-[#fffdf500]">
+      {/* Modern Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-4xl font-bold text-foreground">Welcome Back</h1>
           <div className="text-sm text-muted-foreground">
             {new Date().toLocaleDateString('en-US', { 
               weekday: 'long', 
@@ -59,9 +57,9 @@ export default function Dashboard() {
               day: 'numeric' 
             })}
           </div>
-          </div>
         </div>
-        {/* Quick Actions Grid */}
+      </div>
+      {/* Quick Actions Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 shadow-sm">
           <CardContent className="p-6 text-center">
@@ -309,6 +307,7 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
+
     </div>
   );
 }
