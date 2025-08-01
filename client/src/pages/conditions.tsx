@@ -198,7 +198,7 @@ export default function ConditionsPage() {
                   <MapPin className="h-8 w-8 text-golf-green mx-auto mb-2" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Packanack Golf Club</h3>
-                <p className="text-golf-green font-semibold text-lg mb-3">9-Hole Championship Course</p>
+                <p className="text-golf-green font-semibold text-lg mb-3">-</p>
                 <p className="text-sm text-gray-600 leading-relaxed">
                   Course conditions are monitored and updated regularly by our professional grounds crew to ensure optimal playing conditions.
                 </p>
