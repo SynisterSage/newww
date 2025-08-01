@@ -11,6 +11,10 @@ import { AuthAdmin } from "@/components/auth-admin";
 import AdminNavigation from "@/components/admin-navigation";
 import Dashboard from "@/pages/dashboard";
 import AdminDashboard from "@/pages/admin/dashboard";
+import AdminTeeTimesPage from "@/pages/admin/tee-times";
+import AdminOrdersPage from "@/pages/admin/orders";
+import AdminMembersPage from "@/pages/admin/members";
+import AdminEventsPage from "@/pages/admin/events";
 import TeeTimes from "@/pages/tee-times";
 import Dining from "@/pages/dining";
 import Conditions from "@/pages/conditions";
@@ -74,10 +78,10 @@ function Router() {
         <main className="flex-1 lg:ml-64 pb-16 lg:pb-0">
           <Switch>
             <Route path="/admin">{() => <AdminDashboard adminEmail={adminData?.email} />}</Route>
-            <Route path="/admin/tee-times">{() => <div>Admin Tee Times</div>}</Route>
-            <Route path="/admin/orders">{() => <div>Admin Orders</div>}</Route>
-            <Route path="/admin/members">{() => <div>Admin Members</div>}</Route>
-            <Route path="/admin/events">{() => <div>Admin Events</div>}</Route>
+            <Route path="/admin/tee-times" component={AdminTeeTimesPage} />
+            <Route path="/admin/orders" component={AdminOrdersPage} />
+            <Route path="/admin/members" component={AdminMembersPage} />
+            <Route path="/admin/events" component={AdminEventsPage} />
             <Route component={NotFound} />
           </Switch>
         </main>
