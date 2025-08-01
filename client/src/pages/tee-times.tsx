@@ -34,11 +34,16 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
     cartQuantity: "1",
     specialRequests: ""
   });
-  const [userBookings, setUserBookings] = useState<any[]>([]);
   const [editingBooking, setEditingBooking] = useState<any>(null);
 
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', selectedDate],
+  });
+
+  // Fetch user's existing bookings
+  const { data: userTeetimes = [] } = useQuery<TeeTime[]>({
+    queryKey: ['/api/teetimes/user', userData?.id],
+    enabled: !!userData?.id,
   });
 
   const bookingMutation = useMutation({
@@ -60,23 +65,8 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
       return response.json();
     },
     onSuccess: (data: any) => {
-      // Add booking to user bookings
-      const bookingData = {
-        id: data.id || 'temp-id',
-        date: newBooking.date,
-        time: newBooking.time,
-        players: newBooking.players,
-        holes: newBooking.holes,
-        course: "Packanack Golf Course",
-        cartOption: newBooking.cartOption,
-        cartQuantity: newBooking.cartQuantity,
-        specialRequests: newBooking.specialRequests,
-        status: "pending"
-      };
-      
-      setUserBookings(prev => [...prev, bookingData]);
-      
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/teetimes/user', userData?.id] });
       setIsBookingModalOpen(false);
       setNewBooking({ date: "", time: "", players: "1", holes: "18", cartOption: "walk", cartQuantity: "1", specialRequests: "" });
       toast({
@@ -103,6 +93,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/teetimes/user', userData?.id] });
       toast({
         title: "Booking Cancelled",
         description: "Your tee time has been cancelled.",
@@ -122,12 +113,12 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
     
     if (editingBooking) {
       // Update existing booking
-      const updatedBookings = userBookings.map(booking => 
+      const updatedBookings = userTeetimes.map(booking => 
         booking.id === editingBooking.id 
           ? { ...booking, ...newBooking, holes: newBooking.holes }
           : booking
       );
-      setUserBookings(updatedBookings);
+      // Bookings will be updated via cache invalidation
       setEditingBooking(null);
       setIsBookingModalOpen(false);
       setNewBooking({ date: "", time: "", players: "1", holes: "18", cartOption: "walk", cartQuantity: "1", specialRequests: "" });
@@ -142,11 +133,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
   };
 
   const handleCancelBooking = (bookingId: string) => {
-    setUserBookings(prev => prev.filter(booking => booking.id !== bookingId));
-    toast({
-      title: "Booking Cancelled",
-      description: "Your tee time has been cancelled.",
-    });
+    cancelMutation.mutate(bookingId);
   };
 
   const handleEditBooking = (booking: any) => {
@@ -396,11 +383,11 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
       </Card>
 
       {/* User's Booking Cards - Grid Layout */}
-      {userBookings.filter(booking => selectedHoles === "All" || booking.holes.toString() === selectedHoles).length > 0 && (
+      {userTeetimes.filter(booking => selectedHoles === "All" || booking.holes.toString() === selectedHoles).length > 0 && (
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-foreground mb-4">Your Bookings</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {userBookings
+            {userTeetimes
               .filter(booking => selectedHoles === "All" || booking.holes.toString() === selectedHoles)
               .map((booking, index) => (
               <Card key={booking.id} className="bg-white border shadow-lg hover:shadow-xl transition-shadow duration-200">
@@ -568,7 +555,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
       </div>
 
       {/* No Tee Times Message */}
-      {teetimes.length === 0 && userBookings.length === 0 ? (
+      {teetimes.length === 0 && userTeetimes.length === 0 ? (
         <Card className="border-0 shadow-lg bg-white relative">
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-4">

@@ -28,6 +28,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's tee time bookings
+  app.get("/api/teetimes/user/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const userTeetimes = await storage.getTeetimes();
+      const filteredTeetimes = userTeetimes.filter(teetime => teetime.userId === userId);
+      res.json(filteredTeetimes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user tee times" });
+    }
+  });
+
   app.patch("/api/teetimes/:id/book", async (req, res) => {
     try {
       const { id } = req.params;
