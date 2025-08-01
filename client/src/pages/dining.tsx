@@ -48,7 +48,7 @@ export default function Dining() {
       ...prev,
       [itemId]: (prev[itemId] || 0) + 1
     }));
-    setIsCartOpen(true);
+    // Don't auto-open cart when adding items
   };
 
   const removeFromOrder = (itemId: string) => {
@@ -120,7 +120,7 @@ export default function Dining() {
       {/* Mobile Cart Overlay */}
       {isCartOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-40"
           onClick={() => setIsCartOpen(false)}
         />
       )}
@@ -130,8 +130,23 @@ export default function Dining() {
         <div className="p-4 sm:p-6 max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-2xl sm:text-3xl font-bold text-golf-green mb-2">Dining Menu</h1>
-            <p className="text-muted-foreground text-sm sm:text-base">Order from our premium clubhouse restaurant</p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-golf-green mb-2">Order Food & Drinks</h1>
+                <p className="text-muted-foreground text-sm sm:text-base">From the clubhouse to the course</p>
+              </div>
+              
+              {/* View Cart Button */}
+              {totalItems > 0 && (
+                <Button 
+                  onClick={() => setIsCartOpen(true)}
+                  className="bg-golf-gold hover:bg-golf-gold/90 text-black font-medium w-full sm:w-auto"
+                >
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  View Cart ({totalItems})
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Category Filter */}
@@ -211,7 +226,7 @@ export default function Dining() {
       {/* Order Sidebar */}
       <div className={`w-96 bg-card border-l border-border flex flex-col transition-transform duration-300 ${
         isCartOpen ? 'translate-x-0' : 'translate-x-full'
-      } fixed right-0 top-0 h-full z-50 lg:relative lg:translate-x-0`}>
+      } fixed right-0 top-0 h-full z-50`}>
         <div className="p-6 border-b border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -233,7 +248,7 @@ export default function Dining() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsCartOpen(false)}
-                className="text-muted-foreground hover:text-foreground lg:hidden"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" />
               </Button>
