@@ -100,10 +100,7 @@ export default function AdminMembers() {
             Export Data
           </Button>
           
-          <Button size="sm" variant="outline">
-            <UserPlus className="w-4 h-4 mr-2" />
-            Add Member
-          </Button>
+          
         </div>
       </div>
 
