@@ -194,7 +194,7 @@ export default function Events() {
                             {eventType.label}
                           </span>
                         </div>
-                        <DialogTitle className="text-2xl text-[#08452e] text-left">{event.title}</DialogTitle>
+                        <DialogTitle className="text-2xl text-[#08452e] text-left mt-[5px] mb-[5px]">{event.title}</DialogTitle>
                       </DialogHeader>
                       
                       <div className="space-y-6">
