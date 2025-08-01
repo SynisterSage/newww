@@ -32,8 +32,8 @@ export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminN
 
   return (
     <>
-      {/* Mobile/Tablet Header */}
-      <nav className="xl:hidden bg-slate-700 text-white shadow-lg sticky top-0 z-50">
+      {/* Mobile Header */}
+      <nav className="lg:hidden bg-slate-700 text-white shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
@@ -44,7 +44,7 @@ export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminN
         </div>
       </nav>
       {/* Desktop Sidebar */}
-      <aside className="hidden xl:block w-64 text-white min-h-screen fixed left-0 top-0 z-40 bg-slate-800">
+      <aside className="hidden lg:block w-64 text-white min-h-screen fixed left-0 top-0 z-40 bg-slate-800">
         <div className="p-6">
           <div className="flex items-center space-x-3 mb-8 pb-6 border-b border-white/10">
             <div className="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center">
