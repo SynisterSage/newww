@@ -11,9 +11,8 @@ import type { TeeTime, User } from "@shared/schema";
 export default function AdminTeeTimesPage() {
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState(() => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
+    // Default to today
+    return new Date().toISOString().split('T')[0];
   });
 
   // Fetch all tee times for the selected date
@@ -91,19 +90,15 @@ export default function AdminTeeTimesPage() {
     }
   };
 
-  // Generate date options for the next 14 days
+  // Generate date options for today and tomorrow only
   const getDateOptions = () => {
     const dates = [];
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 2; i++) {
       const date = new Date();
       date.setDate(date.getDate() + i);
       dates.push({
         value: date.toISOString().split('T')[0],
-        label: date.toLocaleDateString('en-US', { 
-          weekday: 'short', 
-          month: 'short', 
-          day: 'numeric' 
-        })
+        label: i === 0 ? 'Today' : 'Tomorrow'
       });
     }
     return dates;

@@ -257,31 +257,72 @@ export class MemStorage implements IStorage {
       this.adminUsers.set(adminUser.id, adminUser);
     });
 
-    // Initialize tee times
+    // Initialize tee times for today and tomorrow
     const today = new Date().toISOString().split('T')[0];
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
-    const teetimeData = [
-      { time: "6:30 AM", spotsAvailable: 4, price: "85.00", status: "available", isPremium: false },
-      { time: "7:00 AM", spotsAvailable: 3, price: "85.00", status: "available", isPremium: false },
-      { time: "7:30 AM", spotsAvailable: 2, price: "125.00", status: "available", isPremium: true },
-      { time: "8:00 AM", spotsAvailable: 0, price: "125.00", status: "booked", isPremium: true },
-      { time: "8:20 AM", spotsAvailable: 1, price: "125.00", status: "available", isPremium: true },
-      { time: "9:00 AM", spotsAvailable: 4, price: "95.00", status: "available", isPremium: false },
-      { time: "9:30 AM", spotsAvailable: 2, price: "95.00", status: "available", isPremium: false },
-      { time: "10:00 AM", spotsAvailable: 3, price: "95.00", status: "available", isPremium: false },
+    // Base tee time slots for 9-hole Packanack Golf Course
+    const baseTimeSlots = [
+      { time: "6:30 AM", price: "65.00", isPremium: false },
+      { time: "7:00 AM", price: "65.00", isPremium: false },
+      { time: "7:30 AM", price: "75.00", isPremium: true },
+      { time: "8:00 AM", price: "75.00", isPremium: true },
+      { time: "8:30 AM", price: "75.00", isPremium: true },
+      { time: "9:00 AM", price: "70.00", isPremium: false },
+      { time: "9:30 AM", price: "70.00", isPremium: false },
+      { time: "10:00 AM", price: "70.00", isPremium: false },
+      { time: "10:30 AM", price: "65.00", isPremium: false },
+      { time: "11:00 AM", price: "65.00", isPremium: false },
+      { time: "11:30 AM", price: "65.00", isPremium: false },
+      { time: "12:00 PM", price: "60.00", isPremium: false },
+      { time: "12:30 PM", price: "60.00", isPremium: false },
+      { time: "1:00 PM", price: "60.00", isPremium: false },
+      { time: "1:30 PM", price: "60.00", isPremium: false },
+      { time: "2:00 PM", price: "55.00", isPremium: false },
+      { time: "2:30 PM", price: "55.00", isPremium: false },
+      { time: "3:00 PM", price: "55.00", isPremium: false },
     ];
 
-    teetimeData.forEach(data => {
-      const teetime: TeeTime = {
-        id: randomUUID(),
-        userId: null,
-        date: tomorrow,
-        course: "Packanack Golf Course",
-        holes: 18,
-        ...data
-      };
-      this.teetimes.set(teetime.id, teetime);
+    // Get some real members for bookings
+    const realMembers = Array.from(this.users.values()).filter(user => user.isActive).slice(0, 15);
+
+    // Create tee times for today and tomorrow
+    [today, tomorrow].forEach((date, dayIndex) => {
+      baseTimeSlots.forEach((slot, slotIndex) => {
+        const teetime: TeeTime = {
+          id: randomUUID(),
+          userId: null,
+          date: date,
+          time: slot.time,
+          course: "Packanack Golf Course",
+          holes: 9, // 9-hole course as specified
+          spotsAvailable: 4,
+          price: slot.price,
+          status: "available",
+          isPremium: slot.isPremium
+        };
+
+        // Add some realistic bookings - more bookings for tomorrow
+        const bookingChance = dayIndex === 0 ? 0.3 : 0.5; // 30% today, 50% tomorrow
+        const pendingChance = dayIndex === 0 ? 0.1 : 0.2; // 10% today, 20% tomorrow
+
+        if (Math.random() < bookingChance && realMembers.length > 0) {
+          const randomMember = realMembers[Math.floor(Math.random() * realMembers.length)];
+          const spotsBooked = Math.floor(Math.random() * 3) + 1; // 1-3 spots booked
+          
+          teetime.userId = randomMember.id;
+          teetime.spotsAvailable = 4 - spotsBooked;
+          
+          // Some bookings are pending approval, others are already approved
+          if (Math.random() < pendingChance) {
+            teetime.status = "pending";
+          } else {
+            teetime.status = spotsBooked >= 4 ? "booked" : "available";
+          }
+        }
+
+        this.teetimes.set(teetime.id, teetime);
+      });
     });
 
     // Initialize menu items
@@ -317,21 +358,21 @@ export class MemStorage implements IStorage {
 
     // Initialize course holes
     const holeData = [
-      { holeNumber: 1, par: 4, yardage: 425, handicap: 7, description: "Slight dogleg left with bunkers right", notes: "Play to left side of fairway" },
-      { holeNumber: 2, par: 3, yardage: 185, handicap: 15, description: "Elevated tee to large green", notes: "Pin usually back left" },
-      { holeNumber: 3, par: 5, yardage: 525, handicap: 3, description: "Long par 5 with water on right", notes: "Lay up short of water on second shot" },
-      { holeNumber: 4, par: 4, yardage: 395, handicap: 11, description: "Straight hole with elevated green", notes: "Take extra club for approach" },
-      { holeNumber: 5, par: 3, yardage: 155, handicap: 17, description: "Short par 3 over water", notes: "Don't be short" },
-      { holeNumber: 6, par: 4, yardage: 375, handicap: 13, description: "Dogleg right around trees", notes: "Driver down the left side" },
-      { holeNumber: 7, par: 4, yardage: 385, handicap: 9, description: "Dogleg right with water hazard on right side", notes: "Pin position: back right" },
-      { holeNumber: 8, par: 3, yardage: 165, handicap: 16, description: "Elevated tee to green with large bunker front left", notes: "Water behind green" },
-      { holeNumber: 9, par: 5, yardage: 545, handicap: 1, description: "Long finishing hole with creek crossing", notes: "Three good shots required" },
+      { holeNumber: 1, par: 4, yardage: 385, handicap: 7, description: "Opening hole with slight dogleg left", notes: "Favor left side of fairway" },
+      { holeNumber: 2, par: 3, yardage: 165, handicap: 15, description: "Short par 3 to elevated green", notes: "Pin usually back center" },
+      { holeNumber: 3, par: 4, yardage: 395, handicap: 3, description: "Straight hole with water on right", notes: "Stay left off the tee" },
+      { holeNumber: 4, par: 3, yardage: 145, handicap: 17, description: "Shortest hole on course", notes: "Don't be short of pin" },
+      { holeNumber: 5, par: 4, yardage: 425, handicap: 1, description: "Toughest hole with dogleg right", notes: "Long iron off tee for position" },
+      { holeNumber: 6, par: 4, yardage: 375, handicap: 11, description: "Slight dogleg left with trees right", notes: "Driver down the left side" },
+      { holeNumber: 7, par: 3, yardage: 185, handicap: 13, description: "Longer par 3 over water", notes: "Take one extra club" },
+      { holeNumber: 8, par: 4, yardage: 355, handicap: 9, description: "Short par 4 with bunkers front right", notes: "Pin position varies daily" },
+      { holeNumber: 9, par: 4, yardage: 405, handicap: 5, description: "Finishing hole with elevated green", notes: "Strong finish required" },
     ];
 
     holeData.forEach(data => {
       const hole: CourseHole = {
         id: randomUUID(),
-        course: "Championship Course",
+        course: "Packanack Golf Course",
         ...data
       };
       this.courseHoles.set(hole.id, hole);
