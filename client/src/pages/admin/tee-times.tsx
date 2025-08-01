@@ -10,10 +10,7 @@ import type { TeeTime, User } from "@shared/schema";
 
 export default function AdminTeeTimesPage() {
   const { toast } = useToast();
-  const [selectedDate, setSelectedDate] = useState(() => {
-    // Default to today
-    return new Date().toISOString().split('T')[0];
-  });
+  const [selectedDate, setSelectedDate] = useState("2025-08-01");
 
   // Fetch all tee times for the selected date
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
@@ -90,18 +87,12 @@ export default function AdminTeeTimesPage() {
     }
   };
 
-  // Generate date options for today and tomorrow only
+  // Generate date options for today (8/1) and tomorrow (8/2) only
   const getDateOptions = () => {
-    const dates = [];
-    for (let i = 0; i < 2; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() + i);
-      dates.push({
-        value: date.toISOString().split('T')[0],
-        label: i === 0 ? 'Today' : 'Tomorrow'
-      });
-    }
-    return dates;
+    return [
+      { value: "2025-08-01", label: "Today (8/1)" },
+      { value: "2025-08-02", label: "Tomorrow (8/2)" }
+    ];
   };
 
   if (isLoading) {

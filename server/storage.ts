@@ -260,9 +260,9 @@ export class MemStorage implements IStorage {
     // Clear existing tee times to start fresh with 30 slots per day
     this.teetimes.clear();
     
-    // Initialize tee times for today and tomorrow - exactly 2 days as requested
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    // Initialize tee times for today (8/1) and tomorrow (8/2) - exactly 2 days as requested
+    const today = "2025-08-01";
+    const tomorrow = "2025-08-02";
     
     // Base tee time slots for 9-hole Packanack Golf Course - exactly 30 slots per day
     const baseTimeSlots = [
