@@ -320,6 +320,22 @@ export class MemStorage implements IStorage {
     return user;
   }
 
+  async authenticateMember(email: string, phone: string): Promise<User | null> {
+    // Clean phone number for matching (remove formatting)
+    const cleanPhone = phone.replace(/\D/g, '');
+    
+    // Find member by email and phone match
+    const member = Array.from(this.users.values()).find(user => {
+      if (!user.email || !user.phone) return false;
+      
+      const userCleanPhone = user.phone.replace(/\D/g, '');
+      return user.email.toLowerCase() === email.toLowerCase() && 
+             userCleanPhone === cleanPhone;
+    });
+    
+    return member || null;
+  }
+
   // Admin user methods
   async getAdminUser(id: string): Promise<AdminUser | undefined> {
     return this.adminUsers.get(id);

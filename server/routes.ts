@@ -142,6 +142,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Member authentication routes
+  const memberAuthSchema = z.object({
+    email: z.string().email(),
+    phone: z.string().min(10),
+  });
+
+  app.post("/api/auth/member", async (req, res) => {
+    try {
+      const { email, phone } = memberAuthSchema.parse(req.body);
+      const member = await storage.authenticateMember(email, phone);
+      
+      if (!member) {
+        return res.status(401).json({ message: "Invalid credentials. Please verify your email and phone number." });
+      }
+      
+      if (!member.isActive) {
+        return res.status(401).json({ message: "Member account is inactive. Please contact the club office." });
+      }
+      
+      // Return member data without password
+      const { password: _, ...memberData } = member;
+      res.json(memberData);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid authentication data" });
+    }
+  });
+
   // User routes
   app.get("/api/user/:id", async (req, res) => {
     try {
