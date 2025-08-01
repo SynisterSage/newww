@@ -162,7 +162,7 @@ export default function Events() {
     return event.category === filter;
   });
 
-  const categories = ["all", "upcoming", "registered", "available", "tournament", "social", "lesson", "special"];
+  const categories = ["all", "upcoming", "registered", "available", "tournament", "social", "lesson"];
 
   if (isLoading) {
     return (
