@@ -14,6 +14,7 @@ export default function Dining() {
   const [currentOrder, setCurrentOrder] = useState<{[key: string]: number}>({});
   const [deliveryOption, setDeliveryOption] = useState("Clubhouse Pickup");
   const [selectedHole, setSelectedHole] = useState("");
+  const [specialRequests, setSpecialRequests] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCartClosing, setIsCartClosing] = useState(false);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
@@ -29,6 +30,7 @@ export default function Dining() {
     },
     onSuccess: () => {
       setCurrentOrder({});
+      setSpecialRequests("");
       closeCart();
       toast({
         title: "Order Placed",
@@ -68,6 +70,7 @@ export default function Dining() {
 
   const clearOrder = () => {
     setCurrentOrder({});
+    setSpecialRequests("");
   };
 
   const closeCart = () => {
@@ -97,7 +100,8 @@ export default function Dining() {
       items: orderItems,
       total: calculateTotal().toFixed(2),
       deliveryOption,
-      deliveryLocation: deliveryOption === "Deliver on Course" ? `Hole ${selectedHole}` : undefined
+      deliveryLocation: deliveryOption === "Deliver on Course" ? `Hole ${selectedHole}` : undefined,
+      specialRequests: specialRequests || undefined
     });
   };
 
@@ -331,6 +335,20 @@ export default function Dining() {
                         </SelectContent>
                       </Select>
                     )}
+                    
+                    {/* Special Requests */}
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-2 block">
+                        Special Requests (Allergens, Notes)
+                      </label>
+                      <textarea
+                        value={specialRequests}
+                        onChange={(e) => setSpecialRequests(e.target.value)}
+                        placeholder="Any special requests, dietary restrictions, or allergen information..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1B4332] focus:border-transparent"
+                        rows={3}
+                      />
+                    </div>
                   </div>
                   
                   <div className="flex items-center justify-between text-lg font-semibold">
