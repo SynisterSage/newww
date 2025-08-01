@@ -50,11 +50,7 @@ export default function AdminEvents() {
   // Create event mutation
   const createEventMutation = useMutation({
     mutationFn: async (eventData: InsertEvent) => {
-      return await apiRequest("/api/events", {
-        method: "POST",
-        body: JSON.stringify(eventData),
-        headers: { "Content-Type": "application/json" },
-      });
+      return await apiRequest("POST", "/api/events", eventData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
@@ -76,11 +72,7 @@ export default function AdminEvents() {
   // Update event mutation
   const updateEventMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Event> }) => {
-      return await apiRequest(`/api/events/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(updates),
-        headers: { "Content-Type": "application/json" },
-      });
+      return await apiRequest("PATCH", `/api/events/${id}`, updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
@@ -103,9 +95,7 @@ export default function AdminEvents() {
   // Delete event mutation
   const deleteEventMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/events/${id}`, {
-        method: "DELETE",
-      });
+      return await apiRequest("DELETE", `/api/events/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
@@ -126,7 +116,8 @@ export default function AdminEvents() {
   // Fetch event registrations
   const fetchRegistrations = async (eventId: string) => {
     try {
-      const registrations = await apiRequest(`/api/events/${eventId}/registrations`);
+      const response = await apiRequest("GET", `/api/events/${eventId}/registrations`);
+      const registrations = await response.json();
       setSelectedEventRegistrations(registrations);
       setIsRegistrationsDialogOpen(true);
     } catch (error) {
