@@ -48,6 +48,19 @@ export default function Dining() {
       ...prev,
       [itemId]: (prev[itemId] || 0) + 1
     }));
+    
+    // Auto-open cart with animation
+    setIsCartOpen(true);
+    
+    // Show toast notification
+    const item = menuItems.find(m => m.id === itemId);
+    if (item) {
+      toast({
+        title: "Added to Cart",
+        description: `${item.name} has been added to your order`,
+        duration: 2000,
+      });
+    }
   };
 
   const removeFromOrder = (itemId: string) => {
@@ -210,8 +223,8 @@ export default function Dining() {
 
       {/* Mobile Cart Modal */}
       {isCartOpen && (
-        <div className="fixed inset-0 z-50">
-          <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl">
+        <div className="fixed inset-0 z-50 animate-in fade-in duration-200">
+          <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl animate-in slide-in-from-right duration-300">
             <div className="flex h-full flex-col">
               <div className="flex items-center justify-between p-4 border-b">
                 <h2 className="text-lg font-semibold">Your Order</h2>
