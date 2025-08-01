@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Trophy, Calendar, Users, MapPin, Clock, ChevronRight } from "lucide-react";
-import { format, addDays, addWeeks } from "date-fns";
+import { Calendar, Clock, ChevronRight } from "lucide-react";
+import { format } from "date-fns";
 
 interface Event {
   id: string;
@@ -21,7 +20,7 @@ interface Event {
 
 export default function Events() {
   const { toast } = useToast();
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   
   const events: Event[] = [
     {
@@ -82,7 +81,11 @@ export default function Events() {
       title: "Event Registration Successful!",
       description: `You've successfully registered for ${event.title}. We'll send you a confirmation email shortly.`,
     });
-    setSelectedEvent(null);
+    setExpandedEvent(null);
+  };
+
+  const toggleEventDetails = (eventId: string) => {
+    setExpandedEvent(expandedEvent === eventId ? null : eventId);
   };
 
   return (
@@ -99,9 +102,10 @@ export default function Events() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {events.map((event) => {
           const eventType = getEventTypeDisplay(event.type);
+          const isExpanded = expandedEvent === event.id;
           
           return (
-            <Card key={event.id} className="hover:shadow-lg transition-shadow border-0 shadow-sm bg-white">
+            <Card key={event.id} className="hover:shadow-lg transition-all duration-300 border-0 shadow-sm bg-white">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <span className="text-sm text-muted-foreground">Past</span>
@@ -124,8 +128,19 @@ export default function Events() {
                 </div>
                 
                 <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-                  {event.description}
+                  {isExpanded ? event.description : `${event.description.substring(0, 80)}...`}
                 </p>
+                
+                {/* Expanded Details */}
+                {isExpanded && (
+                  <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div className="space-y-2 text-sm text-muted-foreground">
+                      <div><strong>Location:</strong> {event.location}</div>
+                      <div><strong>Type:</strong> {event.type}</div>
+                      <div><strong>Registration:</strong> {event.registrationOpen ? 'Open' : 'Closed'}</div>
+                    </div>
+                  </div>
+                )}
                 
                 {/* Participant Progress Bar */}
                 <div className="mb-6">
@@ -143,55 +158,34 @@ export default function Events() {
                   </div>
                 </div>
                 
-                <Dialog>
-                  <DialogTrigger asChild>
+                {/* Dynamic Button */}
+                {!isExpanded ? (
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-between border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white"
+                    onClick={() => toggleEventDetails(event.id)}
+                  >
+                    View Details
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                ) : (
+                  <div className="space-y-3">
                     <Button 
-                      variant="outline" 
-                      className="w-full justify-between border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white"
-                      onClick={() => setSelectedEvent(event)}
+                      className="w-full bg-[#1B4332] hover:bg-[#2D5A3D] text-white"
+                      onClick={() => handleSignUp(event)}
+                      disabled={!event.registrationOpen}
                     >
-                      View Details
-                      <ChevronRight className="w-4 h-4" />
+                      {event.registrationOpen ? 'Sign Up for Event' : 'Registration Closed'}
                     </Button>
-                  </DialogTrigger>
-                  
-                  <DialogContent className="max-w-md">
-                    <DialogHeader>
-                      <div className="flex items-start justify-between mb-4">
-                        <span className="text-sm text-muted-foreground">Past</span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${eventType.color}`}>
-                          {eventType.label}
-                        </span>
-                      </div>
-                      <DialogTitle className="text-xl text-[#08452e]">{event.title}</DialogTitle>
-                    </DialogHeader>
-                    
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                          <Calendar className="w-4 h-4" />
-                          <span>{format(event.date, 'EEEE, MMM dd, yyyy')}</span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                          <Clock className="w-4 h-4" />
-                          <span>{event.time}</span>
-                        </div>
-                      </div>
-                      
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {event.description}
-                      </p>
-                      
-                      <Button 
-                        className="w-full bg-[#1B4332] hover:bg-[#2D5A3D] text-white"
-                        onClick={() => handleSignUp(event)}
-                        disabled={!event.registrationOpen}
-                      >
-                        {event.registrationOpen ? 'Sign Up for Event' : 'Registration Closed'}
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full text-sm text-muted-foreground"
+                      onClick={() => toggleEventDetails(event.id)}
+                    >
+                      Hide Details
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           );
