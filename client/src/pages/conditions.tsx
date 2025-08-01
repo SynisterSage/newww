@@ -73,13 +73,15 @@ export default function Conditions() {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-6">
-        <h1 className="text-3xl font-bold text-golf-green">Course Conditions</h1>
-        <div className="animate-pulse space-y-4">
-          <div className="h-64 bg-gray-300 rounded-lg"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="h-48 bg-gray-300 rounded-lg"></div>
-            <div className="h-48 bg-gray-300 rounded-lg"></div>
+      <div className="min-h-screen bg-[#fbfff5]">
+        <div className="p-6 space-y-6">
+          <h1 className="text-3xl font-bold text-golf-green">Course Conditions</h1>
+          <div className="animate-pulse space-y-4">
+            <div className="h-64 bg-gray-300 rounded-lg"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="h-48 bg-gray-300 rounded-lg"></div>
+              <div className="h-48 bg-gray-300 rounded-lg"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -87,7 +89,8 @@ export default function Conditions() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-[#fbfff5]">
+      <div className="p-6 space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-golf-green">Course Conditions</h1>
         <p className="text-muted-foreground mt-1">
@@ -201,6 +204,7 @@ export default function Conditions() {
           </CardContent>
         </Card>
       </div>
+    </div>
     </div>
   );
 }

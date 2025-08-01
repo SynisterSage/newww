@@ -30,13 +30,15 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="p-4 lg:p-8">
-        <div className="animate-pulse space-y-8">
-          <div className="h-64 bg-gray-300 rounded-2xl"></div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-80 bg-gray-300 rounded-2xl"></div>
-            ))}
+      <div className="min-h-screen bg-[#fbfff5]">
+        <div className="p-4 lg:p-8">
+          <div className="animate-pulse space-y-8">
+            <div className="h-64 bg-gray-300 rounded-2xl"></div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-80 bg-gray-300 rounded-2xl"></div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -44,7 +46,8 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto bg-[#fffdf500]">
+    <div className="min-h-screen bg-[#fbfff5]">
+      <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
       {/* Modern Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
@@ -307,6 +310,7 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
+    </div>
     </div>
   );
 }

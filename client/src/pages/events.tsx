@@ -111,7 +111,8 @@ export default function Events() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-[#fbfff5]">
+      <div className="p-6 space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-golf-green">Club Events</h1>
         <p className="text-muted-foreground mt-1">
@@ -227,6 +228,7 @@ export default function Events() {
           </div>
         </CardContent>
       </Card>
+    </div>
     </div>
   );
 }
