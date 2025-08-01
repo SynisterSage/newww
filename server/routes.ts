@@ -33,7 +33,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       const userTeetimes = await storage.getTeetimes();
-      const filteredTeetimes = userTeetimes.filter(teetime => teetime.userId === userId);
+      const filteredTeetimes = userTeetimes.filter(teetime => 
+        teetime.bookedBy?.includes(userId)
+      );
       res.json(filteredTeetimes);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch user tee times" });
@@ -43,6 +45,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/teetimes/:id/book", async (req, res) => {
     try {
       const { id } = req.params;
+      const { userId, playerName } = req.body;
+      
+      const teetime = await storage.getTeetimeById(id);
+      if (!teetime) {
+        return res.status(404).json({ message: "Tee time not found" });
+      }
+      
+      const currentPlayers = teetime.bookedBy?.length || 0;
+      if (currentPlayers >= teetime.maxPlayers) {
+        return res.status(400).json({ message: "Tee time is full" });
+      }
+      
+      // Check if user already booked this tee time
+      if (teetime.bookedBy?.includes(userId)) {
+        return res.status(400).json({ message: "You have already booked this tee time" });
+      }
+      
+      const newBookedBy = [...(teetime.bookedBy || []), userId];
+      const newPlayerNames = [...(teetime.playerNames || []), playerName || 'Unknown'];
+      const newStatus = newBookedBy.length >= teetime.maxPlayers ? "full" : 
+                       newBookedBy.length > 0 ? "partial" : "available";
+      
+      const updatedTeetime = await storage.updateTeetime(id, {
+        bookedBy: newBookedBy,
+        playerNames: newPlayerNames,
+        status: newStatus
+      });
+      
+      res.json(updatedTeetime);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to book tee time" });
+    }
+  });
+
+  // Cancel/leave a tee time booking for a specific user
+  app.patch("/api/teetimes/:id/cancel", async (req, res) => {
+    try {
+      const { id } = req.params;
       const { userId } = req.body;
       
       const teetime = await storage.getTeetimeById(id);
@@ -50,19 +90,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Tee time not found" });
       }
       
-      if (teetime.spotsAvailable <= 0) {
-        return res.status(400).json({ message: "No spots available" });
+      if (!teetime.bookedBy?.includes(userId)) {
+        return res.status(400).json({ message: "You haven't booked this tee time" });
       }
       
+      const newBookedBy = teetime.bookedBy.filter(id => id !== userId);
+      const userIndex = teetime.bookedBy.indexOf(userId);
+      const newPlayerNames = teetime.playerNames?.filter((_, index) => index !== userIndex) || [];
+      const newStatus = newBookedBy.length === 0 ? "available" :
+                       newBookedBy.length < teetime.maxPlayers ? "partial" : "full";
+      
       const updatedTeetime = await storage.updateTeetime(id, {
-        userId,
-        spotsAvailable: teetime.spotsAvailable - 1,
-        status: teetime.spotsAvailable === 1 ? "pending" : "available"
+        bookedBy: newBookedBy,
+        playerNames: newPlayerNames,
+        status: newStatus
       });
       
       res.json(updatedTeetime);
     } catch (error) {
-      res.status(500).json({ message: "Failed to book tee time" });
+      res.status(500).json({ message: "Failed to cancel tee time booking" });
     }
   });
 
@@ -355,8 +401,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const updatedTeetime = await storage.updateTeetime(id, {
         status: "available",
-        userId: null,
-        spotsAvailable: teetime.spotsAvailable + 1
+        bookedBy: [],
+        playerNames: []
       });
       
       res.json(updatedTeetime);

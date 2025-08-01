@@ -1,14 +1,11 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useState, useEffect } from "react";
-import { Calendar, Clock, Users, MapPin, Plus, Edit, X, Filter } from "lucide-react";
+import { useState } from "react";
+import { Calendar, Clock, Users, Plus, X, UserCheck } from "lucide-react";
 import { format } from "date-fns";
 import type { TeeTime, User } from "@shared/schema";
 
@@ -23,18 +20,6 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
     tomorrow.setDate(tomorrow.getDate() + 1);
     return tomorrow.toISOString().split('T')[0];
   });
-  const [selectedHoles, setSelectedHoles] = useState("All");
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [newBooking, setNewBooking] = useState({
-    date: "",
-    time: "",
-    players: "1",
-    holes: "18",
-    cartOption: "walk",
-    cartQuantity: "1",
-    specialRequests: ""
-  });
-  const [editingBooking, setEditingBooking] = useState<any>(null);
 
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', selectedDate],
@@ -47,38 +32,30 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
   });
 
   const bookingMutation = useMutation({
-    mutationFn: async (bookingData: any) => {
+    mutationFn: async (teetimeId: string) => {
       if (!userData?.id) {
         throw new Error("User not logged in");
       }
       
-      const response = await apiRequest('POST', '/api/teetimes', {
+      const response = await apiRequest('PATCH', `/api/teetimes/${teetimeId}/book`, {
         userId: userData.id,
-        date: bookingData.date,
-        time: bookingData.time,
-        course: "Packanack Golf Course",
-        holes: parseInt(bookingData.holes),
-        spotsAvailable: parseInt(bookingData.players),
-        price: bookingData.holes === "9" ? "45.00" : "85.00",
-        status: "pending"
+        playerName: `${userData.firstName} ${userData.lastName}`.trim() || userData.username
       });
       return response.json();
     },
-    onSuccess: (data: any) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes/user', userData?.id] });
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] }); // For dashboard stats
-      setIsBookingModalOpen(false);
-      setNewBooking({ date: "", time: "", players: "1", holes: "18", cartOption: "walk", cartQuantity: "1", specialRequests: "" });
       toast({
         title: "Booking Confirmed",
-        description: "Your tee time has been successfully booked!",
+        description: "You've joined this tee time!",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Booking Failed",
-        description: "Unable to book this tee time. Please try again.",
+        description: error.message || "Unable to book this tee time. Please try again.",
         variant: "destructive",
       });
     },
@@ -86,10 +63,12 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
 
   const cancelMutation = useMutation({
     mutationFn: async (teetimeId: string) => {
-      const response = await apiRequest('PATCH', `/api/teetimes/${teetimeId}`, {
-        status: "available",
-        userId: null,
-        spotsAvailable: 4
+      if (!userData?.id) {
+        throw new Error("User not logged in");
+      }
+      
+      const response = await apiRequest('PATCH', `/api/teetimes/${teetimeId}/cancel`, {
+        userId: userData.id
       });
       return response.json();
     },
@@ -99,72 +78,68 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] }); // For dashboard stats  
       toast({
         title: "Booking Cancelled",
-        description: "Your tee time has been cancelled.",
+        description: "You've left this tee time.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Cancellation Failed",
+        description: error.message || "Unable to cancel. Please try again.",
+        variant: "destructive",
       });
     },
   });
 
-  const handleBookTeeTime = () => {
-    if (!newBooking.date || !newBooking.time || !newBooking.holes) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleBookTeeTime = (teetimeId: string) => {
+    bookingMutation.mutate(teetimeId);
+  };
+
+  const handleCancelBooking = (teetimeId: string) => {
+    cancelMutation.mutate(teetimeId);
+  };
+
+  const getStatusInfo = (teetime: TeeTime) => {
+    const currentPlayers = teetime.bookedBy?.length || 0;
+    const maxPlayers = teetime.maxPlayers || 4;
+    const isUserBooked = teetime.bookedBy?.includes(userData?.id || "");
     
-    if (editingBooking) {
-      // Update existing booking
-      const updatedBookings = userTeetimes.map(booking => 
-        booking.id === editingBooking.id 
-          ? { ...booking, ...newBooking, holes: newBooking.holes }
-          : booking
-      );
-      // Bookings will be updated via cache invalidation
-      setEditingBooking(null);
-      setIsBookingModalOpen(false);
-      setNewBooking({ date: "", time: "", players: "1", holes: "18", cartOption: "walk", cartQuantity: "1", specialRequests: "" });
-      toast({
-        title: "Booking Updated",
-        description: "Your tee time has been successfully updated!",
-      });
+    if (currentPlayers === 0) {
+      return { 
+        status: "available", 
+        color: "bg-green-100 text-green-700 border-green-200", 
+        text: "Available",
+        canJoin: true
+      };
+    } else if (currentPlayers < maxPlayers) {
+      return { 
+        status: "partial", 
+        color: "bg-blue-100 text-blue-700 border-blue-200", 
+        text: `${currentPlayers}/${maxPlayers} Players`,
+        canJoin: !isUserBooked
+      };
     } else {
-      // Create new booking
-      bookingMutation.mutate(newBooking);
+      return { 
+        status: "full", 
+        color: "bg-red-100 text-red-700 border-red-200", 
+        text: "Full",
+        canJoin: false
+      };
     }
   };
 
-  const handleCancelBooking = (bookingId: string) => {
-    cancelMutation.mutate(bookingId);
-  };
-
-  const handleEditBooking = (booking: any) => {
-    setEditingBooking(booking);
-    setNewBooking({
-      date: booking.date,
-      time: booking.time,
-      players: booking.players,
-      holes: booking.holes.toString(),
-      cartOption: booking.cartOption || "walk",
-      cartQuantity: booking.cartQuantity || "1",
-      specialRequests: booking.specialRequests || ""
-    });
-    setIsBookingModalOpen(true);
-  };
-
-  const getStatusBadge = (teetime: TeeTime) => {
-    if (teetime.status === "pending") return { text: "pending", color: "bg-yellow-100 text-yellow-700" };
-    if (teetime.status === "confirmed") return { text: "confirmed", color: "bg-green-100 text-green-700" };
-    if (teetime.status === "booked") return { text: "booked", color: "bg-blue-100 text-blue-700" };
-    if (teetime.isPremium) return { text: "premium", color: "bg-purple-100 text-purple-700" };
-    return { text: "available", color: "bg-blue-100 text-blue-700" };
+  const formatTime = (time: string) => {
+    // Convert 24-hour format to 12-hour format
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
   };
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { 
-      month: 'short', 
+      month: 'long', 
       day: 'numeric', 
       year: 'numeric' 
     });
@@ -176,9 +151,9 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
         <div className="p-6 lg:p-8">
           <div className="animate-pulse space-y-6">
             <div className="h-20 bg-muted rounded-xl"></div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-48 bg-muted rounded-2xl"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <div key={i} className="h-32 bg-muted rounded-xl"></div>
               ))}
             </div>
           </div>
@@ -190,191 +165,24 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
   return (
     <div className="min-h-screen bg-[#F8F6F0]">
       <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 max-w-7xl mx-auto pb-20 lg:pb-8">
-
-
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#08452e] mb-2">Tee Times</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Book and manage your golf reservations</p>
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#08452e] mb-2">Tee Time Schedule</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">View and join available tee times • 16-minute intervals from 7 AM to 7 PM</p>
+          </div>
         </div>
-        
-        <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>
-          <DialogTrigger asChild>
-            <Button 
-              className="bg-golf-green hover:bg-golf-green-light text-white w-full lg:w-auto"
-              onClick={() => {
-                setEditingBooking(null);
-                setNewBooking({ date: "", time: "", players: "1", holes: "18", cartOption: "walk", cartQuantity: "1", specialRequests: "" });
-              }}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Book Tee Time
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-xl font-bold text-golf-green mb-4">
-                <Calendar className="w-6 h-6 inline mr-2" />
-                {editingBooking ? "Edit Tee Time" : "Book New Tee Time"}
-              </DialogTitle>
-              <DialogDescription className="text-sm text-muted-foreground">
-                {editingBooking ? "Update your existing tee time reservation details." : "Reserve your preferred tee time slot at Packanack Golf Course."}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Date</label>
-                  <Input
-                    type="date"
-                    value={newBooking.date}
-                    onChange={(e) => setNewBooking({...newBooking, date: e.target.value})}
-                    className="w-full"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Bookings available up to 2 days in advance</p>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Time</label>
-                  <Select value={newBooking.time} onValueChange={(value) => setNewBooking({...newBooking, time: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select time" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="6:30 AM">6:30 AM</SelectItem>
-                      <SelectItem value="7:00 AM">7:00 AM</SelectItem>
-                      <SelectItem value="7:30 AM">7:30 AM</SelectItem>
-                      <SelectItem value="8:00 AM">8:00 AM</SelectItem>
-                      <SelectItem value="8:30 AM">8:30 AM</SelectItem>
-                      <SelectItem value="9:00 AM">9:00 AM</SelectItem>
-                      <SelectItem value="9:30 AM">9:30 AM</SelectItem>
-                      <SelectItem value="10:00 AM">10:00 AM</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Number of Players</label>
-                  <Select value={newBooking.players} onValueChange={(value) => setNewBooking({...newBooking, players: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 Player</SelectItem>
-                      <SelectItem value="2">2 Players</SelectItem>
-                      <SelectItem value="3">3 Players</SelectItem>
-                      <SelectItem value="4">4 Players</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Holes</label>
-                  <Select value={newBooking.holes} onValueChange={(value) => setNewBooking({...newBooking, holes: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select holes" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="9">9 Holes ($45)</SelectItem>
-                      <SelectItem value="18">18 Holes ($85)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Cart Option</label>
-                  <Select value={newBooking.cartOption} onValueChange={(value) => setNewBooking({...newBooking, cartOption: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="walk">Walk</SelectItem>
-                      <SelectItem value="cart">Cart</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {newBooking.cartOption === "cart" && (
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-2 block">Number of Carts</label>
-                    <Select value={newBooking.cartQuantity} onValueChange={(value) => setNewBooking({...newBooking, cartQuantity: value})}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">1 Cart</SelectItem>
-                        <SelectItem value="2">2 Carts</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">Special Requests</label>
-                <Textarea
-                  placeholder="Any special requests or notes..."
-                  value={newBooking.specialRequests}
-                  onChange={(e) => setNewBooking({...newBooking, specialRequests: e.target.value})}
-                  className="resize-none"
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4">
-                <Button variant="outline" onClick={() => setIsBookingModalOpen(false)}>
-                  <X className="w-4 h-4 mr-2" />
-                  Cancel
-                </Button>
-                <Button 
-                  className="bg-golf-green hover:bg-golf-green-light text-white"
-                  onClick={handleBookTeeTime}
-                  disabled={bookingMutation.isPending}
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  {bookingMutation.isPending ? 
-                    (editingBooking ? "Updating..." : "Booking...") : 
-                    (editingBooking ? "Edit Tee Time" : "Book Tee Time")
-                  }
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Filters */}
-      <Card className="border-0 shadow-sm">
-        <CardContent className="p-6">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-golf-green" />
-              <span className="text-sm font-medium text-foreground">Filter Tee Times</span>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-4 flex-1">
-              <div className="flex-1">
-                <label className="text-sm text-muted-foreground mb-1 block"># of Holes</label>
-                <Select value={selectedHoles} onValueChange={setSelectedHoles}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="All">All</SelectItem>
-                    <SelectItem value="9">9 Holes</SelectItem>
-                    <SelectItem value="18">18 Holes</SelectItem>
-                  </SelectContent>
-                </Select>
+        {/* Date Selector */}
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4 text-golf-green" />
+                <span className="text-sm font-medium text-foreground">Select Date</span>
               </div>
               
-              <div className="flex-1">
-                <label className="text-sm text-muted-foreground mb-1 block">Date</label>
+              <div className="flex-1 max-w-xs">
                 <Input
                   type="date"
                   value={selectedDate}
@@ -382,225 +190,146 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
                   className="w-full"
                 />
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* User's Booking Cards - Grid Layout */}
-      {userTeetimes.filter(booking => selectedHoles === "All" || booking.holes.toString() === selectedHoles).length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Your Bookings</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {userTeetimes
-              .filter(booking => selectedHoles === "All" || booking.holes.toString() === selectedHoles)
-              .map((booking, index) => (
-              <Card key={booking.id} className="bg-white border shadow-lg hover:shadow-xl transition-shadow duration-200">
-                <CardHeader className="border-b border-border/20 pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Calendar className="w-6 h-6 text-golf-green mr-3" />
-                      <div>
-                        <h3 className="text-lg font-semibold text-foreground">
-                          {format(new Date(booking.date), "MMM d, yyyy")}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">Tee Time Booking</p>
-                      </div>
-                    </div>
-                    <span className="bg-yellow-100 text-yellow-800 border-yellow-300 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">
-                      {booking.status}
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4 mr-3" />
-                      <span>{booking.time}</span>
-                    </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Users className="w-4 h-4 mr-3" />
-                      <span>{booking.players} Players</span>
-                    </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPin className="w-4 h-4 mr-3" />
-                      <span>Packanack Golf Course</span>
-                    </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <span className="bg-golf-green text-white text-xs px-2 py-1 inline-flex items-center rounded-full">
-                        {booking.holes} Holes
-                      </span>
-                    </div>
-                    {booking.cartOption && (
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <span className="w-4 h-4 mr-3">🚗</span>
-                        <span>{booking.cartOption === "cart" ? `Cart (${booking.cartQuantity || 1})` : "Walk"}</span>
-                      </div>
-                    )}
-                    {booking.specialRequests && (
-                      <div className="mt-3 p-2 bg-gray-50 rounded-lg border">
-                        <p className="text-sm text-muted-foreground italic break-words whitespace-pre-wrap">
-                          {booking.specialRequests}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex gap-2 mt-4">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={() => handleEditBooking(booking)}
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1 text-red-600 hover:text-red-700"
-                      onClick={() => handleCancelBooking(booking.id)}
-                    >
-                      <X className="w-4 h-4 mr-2" />
-                      Cancel
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Tee Time Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {teetimes.map((teetime) => {
-          const status = getStatusBadge(teetime);
-          const isUserBooking = teetime.userId === userData?.id;
-          
-          return (
-            <Card key={teetime.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-golf-green-soft rounded-2xl flex items-center justify-center">
-                      <Calendar className="w-6 h-6 text-golf-green" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">
-                        {formatDate(teetime.date)}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">Tee Time Booking</p>
-                    </div>
-                  </div>
-                  <div className={`px-2 py-1 rounded-md text-xs font-medium ${status.color}`}>
-                    {status.text}
-                  </div>
-                </div>
-
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center text-sm">
-                    <Clock className="w-4 h-4 text-muted-foreground mr-2" />
-                    <span className="font-medium">{teetime.time}</span>
-                  </div>
-                  
-                  <div className="flex items-center text-sm">
-                    <Users className="w-4 h-4 text-muted-foreground mr-2" />
-                    <span>{teetime.spotsAvailable} Player{teetime.spotsAvailable !== 1 ? 's' : ''}</span>
-                  </div>
-                  
-                  <div className="flex items-center text-sm">
-                    <MapPin className="w-4 h-4 text-muted-foreground mr-2" />
-                    <span className="text-golf-green font-medium">
-                      Packanack Golf Course
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center text-sm">
-                    <span className="bg-golf-green text-white text-xs px-2 py-1 inline-flex items-center rounded-full">
-                      {teetime.holes || 18} Holes
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-sm text-muted-foreground mb-4">
-                  {isUserBooking ? "Your reservation" : 
-                   teetime.isPremium ? "Tournament preparation" : "Early morning round"}
-                </p>
-
-                <div className="flex space-x-2">
-                  {isUserBooking ? (
-                    <>
-                      <Button variant="outline" size="sm" className="flex-1">
-                        <Edit className="w-4 h-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1 text-red-600 hover:text-red-700"
-                        onClick={() => cancelMutation.mutate(teetime.id)}
-                        disabled={cancelMutation.isPending}
-                      >
-                        <X className="w-4 h-4 mr-1" />
-                        Cancel
-                      </Button>
-                    </>
-                  ) : (
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Edit className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* No Tee Times Message */}
-      {teetimes.length === 0 && userTeetimes.length === 0 ? (
-        <Card className="border-0 shadow-lg bg-white relative">
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-golf-green rounded-lg flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg font-semibold">
-                      No tee times available
-                    </span>
-
-                  </div>
-                  <p className="text-sm text-muted-foreground">Tee Time Booking</p>
-                </div>
+              
+              <div className="text-sm text-muted-foreground">
+                {formatDate(selectedDate)}
               </div>
-
-            </div>
-            
-            <div className="text-center py-12">
-              <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">No tee times found</h3>
-              <p className="text-muted-foreground mb-4">Try selecting a different date or course</p>
-              <Button 
-                className="bg-golf-green hover:bg-golf-green-light text-white"
-                onClick={() => {
-                  setEditingBooking(null);
-                  setNewBooking({ date: "", time: "", players: "1", holes: "18", cartOption: "walk", cartQuantity: "1", specialRequests: "" });
-                  setIsBookingModalOpen(true);
-                }}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Book New Tee Time
-              </Button>
             </div>
           </CardContent>
         </Card>
-      ) : null}
-    </div>
+
+        {/* Legend */}
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex flex-wrap items-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-green-100 border border-green-200"></div>
+                <span>Available</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-blue-100 border border-blue-200"></div>
+                <span>Partially Booked</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-red-100 border border-red-200"></div>
+                <span>Full</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <UserCheck className="w-4 h-4 text-golf-green" />
+                <span>Your Bookings</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tee Time Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {teetimes.map((teetime) => {
+            const statusInfo = getStatusInfo(teetime);
+            const isUserBooked = teetime.bookedBy?.includes(userData?.id || "");
+            
+            return (
+              <Card 
+                key={teetime.id} 
+                className={`border-2 transition-all duration-200 hover:shadow-md ${
+                  isUserBooked 
+                    ? 'border-golf-green bg-golf-green/5' 
+                    : 'border-gray-200 hover:border-golf-green/30'
+                }`}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-golf-green" />
+                      <CardTitle className="text-lg font-semibold text-golf-green">
+                        {formatTime(teetime.time)}
+                      </CardTitle>
+                    </div>
+                    {isUserBooked && (
+                      <UserCheck className="w-4 h-4 text-golf-green" />
+                    )}
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="space-y-4">
+                  {/* Status Badge */}
+                  <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${statusInfo.color}`}>
+                    <Users className="w-3 h-3 mr-1" />
+                    {statusInfo.text}
+                  </div>
+
+                  {/* Players List */}
+                  {teetime.playerNames && teetime.playerNames.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Players</h4>
+                      <div className="space-y-1">
+                        {teetime.playerNames.map((name, index) => (
+                          <div key={index} className="text-sm text-foreground flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-golf-green"></div>
+                            {name}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Course Info */}
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <div>{teetime.holes} Holes • ${teetime.price}</div>
+                    <div>Packanack Golf Course</div>
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="pt-2">
+                    {isUserBooked ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-red-600 border-red-200 hover:bg-red-50"
+                        onClick={() => handleCancelBooking(teetime.id)}
+                        disabled={cancelMutation.isPending}
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        {cancelMutation.isPending ? "Leaving..." : "Leave Tee Time"}
+                      </Button>
+                    ) : statusInfo.canJoin ? (
+                      <Button
+                        size="sm"
+                        className="w-full bg-golf-green hover:bg-golf-green-light text-white"
+                        onClick={() => handleBookTeeTime(teetime.id)}
+                        disabled={bookingMutation.isPending}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        {bookingMutation.isPending ? "Joining..." : "Join Tee Time"}
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full"
+                        disabled
+                      >
+                        {statusInfo.status === "full" ? "Tee Time Full" : "Cannot Join"}
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Empty State */}
+        {teetimes.length === 0 && (
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-12 text-center">
+              <Calendar className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">No Tee Times Available</h3>
+              <p className="text-muted-foreground">There are no tee times scheduled for this date. Please select a different date.</p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

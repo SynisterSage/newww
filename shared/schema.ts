@@ -38,14 +38,16 @@ export const adminUsers = pgTable("admin_users", {
 
 export const teetimes = pgTable("teetimes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id),
   date: text("date").notNull(),
   time: text("time").notNull(),
   course: text("course").notNull().default("Packanack Golf Course"),
-  holes: integer("holes").notNull().default(9), // 9-hole course
-  spotsAvailable: integer("spots_available").notNull().default(4),
-  status: text("status").notNull().default("available"), // available, booked, pending
+  holes: integer("holes").notNull().default(18), // 18-hole course
+  maxPlayers: integer("max_players").notNull().default(4),
+  bookedBy: text("booked_by").array().default([]), // Array of user IDs who booked this slot
+  playerNames: text("player_names").array().default([]), // Array of player names for display
+  status: text("status").notNull().default("available"), // available, partial, full
   isPremium: boolean("is_premium").default(false),
+  price: decimal("price", { precision: 8, scale: 2 }).notNull().default("85.00"),
 });
 
 export const menuItems = pgTable("menu_items", {
