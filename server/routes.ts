@@ -585,6 +585,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Reset orders
       await storage.resetOrders();
       
+      // Reset course notices (hazard notes and maintenance notes)
+      await storage.resetCourseNotices();
+      
       res.json({ message: "Test data reset successfully" });
     } catch (error) {
       console.error("Reset test data error:", error);

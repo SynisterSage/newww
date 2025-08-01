@@ -73,6 +73,7 @@ export interface IStorage {
   resetTeeTimeBookings(): Promise<void>;
   resetEventRegistrations(): Promise<void>;
   resetOrders(): Promise<void>;
+  resetCourseNotices(): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -471,6 +472,7 @@ export class MemStorage implements IStorage {
       const event: Event = {
         id: randomUUID(),
         createdAt: new Date(),
+        isActive: true,
         ...data
       };
       this.events.set(event.id, event);
@@ -802,9 +804,12 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const event: Event = {
       id,
-      ...insertEvent,
-      isActive: insertEvent.isActive ?? true,
+      isActive: true,
       createdAt: new Date(),
+      price: insertEvent.price || null,
+      location: insertEvent.location,
+      maxSignups: insertEvent.maxSignups,
+      ...insertEvent
     };
     this.events.set(id, event);
     return event;
@@ -839,7 +844,9 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const registration: EventRegistration = {
       id,
-      ...insertRegistration,
+      userId: insertRegistration.userId || null,
+      eventId: insertRegistration.eventId || null,
+      notes: insertRegistration.notes || null,
       status: insertRegistration.status || "confirmed",
       registeredAt: new Date(),
     };
@@ -854,6 +861,29 @@ export class MemStorage implements IStorage {
     if (registrationToDelete) {
       this.eventRegistrations.delete(registrationToDelete[0]);
     }
+  }
+
+  // Reset methods for admin (MemStorage)
+  async resetTeeTimeBookings(): Promise<void> {
+    this.teetimes.forEach((teetime, id) => {
+      this.teetimes.set(id, { ...teetime, playerNames: [], bookedBy: [] });
+    });
+  }
+
+  async resetEventRegistrations(): Promise<void> {
+    this.eventRegistrations.clear();
+  }
+
+  async resetOrders(): Promise<void> {
+    this.orders.clear();
+  }
+
+  async resetCourseNotices(): Promise<void> {
+    this.currentConditions = {
+      ...this.currentConditions,
+      hazardNotes: null,
+      maintenanceNotes: []
+    };
   }
 }
 
@@ -1122,6 +1152,14 @@ export class DatabaseStorage implements IStorage {
   async resetOrders(): Promise<void> {
     // Delete all orders
     await db.delete(orders);
+  }
+
+  async resetCourseNotices(): Promise<void> {
+    // Reset hazard notes and maintenance notes to empty
+    await db.update(courseConditions).set({
+      hazardNotes: null,
+      maintenanceNotes: []
+    });
   }
 }
 
