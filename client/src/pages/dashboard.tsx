@@ -78,22 +78,21 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
     fetchWeather();
   }, []);
 
-  // Get all tee times for the next 7 days to show upcoming bookings
-  const { data: teetimes = [] } = useQuery<TeeTime[]>({
-    queryKey: ['/api/teetimes', format(new Date(), 'yyyy-MM-dd')],
-  });
-
-  // Also get tomorrow's tee times to ensure we see upcoming bookings
-  const { data: tomorrowTeetimes = [] } = useQuery<TeeTime[]>({
-    queryKey: ['/api/teetimes', format(new Date(Date.now() + 24 * 60 * 60 * 1000), 'yyyy-MM-dd')],
+  // Get user's tee time bookings
+  const { data: userTeetimes = [] } = useQuery<TeeTime[]>({
+    queryKey: ['/api/teetimes/user', currentUser?.id],
+    enabled: !!currentUser?.id,
   });
 
   const { data: orders = [] } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
   });
 
-  // Combine today's and tomorrow's tee times
-  const allTeetimes = [...teetimes, ...tomorrowTeetimes];
+  // Filter for upcoming tee times only
+  const upcomingTeetimes = userTeetimes.filter((teetime: TeeTime) => {
+    const teetimeDate = new Date(`${teetime.date}T${teetime.time}`);
+    return teetimeDate > new Date();
+  });
 
   if (isLoading) {
     return (
@@ -197,7 +196,7 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
               <div className="w-12 h-12 bg-golf-green-soft rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <Calendar className="w-6 h-6 text-golf-green" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{allTeetimes.filter((t: TeeTime) => new Date(`${t.date}T${t.time}`) > new Date()).length}</div>
+              <div className="text-2xl font-bold text-foreground mb-1">{upcomingTeetimes.length}</div>
               <div className="text-sm text-muted-foreground">Upcoming Tee Times</div>
             </CardContent>
           </Card>
@@ -222,7 +221,7 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
               <div className="w-12 h-12 bg-golf-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <TrendingUp className="w-6 h-6 text-golf-blue" />
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{allTeetimes.filter((t: TeeTime) => {
+              <div className="text-2xl font-bold text-foreground mb-1">{upcomingTeetimes.filter((t: TeeTime) => {
                 const teetimeDate = new Date(t.date);
                 const now = new Date();
                 return teetimeDate.getMonth() === now.getMonth() && teetimeDate.getFullYear() === now.getFullYear();
@@ -254,7 +253,7 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
                 <h3 className="text-lg font-semibold text-foreground">Upcoming Tee Times</h3>
               </div>
               <div className="space-y-3">
-                {allTeetimes.filter((t: TeeTime) => new Date(`${t.date}T${t.time}`) > new Date()).slice(0, 3).map((teetime: TeeTime, index: number) => (
+                {upcomingTeetimes.slice(0, 3).map((teetime: TeeTime, index: number) => (
                   <div key={teetime.id || index} className="flex items-center space-x-3">
                     <div className="bg-golf-green p-2 rounded-full">
                       <Clock className="h-4 w-4 text-white" />
@@ -268,7 +267,7 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
                     </span>
                   </div>
                 ))}
-                {allTeetimes.filter((t: TeeTime) => new Date(`${t.date}T${t.time}`) > new Date()).length === 0 && (
+                {upcomingTeetimes.length === 0 && (
                   <p className="text-muted-foreground text-center py-4">No upcoming tee times</p>
                 )}
               </div>
