@@ -434,7 +434,7 @@ export default function TeeTimes() {
                     )}
                     {booking.specialRequests && (
                       <div className="mt-3 p-2 bg-gray-50 rounded-lg border">
-                        <p className="text-sm text-muted-foreground italic">
+                        <p className="text-sm text-muted-foreground italic break-words whitespace-pre-wrap">
                           {booking.specialRequests}
                         </p>
                       </div>
