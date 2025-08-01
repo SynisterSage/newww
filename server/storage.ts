@@ -291,7 +291,7 @@ export class MemStorage implements IStorage {
           maxPlayers: 4,
           bookedBy: [],
           playerNames: [],
-          status: "available",
+          // Status automatically calculated based on bookedBy array
           isPremium: false,
           price: "85.00"
         };
@@ -486,7 +486,7 @@ export class MemStorage implements IStorage {
       maxPlayers: insertTeetime.maxPlayers || 4,
       bookedBy: insertTeetime.bookedBy || [],
       playerNames: insertTeetime.playerNames || [],
-      status: insertTeetime.status || "available",
+      // Status automatically calculated based on bookedBy array
       isPremium: insertTeetime.isPremium || false,
       price: insertTeetime.price || "85.00"
     };

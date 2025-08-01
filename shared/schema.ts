@@ -45,7 +45,7 @@ export const teetimes = pgTable("teetimes", {
   maxPlayers: integer("max_players").notNull().default(4),
   bookedBy: text("booked_by").array().default([]), // Array of user IDs who booked this slot
   playerNames: text("player_names").array().default([]), // Array of player names for display
-  status: text("status").notNull().default("available"), // available, partial, full
+  // Status is automatically calculated based on bookedBy array length
   isPremium: boolean("is_premium").default(false),
   price: decimal("price", { precision: 8, scale: 2 }).notNull().default("85.00"),
 });

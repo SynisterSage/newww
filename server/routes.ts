@@ -75,13 +75,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const newBookedBy = [...(teetime.bookedBy || []), userId];
       const newPlayerNames = [...(teetime.playerNames || []), playerName || 'Unknown'];
-      const newStatus = newBookedBy.length >= teetime.maxPlayers ? "full" : 
-                       newBookedBy.length > 0 ? "partial" : "available";
       
       const updatedTeetime = await storage.updateTeetime(id, {
         bookedBy: newBookedBy,
-        playerNames: newPlayerNames,
-        status: newStatus
+        playerNames: newPlayerNames
       });
       
       res.json(updatedTeetime);
@@ -108,13 +105,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newBookedBy = teetime.bookedBy.filter(id => id !== userId);
       const userIndex = teetime.bookedBy.indexOf(userId);
       const newPlayerNames = teetime.playerNames?.filter((_, index) => index !== userIndex) || [];
-      const newStatus = newBookedBy.length === 0 ? "available" :
-                       newBookedBy.length < teetime.maxPlayers ? "partial" : "full";
       
       const updatedTeetime = await storage.updateTeetime(id, {
         bookedBy: newBookedBy,
-        playerNames: newPlayerNames,
-        status: newStatus
+        playerNames: newPlayerNames
       });
       
       res.json(updatedTeetime);
@@ -373,54 +367,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin tee time management routes
-  app.patch("/api/admin/teetimes/:id/approve", async (req, res) => {
-    try {
-      const { id } = req.params;
-      
-      const teetime = await storage.getTeetimeById(id);
-      if (!teetime) {
-        return res.status(404).json({ message: "Tee time not found" });
-      }
-      
-      if (teetime.status !== "pending") {
-        return res.status(400).json({ message: "Tee time is not pending approval" });
-      }
-      
-      const updatedTeetime = await storage.updateTeetime(id, {
-        status: "booked"
-      });
-      
-      res.json(updatedTeetime);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to approve tee time" });
-    }
-  });
-
-  app.patch("/api/admin/teetimes/:id/deny", async (req, res) => {
-    try {
-      const { id } = req.params;
-      
-      const teetime = await storage.getTeetimeById(id);
-      if (!teetime) {
-        return res.status(404).json({ message: "Tee time not found" });
-      }
-      
-      if (teetime.status !== "pending") {
-        return res.status(400).json({ message: "Tee time is not pending approval" });
-      }
-      
-      const updatedTeetime = await storage.updateTeetime(id, {
-        status: "available",
-        bookedBy: [],
-        playerNames: []
-      });
-      
-      res.json(updatedTeetime);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to deny tee time" });
-    }
-  });
+  // Removed admin approval routes - tee times are automatically booked
 
   // Admin member management routes
   app.patch("/api/admin/members/:id", async (req, res) => {
