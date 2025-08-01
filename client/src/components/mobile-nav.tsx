@@ -13,7 +13,6 @@ export default function MobileNav() {
     { path: "/", label: "Dashboard", icon: Home },
     { path: "/tee-times", label: "Tee Times", icon: Calendar },
     { path: "/dining", label: "Dining", icon: Utensils },
-    { path: "/gps", label: "GPS", icon: MapPin },
   ];
 
   return (

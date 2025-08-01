@@ -15,7 +15,6 @@ export default function Navigation() {
     { path: "/", label: "Dashboard", icon: Home },
     { path: "/tee-times", label: "Tee Times", icon: Calendar },
     { path: "/dining", label: "Dining", icon: Utensils },
-    { path: "/gps", label: "Course GPS", icon: MapPin },
   ];
 
   return (

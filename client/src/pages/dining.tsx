@@ -1,24 +1,27 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import MenuItemCard from "@/components/menu-item";
 import { useState } from "react";
-import { Utensils } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Trash2 } from "lucide-react";
 import type { MenuItem } from "@shared/schema";
 
 export default function Dining() {
   const { toast } = useToast();
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentOrder, setCurrentOrder] = useState<{[key: string]: number}>({});
+  const [deliveryOption, setDeliveryOption] = useState("Clubhouse Pickup");
+  const [selectedHole, setSelectedHole] = useState("");
 
   const { data: menuItems = [], isLoading } = useQuery<MenuItem[]>({
-    queryKey: ['/api/menu', selectedCategory || undefined],
+    queryKey: ['/api/menu', selectedCategory === "All" ? undefined : selectedCategory],
   });
 
   const orderMutation = useMutation({
-    mutationFn: async (orderData: { userId: string; items: string[]; total: string }) => {
+    mutationFn: async (orderData: { userId: string; items: string[]; total: string; deliveryOption: string; deliveryLocation?: string }) => {
       const response = await apiRequest('POST', '/api/orders', orderData);
       return response.json();
     },
@@ -43,10 +46,6 @@ export default function Dining() {
       ...prev,
       [itemId]: (prev[itemId] || 0) + 1
     }));
-    toast({
-      title: "Item Added",
-      description: "Item added to your order",
-    });
   };
 
   const removeFromOrder = (itemId: string) => {
@@ -59,6 +58,10 @@ export default function Dining() {
       }
       return newOrder;
     });
+  };
+
+  const clearOrder = () => {
+    setCurrentOrder({});
   };
 
   const calculateTotal = () => {
@@ -78,167 +81,263 @@ export default function Dining() {
     orderMutation.mutate({
       userId: 'user-1',
       items: orderItems,
-      total: calculateTotal().toFixed(2)
+      total: calculateTotal().toFixed(2),
+      deliveryOption,
+      deliveryLocation: deliveryOption === "Deliver on Course" ? `Hole ${selectedHole}` : undefined
     });
   };
 
-  const groupedItems = menuItems.reduce((acc, item) => {
-    if (!acc[item.category]) {
-      acc[item.category] = [];
-    }
-    acc[item.category].push(item);
-    return acc;
-  }, {} as Record<string, MenuItem[]>);
+  const filteredItems = selectedCategory === "All" 
+    ? menuItems
+    : menuItems.filter(item => item.category === selectedCategory);
 
-  const categoryNames = {
-    appetizers: "Appetizers",
-    main_course: "Main Course",
-    beverages: "Beverages",
-    desserts: "Desserts"
-  };
+  const totalItems = Object.values(currentOrder).reduce((sum, count) => sum + count, 0);
+  const orderTotal = calculateTotal();
 
   if (isLoading) {
     return (
-      <div className="p-4 lg:p-8">
-        <div className="animate-pulse space-y-8">
-          <div className="h-32 bg-gray-300 rounded-2xl"></div>
-          <div className="h-64 bg-gray-300 rounded-xl"></div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="space-y-4">
-                <div className="h-8 bg-gray-300 rounded"></div>
-                {[1, 2, 3].map((j) => (
-                  <div key={j} className="h-32 bg-gray-300 rounded-xl"></div>
-                ))}
-              </div>
-            ))}
+      <div className="flex h-screen">
+        <div className="flex-1 p-6">
+          <div className="animate-pulse space-y-6">
+            <div className="h-20 bg-muted rounded-xl"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="h-48 bg-muted rounded-xl"></div>
+              ))}
+            </div>
           </div>
         </div>
+        <div className="w-96 bg-muted"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 lg:p-8 space-y-8">
-      <Card>
-        <CardContent className="p-6 lg:p-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-golf-green mb-2">Clubhouse Dining</h1>
-              <p className="text-gray-600">Premium culinary experience with course views</p>
-            </div>
-            <div className="mt-4 lg:mt-0">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
-                  <SelectItem value="appetizers">Appetizers</SelectItem>
-                  <SelectItem value="main_course">Main Course</SelectItem>
-                  <SelectItem value="beverages">Beverages</SelectItem>
-                  <SelectItem value="desserts">Desserts</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+    <div className="flex h-screen bg-background">
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto">
+        <div className="p-6 max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-foreground mb-2">Dining Menu</h1>
+            <p className="text-muted-foreground">Order from our premium clubhouse restaurant</p>
           </div>
 
-          {/* Featured Dining Image */}
-          <div 
-            className="relative h-64 rounded-xl overflow-hidden mb-8 bg-cover bg-center"
-            style={{
-              backgroundImage: `url('https://images.unsplash.com/photo-1559329007-40df8a9345d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=600')`
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-            <div className="absolute bottom-6 left-6 text-white">
-              <h2 className="text-2xl font-bold mb-2">The 19th Hole Restaurant</h2>
-              <p className="text-lg opacity-90">Fine dining with championship course views</p>
-            </div>
+          {/* Category Filter */}
+          <div className="mb-6">
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-64">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All Categories</SelectItem>
+                <SelectItem value="Appetizers">Appetizers</SelectItem>
+                <SelectItem value="Mains">Main Course</SelectItem>
+                <SelectItem value="Desserts">Desserts</SelectItem>
+                <SelectItem value="Beverages">Beverages</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Menu Categories */}
-          {selectedCategory ? (
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-golf-green border-b border-golf-gold pb-2">
-                {categoryNames[selectedCategory as keyof typeof categoryNames]}
-              </h3>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {groupedItems[selectedCategory]?.map((item) => (
-                  <MenuItemCard
-                    key={item.id}
-                    item={item}
-                    quantity={currentOrder[item.id] || 0}
-                    onAdd={() => addToOrder(item.id)}
-                    onRemove={() => removeFromOrder(item.id)}
-                  />
-                ))}
-              </div>
+          {/* Menu Items Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6">
+            {filteredItems.map((item) => (
+              <Card key={item.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-foreground mb-1">{item.name}</h3>
+                      <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-bold text-golf-green">${item.price}</span>
+                        <Badge variant="secondary" className="text-xs">
+                          {item.category}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    {currentOrder[item.id] ? (
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => removeFromOrder(item.id)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Minus className="w-4 h-4" />
+                        </Button>
+                        <span className="w-8 text-center font-medium">
+                          {currentOrder[item.id]}
+                        </span>
+                        <Button
+                          size="sm"
+                          onClick={() => addToOrder(item.id)}
+                          className="h-8 w-8 p-0 bg-golf-green hover:bg-golf-green-light text-white"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={() => addToOrder(item.id)}
+                        className="bg-golf-green hover:bg-golf-green-light text-white"
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Add to Order
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Order Sidebar */}
+      <div className="w-96 bg-card border-l border-border flex flex-col">
+        <div className="p-6 border-b border-border">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <ShoppingCart className="w-5 h-5 text-foreground" />
+              <h2 className="text-lg font-semibold text-foreground">Your Order</h2>
+            </div>
+            {totalItems > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearOrder}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-auto">
+          {totalItems === 0 ? (
+            <div className="p-6 text-center">
+              <ShoppingCart className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">Your order is empty</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {Object.entries(groupedItems).map(([category, items]) => (
-                <div key={category} className="space-y-4">
-                  <h3 className="text-xl font-semibold text-golf-green border-b border-golf-gold pb-2">
-                    {categoryNames[category as keyof typeof categoryNames]}
-                  </h3>
-                  {items.slice(0, 3).map((item) => (
-                    <MenuItemCard
-                      key={item.id}
-                      item={item}
-                      quantity={currentOrder[item.id] || 0}
-                      onAdd={() => addToOrder(item.id)}
-                      onRemove={() => removeFromOrder(item.id)}
-                    />
-                  ))}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Order Summary */}
-          <div className="mt-8 p-6 bg-gray-50 rounded-xl">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-golf-green">Current Order</h3>
-              <span className="text-sm text-gray-600">Table service available</span>
-            </div>
-            {Object.keys(currentOrder).length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <Utensils className="mx-auto text-3xl mb-3" />
-                <p>No items in your order yet</p>
-                <p className="text-sm">Add items from the menu above</p>
-              </div>
-            ) : (
+            <div className="p-6">
               <div className="space-y-4">
                 {Object.entries(currentOrder).map(([itemId, quantity]) => {
-                  const item = menuItems.find(item => item.id === itemId);
+                  const item = menuItems.find(mi => mi.id === itemId);
                   if (!item) return null;
                   
                   return (
-                    <div key={itemId} className="flex justify-between items-center">
-                      <div>
-                        <span className="font-medium">{item.name}</span>
-                        <span className="text-gray-600 ml-2">x{quantity}</span>
+                    <div key={itemId} className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-foreground">{item.name}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          ${item.price} • {item.category}
+                        </p>
                       </div>
-                      <span className="font-semibold">${(parseFloat(item.price) * quantity).toFixed(2)}</span>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => removeFromOrder(itemId)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Minus className="w-3 h-3" />
+                        </Button>
+                        <span className="w-8 text-center text-sm">{quantity}</span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => addToOrder(itemId)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setCurrentOrder(prev => {
+                              const newOrder = { ...prev };
+                              delete newOrder[itemId];
+                              return newOrder;
+                            });
+                          }}
+                          className="h-8 w-8 p-0 text-red-500 hover:text-red-600"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
                     </div>
                   );
                 })}
-                <div className="border-t pt-4 flex justify-between items-center">
-                  <span className="text-lg font-semibold">Total: ${calculateTotal().toFixed(2)}</span>
-                  <button
-                    onClick={placeOrder}
-                    disabled={orderMutation.isPending}
-                    className="bg-golf-gold hover:bg-golf-gold/90 text-white px-6 py-2 rounded-lg font-medium disabled:opacity-50"
-                  >
-                    {orderMutation.isPending ? "Placing Order..." : "Place Order"}
-                  </button>
-                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {totalItems > 0 && (
+          <div className="border-t border-border p-6 space-y-4">
+            {/* Delivery Options */}
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">
+                Delivery Option
+              </label>
+              <Select value={deliveryOption} onValueChange={setDeliveryOption}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Clubhouse Pickup">Clubhouse Pickup</SelectItem>
+                  <SelectItem value="Dine In">Dine In</SelectItem>
+                  <SelectItem value="Deliver on Course">Deliver on Course</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {deliveryOption === "Deliver on Course" && (
+              <div>
+                <label className="text-sm font-medium text-foreground mb-2 block">
+                  Select Hole
+                </label>
+                <Select value={selectedHole} onValueChange={setSelectedHole}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose hole" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((hole) => (
+                      <SelectItem key={hole} value={hole.toString()}>
+                        Hole {hole}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
+
+            {/* Total */}
+            <div className="border-t border-border pt-4">
+              <div className="flex items-center justify-between text-lg font-bold text-foreground">
+                <span>Total:</span>
+                <span>${orderTotal.toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* Place Order Button */}
+            <Button
+              onClick={placeOrder}
+              disabled={orderMutation.isPending || (deliveryOption === "Deliver on Course" && !selectedHole)}
+              className="w-full bg-golf-green hover:bg-golf-green-light text-white py-3"
+            >
+              {orderMutation.isPending ? "Placing Order..." : "Place Order"}
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
     </div>
   );
 }
