@@ -182,7 +182,7 @@ export default function Dashboard() {
                     </div>
                     <div className="flex-1">
                       <p className="font-medium">{format(new Date(teetime.date), 'MMM dd')} at {teetime.time}</p>
-                      <p className="text-sm text-muted-foreground">{teetime.players} players</p>
+                      <p className="text-sm text-muted-foreground">{teetime.spotsAvailable} spots available</p>
                     </div>
                     <span className="text-sm bg-golf-green text-white px-2 py-1 rounded">
                       {teetime.holes === 18 ? 'Championship Course' : 'Practice Range'}
