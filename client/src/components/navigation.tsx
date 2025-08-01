@@ -77,8 +77,8 @@ export default function Navigation({ userEmail }: NavigationProps) {
                     {userEmail ? userEmail.substring(0, 2).toUpperCase() : "JD"}
                   </span>
                 </div>
-                <div>
-                  <h3 className="font-medium text-white">{userEmail || "Member"}</h3>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-white text-sm truncate">{userEmail || "Member"}</h3>
                   <p className="text-xs text-white/70">Member</p>
                 </div>
               </div>

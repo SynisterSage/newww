@@ -32,7 +32,7 @@ function Router() {
       <Navigation userEmail={userEmail} />
       <main className="flex-1 lg:ml-64 pb-16 lg:pb-0">
         <Switch>
-          <Route path="/" component={Dashboard} />
+          <Route path="/">{() => <Dashboard userEmail={userEmail} />}</Route>
           <Route path="/tee-times" component={TeeTimes} />
           <Route path="/dining" component={Dining} />
           <Route path="/conditions" component={Conditions} />

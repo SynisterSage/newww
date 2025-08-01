@@ -7,7 +7,11 @@ import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import type { User as UserType, TeeTime, Order } from "@shared/schema";
 
-export default function Dashboard() {
+interface DashboardProps {
+  userEmail?: string;
+}
+
+export default function Dashboard({ userEmail }: DashboardProps) {
   const { data: user, isLoading } = useQuery<UserType>({
     queryKey: ['/api/user/user-1'],
   });
@@ -109,7 +113,7 @@ export default function Dashboard() {
       {/* Modern Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl font-bold text-[#08452e]">Welcome Back</h1>
+          <h1 className="text-3xl font-bold text-[#08452e]">Welcome Back{userEmail ? `, ${userEmail}` : ""}</h1>
           <div className="text-sm text-muted-foreground">
             {new Date().toLocaleDateString('en-US', { 
               weekday: 'long', 
