@@ -133,7 +133,7 @@ export default function Dining({ userData }: DiningProps) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F8F6F0]">
-        <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
           <div className="animate-pulse space-y-6">
             <div className="h-20 bg-gray-300 rounded-xl"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -157,13 +157,13 @@ export default function Dining({ userData }: DiningProps) {
         />
       )}
       {/* Main Content */}
-      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto pb-20 lg:pb-8">
         {/* Header */}
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2 text-[#08452e]">Order Food & Drinks</h1>
-              <p className="text-muted-foreground">From the clubhouse to the course</p>
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-[#08452e]">Order Food & Drinks</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">From the clubhouse to the course</p>
             </div>
             
             {/* View Cart Button */}
@@ -207,7 +207,7 @@ export default function Dining({ userData }: DiningProps) {
         </div>
 
         {/* Menu Items Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 pb-6">
           {filteredItems.map((item) => {
             const isExpanded = expandedCard === item.id;
             return (

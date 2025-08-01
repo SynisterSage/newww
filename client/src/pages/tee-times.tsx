@@ -189,14 +189,14 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
 
   return (
     <div className="min-h-screen bg-[#F8F6F0]">
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 max-w-7xl mx-auto pb-20 lg:pb-8">
 
 
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#08452e] mb-2">Tee Times</h1>
-          <p className="text-muted-foreground">Book and manage your golf reservations</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#08452e] mb-2">Tee Times</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Book and manage your golf reservations</p>
         </div>
         
         <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>

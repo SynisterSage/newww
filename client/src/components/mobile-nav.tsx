@@ -19,7 +19,7 @@ export default function MobileNav() {
   ];
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border px-4 py-2 z-50">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border px-2 sm:px-4 py-2 z-50 shadow-lg">
       <div className="flex justify-around">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -29,7 +29,7 @@ export default function MobileNav() {
             <Link 
               key={item.path} 
               href={item.path}
-              className={`flex flex-col items-center space-y-1 py-2 px-3 transition-colors cursor-pointer no-underline ${
+              className={`flex flex-col items-center space-y-1 py-2 px-2 sm:px-3 transition-colors cursor-pointer no-underline ${
                 isActive ? "text-golf-green" : "text-muted-foreground"
               }`}
             >
@@ -38,7 +38,7 @@ export default function MobileNav() {
               }`}>
                 <Icon className="w-5 h-5" />
               </div>
-              <span className="text-xs font-medium">{item.label}</span>
+              <span className="text-xs font-medium leading-tight">{item.label}</span>
             </Link>
           );
         })}

@@ -68,11 +68,11 @@ export default function ConditionsPage() {
 
   return (
     <div className="min-h-screen bg-[#F8F6F0]">
-      <div className="p-6 lg:p-8 max-w-6xl mx-auto">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto pb-20 lg:pb-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#08452e] mb-2">Course Conditions</h1>
-          <p className="text-muted-foreground">Packanack Golf Club - 9 Hole Course</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#08452e] mb-2">Course Conditions</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Packanack Golf Club - 9 Hole Course</p>
           <p className="text-sm text-muted-foreground mt-1">
             Last Updated: {conditions ? new Date(conditions.lastUpdated).toLocaleDateString() : "Never"}
           </p>
@@ -83,7 +83,7 @@ export default function ConditionsPage() {
           <h2 className="text-xl font-semibold text-[#08452e] mb-4">Current Weather</h2>
           <Card className="border-0 shadow-sm bg-white">
             <CardContent className="p-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
                 <div className="text-center">
                   <div className="text-4xl mb-3">{getWeatherIcon(conditions?.weather || 'sunny')}</div>
                   <p className="font-semibold text-gray-900 capitalize">
@@ -117,7 +117,7 @@ export default function ConditionsPage() {
         {/* Course Information */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-[#08452e] mb-4">Course Status</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Course Status */}
             <Card className="border-0 shadow-sm bg-white">
               <CardContent className="p-6 text-center">

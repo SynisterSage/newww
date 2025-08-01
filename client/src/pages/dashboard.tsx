@@ -113,12 +113,12 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F8F6F0]">
-        <div className="p-4 lg:p-8">
-          <div className="animate-pulse space-y-8">
-            <div className="h-64 bg-gray-300 rounded-2xl"></div>
-            <div className="grid md:grid-cols-3 gap-6">
+        <div className="p-4 sm:p-6 lg:p-8">
+          <div className="animate-pulse space-y-6 lg:space-y-8">
+            <div className="h-48 sm:h-56 lg:h-64 bg-gray-300 rounded-2xl"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-80 bg-gray-300 rounded-2xl"></div>
+                <div key={i} className="h-64 sm:h-72 lg:h-80 bg-gray-300 rounded-2xl"></div>
               ))}
             </div>
           </div>
@@ -129,16 +129,16 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
 
   return (
     <div className="min-h-screen bg-[#F8F6F0]">
-      <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 max-w-7xl mx-auto pb-20 lg:pb-8">
       {/* Modern Header */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl font-bold text-[#08452e]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#08452e] leading-tight">
             Welcome Back{currentUser?.firstName && currentUser?.lastName 
               ? `, ${currentUser.firstName} ${currentUser.lastName}` 
               : userEmail ? `, ${userEmail}` : ""}
           </h1>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs sm:text-sm text-muted-foreground">
             {new Date().toLocaleDateString('en-US', { 
               weekday: 'long', 
               year: 'numeric', 
@@ -154,27 +154,27 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
         <p className="text-muted-foreground">Your personalized golf club dashboard</p>
       </div>
       {/* Quick Actions Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 lg:mb-8">
         <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 shadow-sm">
-          <CardContent className="p-6 text-center">
+          <CardContent className="p-4 sm:p-6 text-center">
             <Link href="/tee-times">
-              <div className="w-14 h-14 bg-golf-green-soft rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                <Calendar className="w-7 h-7 text-golf-green" />
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-golf-green-soft rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
+                <Calendar className="w-6 h-6 sm:w-7 sm:h-7 text-golf-green" />
               </div>
-              <h3 className="font-semibold text-foreground mb-1">Book Tee Time</h3>
-              <p className="text-sm text-muted-foreground">Reserve your preferred slot</p>
+              <h3 className="font-semibold text-foreground mb-1 text-sm sm:text-base">Book Tee Time</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">Reserve your preferred slot</p>
             </Link>
           </CardContent>
         </Card>
 
         <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 shadow-sm">
-          <CardContent className="p-6 text-center">
+          <CardContent className="p-4 sm:p-6 text-center">
             <Link href="/dining">
-              <div className="w-14 h-14 bg-golf-orange/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                <Utensils className="w-7 h-7 text-golf-orange" />
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-golf-orange/10 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
+                <Utensils className="w-6 h-6 sm:w-7 sm:h-7 text-golf-orange" />
               </div>
-              <h3 className="font-semibold text-foreground mb-1">Order Food</h3>
-              <p className="text-sm text-muted-foreground">Browse clubhouse menu</p>
+              <h3 className="font-semibold text-foreground mb-1 text-sm sm:text-base">Order Food</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">Browse clubhouse menu</p>
             </Link>
           </CardContent>
         </Card>
