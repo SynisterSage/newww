@@ -297,8 +297,9 @@ export default function Events() {
                     <div className="space-y-2">
                       <Button 
                         variant="default"
-                        className="w-full h-10 bg-[#1B4332] hover:bg-[#1B4332] text-white border-[#1B4332] cursor-default opacity-100"
+                        className="w-full h-10 bg-[#1B4332] hover:bg-[#1B4332] text-white border-[#1B4332] cursor-default"
                         disabled
+                        style={{ opacity: 1 }}
                       >
                         <span>Registered</span>
                       </Button>
@@ -308,7 +309,7 @@ export default function Events() {
                         onClick={() => handleWithdrawal(event)}
                         disabled={!canWithdraw(event.date)}
                       >
-                        {canWithdraw(event.date) ? 'Withdraw' : 'Cannot withdraw (< 24h)'}
+                        Withdraw
                       </Button>
                     </div>
                   )}
