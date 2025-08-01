@@ -49,7 +49,7 @@ export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminN
               <Shield className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="font-semibold text-lg">Packanack Golf Club</h1>
+              <h1 className="font-semibold text-lg">PGC</h1>
               <p className="text-xs text-white/60">Admin Portal</p>
             </div>
           </div>
