@@ -87,6 +87,27 @@ export default function Events() {
     });
   };
 
+  const handleWithdrawal = (event: Event) => {
+    setRegisteredEvents(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(event.id);
+      return newSet;
+    });
+    setOpenModal(null);
+    toast({
+      title: "Withdrawal Successful",
+      description: `You've been withdrawn from ${event.title}.`,
+    });
+  };
+
+  const canWithdraw = (eventDate: Date) => {
+    const now = new Date();
+    const eventTime = new Date(eventDate);
+    const timeDiff = eventTime.getTime() - now.getTime();
+    const hoursDiff = timeDiff / (1000 * 3600);
+    return hoursDiff > 24;
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F6F0]">
       <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
@@ -164,7 +185,7 @@ export default function Events() {
                         variant={isRegistered ? "default" : "outline"}
                         className={`w-full h-10 justify-between transition-colors ${
                           isRegistered 
-                            ? "bg-green-600 hover:bg-green-700 text-white border-green-600" 
+                            ? "bg-[#1B4332] hover:bg-[#2D5A3D] text-white border-[#1B4332]" 
                             : "border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white"
                         }`}
                         disabled={isRegistered}
@@ -245,15 +266,32 @@ export default function Events() {
                         )}
                         
                         {isRegistered && (
-                          <div className="text-center py-4">
-                            <div className="inline-flex items-center space-x-2 text-green-600">
-                              <div className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
-                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
+                          <div className="space-y-4">
+                            <div className="text-center py-4">
+                              <div className="inline-flex items-center space-x-2 text-[#1B4332]">
+                                <div className="w-5 h-5 bg-[#1B4332] rounded-full flex items-center justify-center flex-shrink-0">
+                                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                                <span className="font-medium">You're registered for this event!</span>
                               </div>
-                              <span className="font-medium">You're registered for this event!</span>
                             </div>
+                            
+                            <Button 
+                              variant="outline"
+                              className="w-full h-10 border-red-500 text-red-600 hover:bg-red-50 hover:border-red-600"
+                              onClick={() => handleWithdrawal(event)}
+                              disabled={!canWithdraw(event.date)}
+                            >
+                              {canWithdraw(event.date) ? 'Withdraw from Event' : 'Cannot withdraw (< 24h)'}
+                            </Button>
+                            
+                            {!canWithdraw(event.date) && (
+                              <p className="text-xs text-muted-foreground text-center">
+                                Withdrawal is not allowed within 24 hours of the event
+                              </p>
+                            )}
                           </div>
                         )}
                       </div>
