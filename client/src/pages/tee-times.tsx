@@ -1,7 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -402,9 +401,9 @@ export default function TeeTimes() {
                         <p className="text-sm text-muted-foreground">Tee Time Booking</p>
                       </div>
                     </div>
-                    <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                    <span className="bg-yellow-100 text-yellow-800 border-yellow-300 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">
                       {booking.status}
-                    </Badge>
+                    </span>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-4">
@@ -422,9 +421,9 @@ export default function TeeTimes() {
                       <span>Packanack Golf Course</span>
                     </div>
                     <div className="flex items-center text-sm text-muted-foreground">
-                      <Badge className="bg-golf-green text-white text-xs px-2 py-1">
+                      <span className="bg-golf-green text-white text-xs px-2 py-1 inline-flex items-center rounded-full">
                         {booking.holes} Holes
-                      </Badge>
+                      </span>
                     </div>
                     {booking.cartOption && (
                       <div className="flex items-center text-sm text-muted-foreground">
@@ -512,9 +511,9 @@ export default function TeeTimes() {
                   </div>
                   
                   <div className="flex items-center text-sm">
-                    <Badge className="bg-golf-green text-white text-xs px-2 py-1">
+                    <span className="bg-golf-green text-white text-xs px-2 py-1 inline-flex items-center rounded-full">
                       {teetime.holes || 18} Holes
-                    </Badge>
+                    </span>
                   </div>
                 </div>
 
@@ -568,9 +567,9 @@ export default function TeeTimes() {
                     <span className="text-lg font-semibold">
                       No tee times available
                     </span>
-                    <Badge className="bg-orange-100 text-orange-700 text-xs font-medium px-2 py-1">
+                    <span className="bg-orange-100 text-orange-700 text-xs font-medium px-2 py-1 inline-flex items-center rounded-full border">
                       pending
-                    </Badge>
+                    </span>
                   </div>
                   <p className="text-sm text-muted-foreground">Tee Time Booking</p>
                 </div>
