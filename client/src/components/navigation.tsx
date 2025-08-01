@@ -37,7 +37,7 @@ export default function Navigation({ userEmail }: NavigationProps) {
         </div>
       </nav>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block w-64 bg-golf-green text-white min-h-screen fixed left-0 top-0 z-40">
+      <aside className="hidden lg:block w-64 text-white min-h-screen fixed left-0 top-0 z-40 bg-[#032617]">
         <div className="p-6">
           <div className="flex items-center space-x-3 mb-8">
             <div className="w-10 h-10 bg-golf-gold rounded-xl flex items-center justify-center">
