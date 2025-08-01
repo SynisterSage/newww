@@ -72,7 +72,7 @@ export default function Navigation() {
                   <span className="text-golf-green font-bold text-sm">JD</span>
                 </div>
                 <div>
-                  <h3 className="font-medium text-white">John Doe</h3>
+                  <h3 className="font-medium text-white">Lex Ferguson</h3>
                   <p className="text-xs text-white/70">Member</p>
                 </div>
               </div>
