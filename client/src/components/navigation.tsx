@@ -8,7 +8,11 @@ import {
   Trophy
 } from "lucide-react";
 
-export default function Navigation() {
+interface NavigationProps {
+  userEmail?: string;
+}
+
+export default function Navigation({ userEmail }: NavigationProps) {
   const [location] = useLocation();
 
   const navItems = [

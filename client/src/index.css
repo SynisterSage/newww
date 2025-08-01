@@ -155,4 +155,13 @@
   .gradient-golf {
     background: linear-gradient(135deg, var(--golf-green) 0%, var(--golf-green-light) 100%);
   }
+  
+  /* Custom animations for loading spinner */
+  .animation-delay-200 {
+    animation-delay: 0.2s;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 0.4s;
+  }
 }
