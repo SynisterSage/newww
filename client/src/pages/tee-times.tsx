@@ -224,7 +224,9 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
 
         {/* Tee Time Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {teetimes.map((teetime) => {
+          {[...teetimes]
+            .sort((a, b) => a.time.localeCompare(b.time))
+            .map((teetime) => {
             const statusInfo = getStatusInfo(teetime);
             const isUserBooked = teetime.bookedBy?.includes(userData?.id || "");
             
@@ -312,7 +314,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
                 </CardContent>
               </Card>
             );
-          })}
+            })}
         </div>
 
         {/* Empty State */}
