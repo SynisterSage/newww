@@ -10,7 +10,7 @@ import { AuthLogin } from "@/components/auth-login";
 import Dashboard from "@/pages/dashboard";
 import TeeTimes from "@/pages/tee-times";
 import Dining from "@/pages/dining";
-import Conditions from "@/pages/conditions";
+import CourseConditions from "@/pages/course-conditions";
 import Events from "@/pages/events";
 import NotFound from "@/pages/not-found";
 
@@ -35,7 +35,7 @@ function Router() {
           <Route path="/" component={Dashboard} />
           <Route path="/tee-times" component={TeeTimes} />
           <Route path="/dining" component={Dining} />
-          <Route path="/conditions" component={Conditions} />
+          <Route path="/course-conditions" component={CourseConditions} />
           <Route path="/events" component={Events} />
           <Route component={NotFound} />
         </Switch>
