@@ -12,14 +12,14 @@ export default function ConditionsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-stone-100 to-stone-200 p-6">
+      <div className="min-h-screen bg-[#F8F6F0] p-6">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
-            <CloudSun className="h-8 w-8 text-golf-green" />
-            <h1 className="text-3xl font-bold text-golf-green">Course Conditions</h1>
+            <CloudSun className="h-8 w-8 text-[#08452e]" />
+            <h1 className="text-3xl font-bold text-[#08452e]">Course Conditions</h1>
           </div>
           <div className="text-center py-12">
-            <div className="animate-spin h-8 w-8 border-2 border-golf-green border-t-transparent rounded-full mx-auto"></div>
+            <div className="animate-spin h-8 w-8 border-2 border-[#08452e] border-t-transparent rounded-full mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading course conditions...</p>
           </div>
         </div>
@@ -67,178 +67,140 @@ export default function ConditionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-stone-100 to-stone-200 px-4 py-6 md:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#F8F6F0]">
+      <div className="p-6 lg:p-8 max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white rounded-xl shadow-sm border border-gray-100">
-                <CloudSun className="h-8 w-8 text-golf-green" />
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold text-golf-green tracking-tight">Course Conditions</h1>
-                <p className="text-gray-600 mt-1">Packanack Golf Club - 9 Hole Course</p>
-              </div>
-            </div>
-            <div className="hidden md:flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
-              <Clock className="h-4 w-4 text-gray-500" />
-              <span className="text-sm text-gray-600">
-                Updated: {conditions ? new Date(conditions.lastUpdated).toLocaleDateString() : "Never"}
-              </span>
-            </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-[#08452e] mb-2">Course Conditions</h1>
+          <p className="text-muted-foreground">Packanack Golf Club - 9 Hole Course</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Last Updated: {conditions ? new Date(conditions.lastUpdated).toLocaleDateString() : "Never"}
+          </p>
+        </div>
+
+        {/* Weather Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-[#08452e] mb-4">Current Weather</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="border-0 shadow-sm bg-white">
+              <CardContent className="p-6 text-center">
+                <div className="text-4xl mb-3">{getWeatherIcon(conditions?.weather || 'sunny')}</div>
+                <p className="font-semibold text-gray-900 capitalize">
+                  {conditions?.weather?.replace('-', ' ') || 'Sunny'}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">Conditions</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-0 shadow-sm bg-white">
+              <CardContent className="p-6 text-center">
+                <Thermometer className="h-8 w-8 text-red-500 mx-auto mb-3" />
+                <p className="text-2xl font-bold text-gray-900 mb-1">{conditions?.temperature || 72}°F</p>
+                <p className="text-sm text-muted-foreground">Temperature</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-0 shadow-sm bg-white">
+              <CardContent className="p-6 text-center">
+                <Wind className="h-8 w-8 text-blue-500 mx-auto mb-3" />
+                <p className="text-2xl font-bold text-gray-900 mb-1">{conditions?.windSpeed || 5} mph</p>
+                <p className="text-sm text-muted-foreground">Wind Speed</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-0 shadow-sm bg-white">
+              <CardContent className="p-6 text-center">
+                <Droplets className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+                <p className="text-2xl font-bold text-gray-900 mb-1">{conditions?.humidity || 45}%</p>
+                <p className="text-sm text-muted-foreground">Humidity</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
-        {/* Current Weather Section */}
+        {/* Course Information */}
         <div className="mb-8">
-          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-3">
-                <div className="w-2 h-8 bg-golf-green rounded-full"></div>
-                Current Weather Conditions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="text-center p-6 bg-gradient-to-b from-gray-50 to-white rounded-xl border border-gray-100">
-                  <div className="text-5xl mb-3">{getWeatherIcon(conditions?.weather || 'sunny')}</div>
-                  <p className="font-semibold text-gray-900 capitalize text-lg">
-                    {conditions?.weather?.replace('-', ' ') || 'Sunny'}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">Conditions</p>
-                </div>
-                <div className="text-center p-6 bg-gradient-to-b from-gray-50 to-white rounded-xl border border-gray-100">
-                  <div className="flex items-center justify-center mb-3">
-                    <Thermometer className="h-8 w-8 text-red-500 mr-2" />
-                    <span className="text-4xl font-bold text-gray-900">{conditions?.temperature || 72}°F</span>
-                  </div>
-                  <p className="text-sm text-gray-500">Temperature</p>
-                </div>
-                <div className="text-center p-6 bg-gradient-to-b from-gray-50 to-white rounded-xl border border-gray-100">
-                  <div className="flex items-center justify-center mb-3">
-                    <Wind className="h-8 w-8 text-blue-500 mr-2" />
-                    <span className="text-4xl font-bold text-gray-900">{conditions?.windSpeed || 5}</span>
-                  </div>
-                  <p className="text-sm text-gray-500">Wind Speed (mph)</p>
-                </div>
-                <div className="text-center p-6 bg-gradient-to-b from-gray-50 to-white rounded-xl border border-gray-100">
-                  <div className="flex items-center justify-center mb-3">
-                    <Droplets className="h-8 w-8 text-blue-600 mr-2" />
-                    <span className="text-4xl font-bold text-gray-900">{conditions?.humidity || 45}%</span>
-                  </div>
-                  <p className="text-sm text-gray-500">Humidity</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Course Status & Conditions Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Course Status */}
-          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-3">
-                <div className="w-2 h-6 bg-golf-green rounded-full"></div>
-                Course Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="text-center p-4 bg-gradient-to-b from-gray-50 to-white rounded-lg border border-gray-100">
-                <p className="text-sm font-medium text-gray-600 mb-3">Current Status</p>
-                <Badge className={`${getStatusColor(conditions?.courseStatus || 'open')} text-base px-6 py-2 capitalize font-medium`}>
+          <h2 className="text-xl font-semibold text-[#08452e] mb-4">Course Status</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Course Status */}
+            <Card className="border-0 shadow-sm bg-white">
+              <CardContent className="p-6 text-center">
+                <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-3" />
+                <p className="font-semibold text-gray-900 mb-1">Course Status</p>
+                <Badge className={`${getStatusColor(conditions?.courseStatus || 'open')} capitalize`}>
                   {conditions?.courseStatus || 'Open'}
                 </Badge>
-              </div>
-              <div className="text-center p-4 bg-gradient-to-b from-gray-50 to-white rounded-lg border border-gray-100">
-                <p className="text-sm font-medium text-gray-600 mb-3">Cart Policy</p>
-                <Badge className={`${conditions?.cartPathOnly ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200'} text-base px-6 py-2 font-medium border`}>
+              </CardContent>
+            </Card>
+
+            {/* Cart Policy */}
+            <Card className="border-0 shadow-sm bg-white">
+              <CardContent className="p-6 text-center">
+                <MapPin className="h-8 w-8 text-blue-500 mx-auto mb-3" />
+                <p className="font-semibold text-gray-900 mb-1">Cart Policy</p>
+                <Badge className={`${conditions?.cartPathOnly ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
                   {conditions?.cartPathOnly ? 'Cart Path Only' : 'Fairways Allowed'}
                 </Badge>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Playing Conditions */}
-          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-3">
-                <div className="w-2 h-6 bg-golf-green rounded-full"></div>
-                Playing Conditions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="text-center p-4 bg-gradient-to-b from-gray-50 to-white rounded-lg border border-gray-100">
-                <p className="text-sm font-medium text-gray-600 mb-3">Greens</p>
-                <Badge className={`${getConditionColor(conditions?.greensCondition || 'excellent')} text-base px-6 py-2 capitalize font-medium`}>
+            {/* Greens Condition */}
+            <Card className="border-0 shadow-sm bg-white">
+              <CardContent className="p-6 text-center">
+                <div className="w-8 h-8 bg-green-500 rounded-full mx-auto mb-3 flex items-center justify-center">
+                  <div className="w-4 h-4 bg-white rounded-full"></div>
+                </div>
+                <p className="font-semibold text-gray-900 mb-1">Greens</p>
+                <Badge className={`${getConditionColor(conditions?.greensCondition || 'excellent')} capitalize`}>
                   {conditions?.greensCondition || 'Excellent'}
                 </Badge>
-              </div>
-              <div className="text-center p-4 bg-gradient-to-b from-gray-50 to-white rounded-lg border border-gray-100">
-                <p className="text-sm font-medium text-gray-600 mb-3">Fairways</p>
-                <Badge className={`${getConditionColor(conditions?.fairwaysCondition || 'good')} text-base px-6 py-2 capitalize font-medium`}>
+              </CardContent>
+            </Card>
+
+            {/* Fairways Condition */}
+            <Card className="border-0 shadow-sm bg-white">
+              <CardContent className="p-6 text-center">
+                <div className="w-8 h-8 bg-green-400 rounded-full mx-auto mb-3 flex items-center justify-center">
+                  <div className="w-4 h-4 bg-white rounded-full"></div>
+                </div>
+                <p className="font-semibold text-gray-900 mb-1">Fairways</p>
+                <Badge className={`${getConditionColor(conditions?.fairwaysCondition || 'good')} capitalize`}>
                   {conditions?.fairwaysCondition || 'Good'}
                 </Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Course Information */}
-          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-3">
-                <div className="w-2 h-6 bg-golf-green rounded-full"></div>
-                Course Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center p-6 bg-gradient-to-b from-golf-green-soft to-white rounded-lg border border-golf-green-light">
-                <div className="mb-4">
-                  <MapPin className="h-8 w-8 text-golf-green mx-auto mb-2" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Packanack Golf Club</h3>
-                <p className="text-golf-green font-semibold text-lg mb-3">-</p>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  Course conditions are monitored and updated regularly by our professional grounds crew to ensure optimal playing conditions.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Course Notices */}
         {(conditions?.hazardNotes || conditions?.maintenanceNotes) && (
-          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-3">
-                <div className="w-2 h-8 bg-red-500 rounded-full"></div>
-                Course Notices & Alerts
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {conditions?.hazardNotes && (
-                  <div className="p-6 bg-gradient-to-b from-red-50 to-white rounded-xl border-l-4 border-red-400 shadow-sm">
-                    <div className="flex items-center gap-3 mb-4">
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold text-[#08452e] mb-4">Course Notices</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {conditions?.hazardNotes && (
+                <Card className="border-0 shadow-sm bg-white border-l-4 border-red-400">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-3">
                       <AlertCircle className="h-6 w-6 text-red-600" />
-                      <h4 className="font-bold text-red-800 text-lg">Hazard Alert</h4>
+                      <h4 className="font-semibold text-red-800">Hazard Alert</h4>
                     </div>
-                    <p className="text-gray-700 leading-relaxed">{conditions.hazardNotes}</p>
-                  </div>
-                )}
-                {conditions?.maintenanceNotes && (
-                  <div className="p-6 bg-gradient-to-b from-orange-50 to-white rounded-xl border-l-4 border-orange-400 shadow-sm">
-                    <div className="flex items-center gap-3 mb-4">
+                    <p className="text-gray-700">{conditions.hazardNotes}</p>
+                  </CardContent>
+                </Card>
+              )}
+              {conditions?.maintenanceNotes && (
+                <Card className="border-0 shadow-sm bg-white border-l-4 border-orange-400">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-3">
                       <Wrench className="h-6 w-6 text-orange-600" />
-                      <h4 className="font-bold text-orange-800 text-lg">Maintenance Notice</h4>
+                      <h4 className="font-semibold text-orange-800">Maintenance Notice</h4>
                     </div>
-                    <p className="text-gray-700 leading-relaxed">{conditions.maintenanceNotes}</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                    <p className="text-gray-700">{conditions.maintenanceNotes}</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
         )}
       </div>
     </div>
