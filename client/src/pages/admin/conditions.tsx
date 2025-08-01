@@ -107,7 +107,7 @@ export default function CourseConditionsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="space-y-2 pl-[0px] pr-[0px] pt-[0px] pb-[0px] mt-[-8px] mb-[-8px]">
+              <div className="space-y-2 pl-[0px] pr-[0px] mt-[-8px] mb-[-8px] ml-[0px] mr-[0px] pt-[-14px] pb-[-14px]">
                 <Label htmlFor="weather">Weather</Label>
                 <Select 
                   value={formData.weather || conditions?.weather || ""} 
