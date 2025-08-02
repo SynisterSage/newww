@@ -283,9 +283,17 @@ export class MemStorage implements IStorage {
     // Clear existing tee times to start fresh with 30 slots per day
     this.teetimes.clear();
     
-    // Initialize tee times for today (8/1) and tomorrow (8/2) - exactly 2 days as requested
-    const today = "2025-08-01";
-    const tomorrow = "2025-08-02";
+    // Initialize tee times for today and the next 6 days dynamically
+    const now = new Date();
+    const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    // Generate dates for the next 7 days
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(todayDate);
+      date.setDate(todayDate.getDate() + i);
+      dates.push(date.toISOString().split('T')[0]);
+    }
     
     // Base tee time slots for 9-hole Packanack Golf Course - exactly 30 slots per day
     const baseTimeSlots = [
@@ -302,8 +310,8 @@ export class MemStorage implements IStorage {
     // Get some real members for bookings
     const realMembers = Array.from(this.users.values()).filter(user => user.isActive).slice(0, 15);
 
-    // Create tee times for today and tomorrow - exactly 30 slots each day
-    [today, tomorrow].forEach((date, dayIndex) => {
+    // Create tee times for the next 7 days - exactly 30 slots each day
+    dates.forEach((date, dayIndex) => {
       baseTimeSlots.forEach((time, slotIndex) => {
         const teetime: TeeTime = {
           id: randomUUID(),
