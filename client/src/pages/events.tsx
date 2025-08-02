@@ -32,9 +32,15 @@ export default function Events({ userData }: EventsProps) {
   const currentUserId = userData?.id;
   const isAuthenticated = !!userData;
 
-  // Fetch events
+  // Fetch events with user registration status
   const { data: events = [], isLoading } = useQuery({
-    queryKey: ["/api/events"],
+    queryKey: ["/api/events", currentUserId],
+    queryFn: async () => {
+      const url = currentUserId ? `/api/events?userId=${currentUserId}` : "/api/events";
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch events");
+      return response.json();
+    }
   }) as { data: EventWithRegistration[], isLoading: boolean };
 
   // Register for event mutation
@@ -43,7 +49,7 @@ export default function Events({ userData }: EventsProps) {
       return await apiRequest("POST", `/api/events/${eventId}/register`, { userId: currentUserId, notes });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events", currentUserId] });
       setIsRegisterDialogOpen(false);
       setSelectedEvent(null);
       toast({
@@ -66,7 +72,7 @@ export default function Events({ userData }: EventsProps) {
       return await apiRequest("DELETE", `/api/events/${eventId}/register/${currentUserId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events", currentUserId] });
       toast({
         title: "Unregistered Successfully",
         description: "You have been removed from the event",
@@ -111,8 +117,10 @@ export default function Events({ userData }: EventsProps) {
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { 
+    // Parse date as local date to avoid timezone issues
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString(navigator.language || 'en-US', { 
       weekday: 'long',
       month: 'long', 
       day: 'numeric', 

@@ -620,8 +620,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/events", async (req, res) => {
     try {
       const events = await storage.getEvents();
+      const { userId } = req.query;
       
-      // Add registration count to each event
+      // Filter out past events
+      const currentEvents = events.filter(event => {
+        const eventDateTime = new Date(`${event.date}T${event.time}`);
+        return eventDateTime >= new Date();
+      });
+      
+      // Add registration count and user registration status to each event
+      const eventsWithMetadata = await Promise.all(
+        currentEvents.map(async (event) => {
+          const registrations = await storage.getEventRegistrations(event.id);
+          const isRegistered = userId ? registrations.some(reg => reg.userId === userId) : false;
+          
+          return {
+            ...event,
+            registrationCount: registrations.length,
+            isRegistered
+          };
+        })
+      );
+      
+      res.json(eventsWithMetadata);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch events" });
+    }
+  });
+
+  // Admin endpoint to get all events including past ones
+  app.get("/api/events/all", async (req, res) => {
+    try {
+      const events = await storage.getEvents();
+      
+      // Add registration count to each event (no filtering for admin)
       const eventsWithCounts = await Promise.all(
         events.map(async (event) => {
           const registrations = await storage.getEventRegistrations(event.id);

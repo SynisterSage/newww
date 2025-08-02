@@ -806,9 +806,9 @@ export class MemStorage implements IStorage {
       id,
       isActive: true,
       createdAt: new Date(),
-      price: insertEvent.price || null,
-      location: insertEvent.location,
-      maxSignups: insertEvent.maxSignups,
+      price: insertEvent.price || "0.00",
+      location: insertEvent.location || "Packanack Golf Club",
+      maxSignups: insertEvent.maxSignups || 50,
       ...insertEvent
     };
     this.events.set(id, event);

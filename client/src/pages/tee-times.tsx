@@ -16,9 +16,8 @@ interface TeeTimesProps {
 export default function TeeTimes({ userData }: TeeTimesProps) {
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState(() => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
+    const today = new Date();
+    return today.toISOString().split('T')[0];
   });
 
   const getTodayDate = () => {

@@ -42,10 +42,21 @@ export default function AdminEvents() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedEventRegistrations, setSelectedEventRegistrations] = useState<EventRegistration[]>([]);
 
-  // Fetch events
-  const { data: events = [], isLoading } = useQuery({
-    queryKey: ["/api/events"],
+  // Fetch events (admin side gets all events including past ones for record keeping)
+  const { data: allEvents = [], isLoading } = useQuery({
+    queryKey: ["/api/events/all"],
+    queryFn: async () => {
+      const response = await fetch("/api/events/all");
+      if (!response.ok) throw new Error("Failed to fetch events");
+      return response.json();
+    }
   }) as { data: EventWithRegistrations[], isLoading: boolean };
+
+  // Filter out ended events from display
+  const events = allEvents.filter(event => {
+    const eventDateTime = new Date(`${event.date}T${event.time}`);
+    return eventDateTime >= new Date();
+  });
 
   // Create event mutation
   const createEventMutation = useMutation({
@@ -174,8 +185,10 @@ export default function AdminEvents() {
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { 
+    // Parse date as local date to avoid timezone issues
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString(navigator.language || 'en-US', { 
       month: 'long', 
       day: 'numeric', 
       year: 'numeric' 
