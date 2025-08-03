@@ -41,10 +41,11 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
   const isTomorrow = selectedDate === getTomorrowDate();
 
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
-    queryKey: ['/api/teetimes', selectedDate],
+    queryKey: ['/api/teetimes', selectedDate, Date.now()], // Force cache bust
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     staleTime: 0, // Always fetch fresh data
+    cacheTime: 0, // Don't cache at all
   });
 
   // Fetch user's existing bookings
