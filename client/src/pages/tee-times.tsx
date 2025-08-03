@@ -42,6 +42,9 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
 
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', selectedDate],
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always fetch fresh data
   });
 
   // Fetch user's existing bookings
