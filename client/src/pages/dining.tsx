@@ -278,16 +278,14 @@ export default function Dining({ userData }: DiningProps) {
                       </span>
                     </div>
                     
-                    {/* Title - Fixed height for consistency */}
-                    <div className={`mb-2 ${isExpanded ? 'h-auto' : 'h-14'} flex items-start`}>
-                      <h3 className={`font-semibold text-gray-900 text-lg leading-tight ${isExpanded ? '' : 'line-clamp-2'}`}>
-                        {item.name}
-                      </h3>
-                    </div>
+                    {/* Title */}
+                    <h3 className="font-semibold text-gray-900 text-lg leading-tight mb-2 min-h-[2.5rem] flex items-start">
+                      {item.name}
+                    </h3>
                     
                     {/* Description - Fixed height to maintain consistent layout */}
                     <div className={`text-sm text-gray-600 mb-3 ${isExpanded ? 'h-auto' : 'h-12'} flex items-start`}>
-                      <p className={`${isExpanded ? '' : 'line-clamp-2'}`}>
+                      <p className={`${isExpanded ? '' : 'line-clamp-3'}`}>
                         {item.description}
                       </p>
                     </div>
