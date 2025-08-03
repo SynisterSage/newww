@@ -975,8 +975,8 @@ export class DatabaseStorage implements IStorage {
       // Check if tee times exist for the requested date
       const existingTeetimes = await db.select().from(teetimes).where(eq(teetimes.date, date));
       
-      // If no tee times exist for this date, generate them automatically
-      if (existingTeetimes.length === 0) {
+      // If no tee times exist or there are fewer than expected (30), generate them
+      if (existingTeetimes.length < 30) {
         await this.generateTeetimesForDate(date);
         // Fetch the newly created tee times
         return await db.select().from(teetimes).where(eq(teetimes.date, date));
@@ -1010,22 +1010,30 @@ export class DatabaseStorage implements IStorage {
         "1:00 PM", "1:15 PM"
       ];
 
-      // Create tee times for the requested date
-      const teetimesToInsert = baseTimeSlots.map(time => ({
-        id: randomUUID(),
-        date: date,
-        time: time,
-        course: "Packanack Golf Course",
-        holes: 18,
-        maxPlayers: 4,
-        bookedBy: [],
-        playerNames: [],
-        isPremium: false,
-        price: "85.00"
-      }));
+      // Get existing times to avoid duplicates
+      const existingTimes = await db.select().from(teetimes).where(eq(teetimes.date, date));
+      const existingTimeSlots = existingTimes.map(t => t.time);
+      
+      // Only create tee times for slots that don't already exist
+      const newTimeSlots = baseTimeSlots.filter(time => !existingTimeSlots.includes(time));
+      
+      if (newTimeSlots.length > 0) {
+        const teetimesToInsert = newTimeSlots.map(time => ({
+          id: randomUUID(),
+          date: date,
+          time: time,
+          course: "Packanack Golf Course",
+          holes: 18,
+          maxPlayers: 4,
+          bookedBy: [],
+          playerNames: [],
+          isPremium: false,
+          price: "85.00"
+        }));
 
-      // Insert all tee times in a single transaction
-      await db.insert(teetimes).values(teetimesToInsert);
+        // Insert new tee times in a single transaction
+        await db.insert(teetimes).values(teetimesToInsert);
+      }
     }
   }
 
