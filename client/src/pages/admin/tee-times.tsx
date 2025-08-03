@@ -1,18 +1,28 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, User as UserIcon, Users, MapPin } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import type { TeeTime, User } from "@shared/schema";
 
 export default function AdminTeeTimesPage() {
+  const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState(() => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     return tomorrow.toISOString().split('T')[0];
   });
+
+  // Auto-refresh every minute to hide expired time slots in real-time
+  useEffect(() => {
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['/api/teetimes', selectedDate] });
+    }, 60000); // Refresh every minute
+
+    return () => clearInterval(interval);
+  }, [selectedDate, queryClient]);
 
   const getTodayDate = () => {
     const today = new Date();
@@ -223,6 +233,33 @@ export default function AdminTeeTimesPage() {
         {/* Tee Time Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[...teetimes]
+            .filter((teetime) => {
+              // If viewing today's date, filter out past times
+              const today = new Date();
+              const isToday = selectedDate === today.toISOString().split('T')[0];
+              
+              if (!isToday) return true; // Show all times for future dates
+              
+              // For today, only show future times
+              const now = new Date();
+              const currentHour = now.getHours();
+              const currentMinute = now.getMinutes();
+              
+              // Parse the tee time
+              const timeMatch = teetime.time.match(/(\d+):(\d+)\s*(AM|PM)/);
+              if (!timeMatch) return true;
+              
+              let teeHour = parseInt(timeMatch[1]);
+              const teeMinute = parseInt(timeMatch[2]);
+              const ampm = timeMatch[3];
+              
+              // Convert to 24-hour format
+              if (ampm === 'PM' && teeHour !== 12) teeHour += 12;
+              if (ampm === 'AM' && teeHour === 12) teeHour = 0;
+              
+              // Compare with current time
+              return teeHour > currentHour || (teeHour === currentHour && teeMinute > currentMinute);
+            })
             .sort((a, b) => a.time.localeCompare(b.time))
             .map((teetime) => {
             const statusInfo = getStatusInfo(teetime);
