@@ -264,18 +264,30 @@ export default function Dining({ userData }: DiningProps) {
             return (
               <Card 
                 key={item.id} 
-                className={`bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 rounded-xl overflow-hidden cursor-pointer ${
+                className={`bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 rounded-xl overflow-hidden ${
+                  item.availableSettings ? 'cursor-pointer' : ''
+                } ${
                   isExpanded ? 'h-auto' : 'h-56'
                 } flex flex-col`}
-                onClick={() => setExpandedCard(isExpanded ? null : item.id)}
+                onClick={() => {
+                  // Only allow expansion if item has available settings
+                  if (item.availableSettings) {
+                    setExpandedCard(isExpanded ? null : item.id);
+                  }
+                }}
               >
                 <CardContent className="p-5 flex flex-col h-full">
                   <div className="flex-1 flex flex-col">
-                    {/* Header with category badge */}
+                    {/* Header with category badge and expand indicator */}
                     <div className="flex items-start justify-between mb-3">
                       <span className="bg-green-100 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap">
                         {formatCategoryName(item.category)}
                       </span>
+                      {item.availableSettings && (
+                        <span className="text-xs text-gray-400 font-medium">
+                          {isExpanded ? 'Click to collapse' : 'Click for options'}
+                        </span>
+                      )}
                     </div>
                     
                     {/* Title */}
@@ -292,9 +304,9 @@ export default function Dining({ userData }: DiningProps) {
                     
                     {/* Available options for expanded cards */}
                     {item.availableSettings && isExpanded && (
-                      <div className="mb-3 p-3 bg-gray-50 rounded-lg">
-                        <p className="text-xs font-medium text-gray-700 mb-1">Available Options:</p>
-                        <p className="text-xs text-gray-600">{item.availableSettings}</p>
+                      <div className="mb-4 p-3 bg-green-50 border border-green-100 rounded-lg">
+                        <p className="text-sm font-semibold text-green-800 mb-2">Available Options:</p>
+                        <p className="text-sm text-green-700 leading-relaxed">{item.availableSettings}</p>
                       </div>
                     )}
                   </div>
