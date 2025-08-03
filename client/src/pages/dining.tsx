@@ -283,10 +283,12 @@ export default function Dining({ userData }: DiningProps) {
                       {item.name}
                     </h3>
                     
-                    {/* Description */}
-                    <p className={`text-sm text-gray-600 mb-3 flex-1 ${isExpanded ? '' : 'line-clamp-3'}`}>
-                      {item.description}
-                    </p>
+                    {/* Description - Fixed height to maintain consistent layout */}
+                    <div className={`text-sm text-gray-600 mb-3 ${isExpanded ? 'h-auto' : 'h-12'} flex items-start`}>
+                      <p className={`${isExpanded ? '' : 'line-clamp-3'}`}>
+                        {item.description}
+                      </p>
+                    </div>
                     
                     {/* Available options for expanded cards */}
                     {item.availableSettings && isExpanded && (
