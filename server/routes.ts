@@ -139,7 +139,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/menu", async (req, res) => {
     try {
       const { category } = req.query;
-      const menuItems = await storage.getMenuItems(category as string);
+      
+      // Determine which menu to show based on current time
+      // Lunch: before 6:30 PM, Dinner: 6:30 PM and after
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const currentTimeIn24 = currentHour + (currentMinute / 60);
+      
+      // 6:30 PM = 18.5 in 24-hour format
+      const dinnerStartTime = 18.5;
+      const mealType = currentTimeIn24 >= dinnerStartTime ? 'dinner' : 'lunch';
+      
+      const menuItems = await storage.getMenuItems(category as string, mealType);
       res.json(menuItems);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch menu items" });

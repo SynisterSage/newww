@@ -1,0 +1,34 @@
+Name,Description,Price,Category,Available_Settings
+Rainbow Mesclun,"Assorted Greens, Tomatoes, Cucumbers, Shredded Carrots & Choice of Dressing",12.00,Salads,House-Made Balsamic; Champagne; Honey Mustard; Blue Cheese; Thousand Island; Ranch; EVOO & Balsamic Vinegar
+Classic Caesar,"Romaine, Parmesan, Croutons & Caesar Dressing",12.00,Salads,
+Quinoa,"Baby Arugula, Cherry Tomatoes, Sweet Red Onions, Corn, Avocado & Sherry Vinaigrette",16.00,Salads,
+Queen,"Assorted Greens, Dried Cranberries, Fresh Strawberries, Blackberries, Orange Segments, Candied Walnuts & Champagne Vinaigrette",16.00,Salads,
+Bam-Bam Shrimp Wrap,"Mixed Greens & Tomatoes",18.00,Chef Specialties,
+Brisket Sandwich,"Braised Brisket, Melted Provolone & Fried Onions on Ciabatta",21.00,Chef Specialties,
+12' Cheese Pizza,"Cheese pizza (12") – toppings $1.50 each: Mushrooms; Pepperoni; Peppers; Onions",14.00,Chef Specialties,Mushrooms; Pepperoni; Peppers; Onions
+10 oz Angus Burger,"Served with Lettuce, Tomato & Red Onion on Brioche",18.00,Packanack’s Picks,Bacon; Sautéed Onions; American; Cheddar; Swiss Cheese
+Veggie Burger,"Served with Lettuce, Tomato & Red Onion on Brioche",14.50,Packanack’s Picks,Sautéed Onions; American; Cheddar; Swiss Cheese; Blue Cheese
+Thummans All Beef Hot Dog,"Served with Sauerkraut",8.00,Packanack’s Picks,Sauerkraut
+Chicken Wings (7),"Served with Celery & choice of Blue Cheese or Cool Ranch",12.00,Packanack’s Picks,Buffalo; BBQ; Sweet Thai Chili; Cajun
+Chicken Wings (16),"Served with Celery & choice of Blue Cheese or Cool Ranch",23.00,Packanack’s Picks,Buffalo; BBQ; Sweet Thai Chili; Cajun
+Chicken Quesadilla,"Served with Salsa & Sour Cream",14.00,Packanack’s Picks,Salsa; Sour Cream
+Happy Waitress,"Grilled Cheese with Tomato & Crispy Bacon",14.00,Packanack’s Picks,
+French Fries,"French Fries",4.75,Sides,
+French Fries with Cheese,"French Fries with Cheese",6.00,Sides,
+French Fries with Cheese & Bacon,"French Fries with Cheese & Bacon",8.50,Sides,
+Beer Battered Onion Rings,"Beer Battered Onion Rings",7.00,Sides,
+BLTA,"Crispy Bacon, Lettuce, Tomato & Avocado on choice of bread",14.00,Sandwiches,French Fries; Cole Slaw; Fresh Fruit Salad
+Turkey Sloppy Joe,"Turkey Breast, Swiss Cheese, Cole Slaw & Russian Dressing on Rye",16.00,Sandwiches,French Fries; Cole Slaw; Fresh Fruit Salad
+Turkey Club,"Turkey Breast, Swiss Cheese, Bacon, Avocado, Lettuce & Tomato on White Toast",17.00,Sandwiches,French Fries; Cole Slaw; Fresh Fruit Salad
+Fried Chicken Sandwich,"Crispy Chicken, Lettuce, Pickles, Pickled Radish & Chipotle Aioli on a Butter Roll",15.50,Sandwiches,French Fries; Cole Slaw; Fresh Fruit Salad
+Grilled Chicken Club,"Marinated Chicken, Bacon, Lettuce, Tomato & Mayo on Ciabatta",16.75,Sandwiches,French Fries; Cole Slaw; Fresh Fruit Salad
+Crabcake Sandwich,"Rainbow Greens, Avocado, Bacon & Tartar Sauce on Brioche",18.00,Sandwiches,French Fries; Cole Slaw; Fresh Fruit Salad
+The Godfather,"Chicken Cutlet, Broccoli Rabe & Melted Provolone on French Loaf",18.00,Sandwiches,French Fries; Cole Slaw; Fresh Fruit Salad
+Ribeye Steak Sandwich,"Diced Peppers, Onions, Mushrooms, Melted Provolone & Au Jus on French Loaf",21.00,Sandwiches,French Fries; Cole Slaw; Fresh Fruit Salad
+Tuna Salad BLT,"Tuna Salad, Bacon, Lettuce & Tomato",16.00,Wraps,French Fries; Cole Slaw; Fresh Fruit Salad
+Buffalo Chicken,"Chicken Fingers, Lettuce, Tomato, Red Onion, Blue Cheese & Buffalo Sauce",15.50,Wraps,French Fries; Cole Slaw; Fresh Fruit Salad
+Grilled Chicken Caesar,"Grilled Chicken, Parmesan Cheese & Caesar Dressing",15.00,Wraps,French Fries; Cole Slaw; Fresh Fruit Salad
+Grilled Chicken Waldorf,"Grilled Chicken, Apple, Grapes & Walnuts",16.00,Wraps,French Fries; Cole Slaw; Fresh Fruit Salad
+Cheezy Western Omelet,"(3) Eggs, Diced Peppers, Onions, Mushrooms, Ham, Cheese, Fries & Toast",14.00,Breakfast Corner,
+Taylor Ham, Egg & Cheese,"Taylor Ham, Egg & Cheese",10.00,Breakfast Corner,
+Bacon, Egg & Cheese,"Bacon, Egg & Cheese",10.00,Breakfast Corner,

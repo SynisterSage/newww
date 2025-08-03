@@ -32,7 +32,7 @@ export interface IStorage {
   updateTeetime(id: string, updates: Partial<TeeTime>): Promise<TeeTime | undefined>;
   
   // Menu methods
-  getMenuItems(category?: string): Promise<MenuItem[]>;
+  getMenuItems(category?: string, mealType?: string): Promise<MenuItem[]>;
   getMenuItemById(id: string): Promise<MenuItem | undefined>;
   createMenuItem(item: InsertMenuItem): Promise<MenuItem>;
   
@@ -637,12 +637,19 @@ export class MemStorage implements IStorage {
   }
 
   // Menu methods
-  async getMenuItems(category?: string): Promise<MenuItem[]> {
+  async getMenuItems(category?: string, mealType?: string): Promise<MenuItem[]> {
     const allItems = Array.from(this.menuItems.values());
-    if (category) {
-      return allItems.filter(item => item.category === category);
+    let filteredItems = allItems;
+    
+    if (mealType) {
+      filteredItems = filteredItems.filter(item => item.mealType === mealType);
     }
-    return allItems;
+    
+    if (category) {
+      filteredItems = filteredItems.filter(item => item.category === category);
+    }
+    
+    return filteredItems;
   }
 
   async getMenuItemById(id: string): Promise<MenuItem | undefined> {
@@ -1059,11 +1066,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Menu methods
-  async getMenuItems(category?: string): Promise<MenuItem[]> {
+  async getMenuItems(category?: string, mealType?: string): Promise<MenuItem[]> {
+    let query = db.select().from(menuItems);
+    
+    const conditions = [];
     if (category) {
-      return await db.select().from(menuItems).where(eq(menuItems.category, category));
+      conditions.push(eq(menuItems.category, category));
     }
-    return await db.select().from(menuItems);
+    if (mealType) {
+      conditions.push(eq(menuItems.mealType, mealType));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(conditions.length === 1 ? conditions[0] : and(...conditions));
+    }
+    
+    return await query;
   }
 
   async getMenuItemById(id: string): Promise<MenuItem | undefined> {

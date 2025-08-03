@@ -164,6 +164,25 @@ export default function Dining({ userData }: DiningProps) {
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-[#08452e]">Order Food & Drinks</h1>
               <p className="text-sm sm:text-base text-muted-foreground">From the clubhouse to the course</p>
+              {/* Menu Time Indicator */}
+              <div className="mt-2">
+                {(() => {
+                  const now = new Date();
+                  const currentHour = now.getHours();
+                  const currentMinute = now.getMinutes();
+                  const currentTime = currentHour + (currentMinute / 60);
+                  const isDinnerTime = currentTime >= 18.5; // 6:30 PM
+                  
+                  return (
+                    <div className="inline-flex items-center gap-2 text-sm">
+                      <div className={`w-2 h-2 rounded-full ${isDinnerTime ? 'bg-orange-500' : 'bg-green-500'}`}></div>
+                      <span className="text-gray-600">
+                        {isDinnerTime ? 'Dinner Menu' : 'Lunch Menu'} • Available until {isDinnerTime ? '11:00 PM' : '6:30 PM'}
+                      </span>
+                    </div>
+                  );
+                })()}
+              </div>
             </div>
             
             {/* View Cart Button */}

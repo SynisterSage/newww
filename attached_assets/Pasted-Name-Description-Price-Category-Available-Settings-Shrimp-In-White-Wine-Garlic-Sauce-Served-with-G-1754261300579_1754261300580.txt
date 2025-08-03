@@ -1,0 +1,28 @@
+Name,Description,Price,Category,Available_Settings
+Shrimp In White Wine Garlic Sauce,"Served with Grilled Bread",15.00,Starters,
+Spinach & Artichoke Dip,"Served with Tortilla Chips",13.00,Starters,
+Chicken Lemongrass Dumplings,"Steamed or Fried, served with Ponzu Scallion Sauce",10.00,Starters,
+Bam-Bam Shrimp,"Crispy Shrimp in a Creamy Sweet Chili Sauce",18.00,Starters,
+Fried Calamari,"Served with Marinara & Lemon Wedges",14.00,Starters,
+House Salad,"Fresh Garden Greens, Tomatoes, Cucumbers & Carrots with choice of dressing",6.50,Salads,"Dressings: House-Made Balsamic Vinaigrette; Champagne Vinaigrette; Honey Mustard; Blue Cheese; Thousand Island; Ranch; EVOO & Balsamic Vinegar; Enhancements: Grilled Chicken $6; Grilled Steak $15; Crabcake $9.50; Grilled Shrimp $10; Grilled Salmon $9.50"
+House Salad (Large),"Fresh Garden Greens, Tomatoes, Cucumbers & Carrots with choice of dressing",12.00,Salads,"Dressings: House-Made Balsamic Vinaigrette; Champagne Vinaigrette; Honey Mustard; Blue Cheese; Thousand Island; Ranch; EVOO & Balsamic Vinegar; Enhancements: Grilled Chicken $6; Grilled Steak $15; Crabcake $9.50; Grilled Shrimp $10; Grilled Salmon $9.50"
+Classic Caesar Salad,"Crisp hearts of Romaine, homemade croutons & Parmesan cheese",6.50,Salads,"Dressings: Caesar; Enhancements: Grilled Chicken $6; Grilled Steak $15; Crabcake $9.50; Grilled Shrimp $10; Grilled Salmon $9.50"
+Classic Caesar Salad (Large),"Crisp hearts of Romaine, homemade croutons & Parmesan cheese",12.00,Salads,"Dressings: Caesar; Enhancements: Grilled Chicken $6; Grilled Steak $15; Crabcake $9.50; Grilled Shrimp $10; Grilled Salmon $9.50"
+Packanack Salad,"Mesclun greens, fresh strawberries, mango, goat cheese, walnuts & sun-dried cranberries with Champagne vinaigrette",16.50,Salads,"Enhancements: Grilled Chicken $6; Grilled Steak $15; Crabcake $9.50; Grilled Shrimp $10; Grilled Salmon $9.50"
+French Onion Soup,,7.00,Soups,
+Chili All The Way Soup,,7.00,Soups,
+Soup Du Jour,,7.00,Soups,
+Farfalle with Italian Sausage & Broccoli Rabe,"Pecorino cheese & grilled bread",14.00,Pastas,
+Four Cheese Ravioli,"In a creamy pesto sauce",20.00,Pastas,
+PGC Penne Vodka,"Mushrooms, onions, English peas & sun-dried tomatoes tossed in vodka sauce",19.00,Pastas,"Enhancements: Grilled Chicken $6; Salmon $9.50; Grilled Shrimp $10"
+Seared Salmon,"With chunky avocado/mango salsa; served with sautéed garden vegetables over basmati rice",28.00,"Entrees – Seafood",
+Pan Seared Bronzino,"With Mediterranean herbs; served with mashed potatoes, broccolini, pearl onions & carrots",33.00,"Entrees – Seafood",
+Filet Mignon,"Grilled asparagus, mushrooms & mashed potatoes",41.00,"Entrees – Meat","Preparation: Simply Grilled; Blackened; Gorgonzola Crusted; Maître D’hôtel Butter"
+Rosemary & Garlic Flat Iron Steak,"Haricot verts, squash, zucchini, onions & mashed potatoes",33.00,"Entrees – Meat",
+Saltimbocca,"Topped with spinach, prosciutto, provolone & mushroom sauce; served with choice of pasta",26.00,"Entrees – Chicken","Choice of Pasta"
+Parmesan/Marsala/Française Chicken,"Served with choice of pasta",22.00,"Entrees – Chicken","Preparation: Parmesan; Marsala; Française; Choice of Pasta"
+10 oz Black Angus Burger,"Served with French fries",18.00,Casual,"Add-ons: Bacon; Sautéed Onions; Sautéed Mushrooms; American Cheese; Swiss Cheese; Cheddar Cheese; Blue Cheese"
+Grilled Chicken Sandwich,"Grilled chicken, eggplant, grilled red peppers, bacon & provolone cheese on brioche; served with French fries",16.50,Casual,
+Crabcake Sandwich,"Mixed greens, avocado, bacon & tartar sauce; served with French fries",18.00,Casual,
+Club Sandwich,"Turkey, bacon, Swiss cheese, avocado, lettuce, tomato & mayo on white toast; served with French fries",17.00,Casual,
+Tacos,"Cumin-baked choice of meat with lettuce, tomato, lime mayo aioli & cole slaw; served on corn or flour tortilla",varies,Casual,"Meat: Chicken $15; St. Peters Fish $15; Shrimp $19; Steak $23; Tortillas: Corn; Flour"
