@@ -563,6 +563,17 @@ export default function Dining({ userData }: DiningProps) {
                         </Select>
                       </div>
                     )}
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Special Requests / Allergens</label>
+                      <textarea
+                        value={specialRequests}
+                        onChange={(e) => setSpecialRequests(e.target.value)}
+                        placeholder="Any special requests, dietary restrictions, or allergens..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        rows={2}
+                      />
+                    </div>
                   </div>
                   
                   <div className="flex items-center justify-between pt-2 border-t">
