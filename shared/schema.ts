@@ -25,6 +25,21 @@ export const users = pgTable("users", {
   accountBalance: decimal("account_balance", { precision: 10, scale: 2 }).default("285.00"),
   joinDate: timestamp("join_date").defaultNow(),
   isActive: boolean("is_active").default(true),
+  // New columns from membership list
+  paymentStatus: text("payment_status"), // "Paid", "Payment Plan", "Partial Payment"
+  membershipClass: text("membership_class"), // "A", "AG", "G", "H", "HM", etc.
+  status: text("status").default("Active"), // "Active", "Leave"
+  yearJoined: integer("year_joined"),
+  birthday: text("birthday"),
+  spouse: text("spouse"),
+  lockers: text("lockers"), // "TRUE", "FALSE", "BOARD"
+  spouseLocker: boolean("spouse_locker").default(false),
+  bagStorage: boolean("bag_storage").default(false),
+  food: text("food"), // Amount like "533.00" or "None"
+  extraHandicap: text("extra_handicap"),
+  restrictedAssessment: text("restricted_assessment"),
+  specialConsiderations: text("special_considerations"),
+  lotteryEligible: text("lottery_eligible"),
 });
 
 export const adminUsers = pgTable("admin_users", {
