@@ -263,6 +263,33 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
         {/* Tee Time Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[...teetimes]
+            .filter((teetime) => {
+              // If viewing today's date, filter out past times
+              const today = new Date();
+              const isToday = selectedDate === today.toISOString().split('T')[0];
+              
+              if (!isToday) return true; // Show all times for future dates
+              
+              // For today, only show future times
+              const now = new Date();
+              const currentHour = now.getHours();
+              const currentMinute = now.getMinutes();
+              
+              // Parse the tee time
+              const timeMatch = teetime.time.match(/(\d+):(\d+)\s*(AM|PM)/);
+              if (!timeMatch) return true;
+              
+              let teeHour = parseInt(timeMatch[1]);
+              const teeMinute = parseInt(timeMatch[2]);
+              const ampm = timeMatch[3];
+              
+              // Convert to 24-hour format
+              if (ampm === 'PM' && teeHour !== 12) teeHour += 12;
+              if (ampm === 'AM' && teeHour === 12) teeHour = 0;
+              
+              // Compare with current time
+              return teeHour > currentHour || (teeHour === currentHour && teeMinute > currentMinute);
+            })
             .sort((a, b) => a.time.localeCompare(b.time))
             .map((teetime) => {
             const statusInfo = getStatusInfo(teetime);

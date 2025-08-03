@@ -975,8 +975,8 @@ export class DatabaseStorage implements IStorage {
       // Check if tee times exist for the requested date
       const existingTeetimes = await db.select().from(teetimes).where(eq(teetimes.date, date));
       
-      // If no tee times exist or there are fewer than expected (30), generate them
-      if (existingTeetimes.length < 30) {
+      // If no tee times exist or there are fewer than expected (45), generate them
+      if (existingTeetimes.length < 45) {
         await this.generateTeetimesForDate(date);
         // Fetch the newly created tee times
         return await db.select().from(teetimes).where(eq(teetimes.date, date));
@@ -998,17 +998,23 @@ export class DatabaseStorage implements IStorage {
     maxDate.setDate(today.getDate() + 1);
     
     if (requestedDate <= maxDate) {
-      // Base tee time slots - 30 slots per day
-      const baseTimeSlots = [
-        "6:00 AM", "6:15 AM", "6:30 AM", "6:45 AM", 
-        "7:00 AM", "7:15 AM", "7:30 AM", "7:45 AM",
-        "8:00 AM", "8:15 AM", "8:30 AM", "8:45 AM",
-        "9:00 AM", "9:15 AM", "9:30 AM", "9:45 AM",
-        "10:00 AM", "10:15 AM", "10:30 AM", "10:45 AM",
-        "11:00 AM", "11:15 AM", "11:30 AM", "11:45 AM",
-        "12:00 PM", "12:15 PM", "12:30 PM", "12:45 PM",
-        "1:00 PM", "1:15 PM"
-      ];
+      // Generate time slots from 7:00 AM to 7:00 PM with 16-minute intervals
+      const baseTimeSlots = [];
+      const startHour = 7; // 7 AM
+      const endHour = 19; // 7 PM
+      const intervalMinutes = 16;
+      
+      for (let hour = startHour; hour <= endHour; hour++) {
+        for (let minute = 0; minute < 60; minute += intervalMinutes) {
+          // Stop at 7:00 PM exactly, don't go beyond
+          if (hour === endHour && minute > 0) break;
+          
+          const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+          const ampm = hour >= 12 ? 'PM' : 'AM';
+          const timeString = `${displayHour}:${minute.toString().padStart(2, '0')} ${ampm}`;
+          baseTimeSlots.push(timeString);
+        }
+      }
 
       // Get existing times to avoid duplicates
       const existingTimes = await db.select().from(teetimes).where(eq(teetimes.date, date));
