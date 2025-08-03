@@ -267,7 +267,7 @@ export default function Dining({ userData }: DiningProps) {
                 className={`bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 rounded-xl overflow-hidden ${
                   item.availableSettings ? 'cursor-pointer' : ''
                 } ${
-                  isExpanded ? 'h-auto' : 'h-56'
+                  isExpanded ? 'h-auto' : 'h-72'
                 } flex flex-col`}
                 onClick={() => {
                   // Only allow expansion if item has available settings
@@ -291,15 +291,15 @@ export default function Dining({ userData }: DiningProps) {
                     </div>
                     
                     {/* Title - Fixed height for consistency */}
-                    <div className={`mb-2 ${isExpanded ? 'h-auto' : 'h-14'} flex items-start`}>
+                    <div className={`mb-3 ${isExpanded ? 'h-auto' : 'h-16'} flex items-start`}>
                       <h3 className="font-semibold text-gray-900 text-lg leading-tight">
                         {item.name}
                       </h3>
                     </div>
                     
                     {/* Description - Fixed height to maintain consistent layout */}
-                    <div className={`text-sm text-gray-600 mb-3 ${isExpanded ? 'h-auto' : 'h-16'} flex items-start overflow-hidden`}>
-                      <p className={`${isExpanded ? '' : 'line-clamp-3'}`}>
+                    <div className={`text-sm text-gray-600 mb-4 ${isExpanded ? 'h-auto' : 'h-20'} flex items-start overflow-hidden`}>
+                      <p className={`${isExpanded ? '' : 'line-clamp-4'}`}>
                         {item.description}
                       </p>
                     </div>
