@@ -972,9 +972,61 @@ export class DatabaseStorage implements IStorage {
   // Tee time methods
   async getTeetimes(date?: string): Promise<TeeTime[]> {
     if (date) {
-      return await db.select().from(teetimes).where(eq(teetimes.date, date));
+      // Check if tee times exist for the requested date
+      const existingTeetimes = await db.select().from(teetimes).where(eq(teetimes.date, date));
+      
+      // If no tee times exist for this date, generate them automatically
+      if (existingTeetimes.length === 0) {
+        await this.generateTeetimesForDate(date);
+        // Fetch the newly created tee times
+        return await db.select().from(teetimes).where(eq(teetimes.date, date));
+      }
+      
+      return existingTeetimes;
     }
     return await db.select().from(teetimes);
+  }
+
+  // Helper method to generate tee times for a specific date
+  private async generateTeetimesForDate(date: string): Promise<void> {
+    const requestedDate = new Date(date + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Only generate tee times for today and tomorrow (2 days max advance booking)
+    const maxDate = new Date(today);
+    maxDate.setDate(today.getDate() + 1);
+    
+    if (requestedDate <= maxDate) {
+      // Base tee time slots - 30 slots per day
+      const baseTimeSlots = [
+        "6:00 AM", "6:15 AM", "6:30 AM", "6:45 AM", 
+        "7:00 AM", "7:15 AM", "7:30 AM", "7:45 AM",
+        "8:00 AM", "8:15 AM", "8:30 AM", "8:45 AM",
+        "9:00 AM", "9:15 AM", "9:30 AM", "9:45 AM",
+        "10:00 AM", "10:15 AM", "10:30 AM", "10:45 AM",
+        "11:00 AM", "11:15 AM", "11:30 AM", "11:45 AM",
+        "12:00 PM", "12:15 PM", "12:30 PM", "12:45 PM",
+        "1:00 PM", "1:15 PM"
+      ];
+
+      // Create tee times for the requested date
+      const teetimesToInsert = baseTimeSlots.map(time => ({
+        id: randomUUID(),
+        date: date,
+        time: time,
+        course: "Packanack Golf Course",
+        holes: 18,
+        maxPlayers: 4,
+        bookedBy: [],
+        playerNames: [],
+        isPremium: false,
+        price: "85.00"
+      }));
+
+      // Insert all tee times in a single transaction
+      await db.insert(teetimes).values(teetimesToInsert);
+    }
   }
 
   async getTeetimeById(id: string): Promise<TeeTime | undefined> {
