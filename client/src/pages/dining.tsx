@@ -123,8 +123,40 @@ export default function Dining({ userData }: DiningProps) {
     });
   };
 
+  // Smart filtering based on time of day and available categories
+  const getAvailableCategories = () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentTime = currentHour + (currentMinute / 60);
+    const isDinnerTime = currentTime >= 18.5; // 6:30 PM
+    
+    // Get categories that actually have items
+    const categoriesWithItems = Array.from(new Set(menuItems.map(item => item.category)));
+    
+    // Filter categories based on time of day
+    const timeFilteredCategories = categoriesWithItems.filter(category => {
+      if (isDinnerTime) {
+        // During dinner time, exclude breakfast
+        return category !== "Breakfast Corner";
+      } else {
+        // During lunch time, exclude dinner-specific items if any
+        return true;
+      }
+    });
+    
+    return ["All", ...timeFilteredCategories];
+  };
+
+  const availableCategories = getAvailableCategories();
+  
+  // Reset to "All" if current category is not available
+  if (!availableCategories.includes(selectedCategory)) {
+    setSelectedCategory("All");
+  }
+  
   const filteredItems = selectedCategory === "All" 
-    ? menuItems
+    ? menuItems.filter(item => availableCategories.includes(item.category))
     : menuItems.filter(item => item.category === selectedCategory);
 
   const totalItems = Object.values(currentOrder).reduce((sum, count) => sum + count, 0);
@@ -200,17 +232,17 @@ export default function Dining({ userData }: DiningProps) {
           </div>
         </div>
 
-        {/* Category Tabs */}
+        {/* Category Tabs - Only show available categories */}
         <div className="mb-8">
           <div className="flex flex-wrap gap-2 overflow-x-auto pb-2">
-            {["All", "Starters", "Salads", "Soups", "Pastas", "Entrees – Seafood", "Entrees – Meat", "Entrees – Chicken", "Casual", "Sandwiches", "Wraps", "Sides", "Chef Specialties", "Packanacks Picks", "Breakfast Corner"].map((category) => (
+            {availableCategories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-3 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                   selectedCategory === category
-                    ? "bg-[#1B4332] text-white"
-                    : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+                    ? "bg-[#1B4332] text-white shadow-md"
+                    : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200 hover:border-gray-300"
                 }`}
               >
                 {category === "Entrees – Seafood" ? "Seafood" :
@@ -226,42 +258,51 @@ export default function Dining({ userData }: DiningProps) {
         </div>
 
         {/* Menu Items Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 pb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-6">
           {filteredItems.map((item) => {
             const isExpanded = expandedCard === item.id;
             return (
               <Card 
                 key={item.id} 
-                className={`bg-white border-0 shadow-sm hover:shadow-lg transition-all duration-200 rounded-lg overflow-hidden cursor-pointer ${
-                  isExpanded ? 'h-auto' : 'h-52'
+                className={`bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 rounded-xl overflow-hidden cursor-pointer ${
+                  isExpanded ? 'h-auto' : 'h-56'
                 } flex flex-col`}
                 onClick={() => setExpandedCard(isExpanded ? null : item.id)}
               >
-                <CardContent className="p-4 flex flex-col h-full">
+                <CardContent className="p-5 flex flex-col h-full">
                   <div className="flex-1 flex flex-col">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-gray-900 text-base leading-tight flex-1 pr-2">{item.name}</h3>
-                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                        <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap">
-                          {item.category}
-                        </span>
-                        <span className="text-lg font-bold text-[#1B4332]">${item.price}</span>
-                      </div>
+                    {/* Header with category badge */}
+                    <div className="flex items-start justify-between mb-3">
+                      <span className="bg-green-100 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap">
+                        {formatCategoryName(item.category)}
+                      </span>
                     </div>
                     
-                    <p className={`text-sm text-gray-600 mb-3 ${isExpanded ? '' : 'line-clamp-2'}`}>
+                    {/* Title */}
+                    <h3 className="font-semibold text-gray-900 text-lg leading-tight mb-2 min-h-[2.5rem] flex items-start">
+                      {item.name}
+                    </h3>
+                    
+                    {/* Description */}
+                    <p className={`text-sm text-gray-600 mb-3 flex-1 ${isExpanded ? '' : 'line-clamp-3'}`}>
                       {item.description}
                     </p>
                     
+                    {/* Available options for expanded cards */}
                     {item.availableSettings && isExpanded && (
-                      <div className="mb-3 p-2 bg-gray-50 rounded-md">
+                      <div className="mb-3 p-3 bg-gray-50 rounded-lg">
                         <p className="text-xs font-medium text-gray-700 mb-1">Available Options:</p>
                         <p className="text-xs text-gray-600">{item.availableSettings}</p>
                       </div>
                     )}
                   </div>
                   
-                  <div className="flex items-center justify-between mt-auto pt-2">
+                  {/* Footer with price and add button */}
+                  <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl font-bold text-[#1B4332]">${item.price}</span>
+                    </div>
+                    
                     {currentOrder[item.id] ? (
                       <div className="flex items-center gap-2">
                         <Button
@@ -271,12 +312,12 @@ export default function Dining({ userData }: DiningProps) {
                             e.stopPropagation();
                             removeFromOrder(item.id);
                           }}
-                          className="h-8 w-8 p-0"
+                          className="h-8 w-8 p-0 border-gray-300"
                           data-testid={`button-decrease-${item.id}`}
                         >
                           <Minus className="w-3 h-3" />
                         </Button>
-                        <span className="font-medium text-sm min-w-[20px] text-center">
+                        <span className="font-medium text-sm min-w-[24px] text-center">
                           {currentOrder[item.id]}
                         </span>
                         <Button
@@ -298,7 +339,7 @@ export default function Dining({ userData }: DiningProps) {
                           e.stopPropagation();
                           addToOrder(item.id);
                         }}
-                        className="bg-[#1B4332] hover:bg-[#1B4332]/90 text-white"
+                        className="bg-[#1B4332] hover:bg-[#1B4332]/90 text-white px-4"
                         data-testid={`button-add-${item.id}`}
                       >
                         <Plus className="w-4 h-4 mr-1" />
