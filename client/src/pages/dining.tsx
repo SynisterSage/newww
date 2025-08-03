@@ -15,13 +15,14 @@ interface DiningProps {
 export default function Dining({ userData }: DiningProps) {
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [currentOrder, setCurrentOrder] = useState<{[key: string]: number}>({});
+  const [currentOrder, setCurrentOrder] = useState<{[key: string]: {quantity: number, options: string[]}}>({});
   const [deliveryOption, setDeliveryOption] = useState("Clubhouse Pickup");
   const [selectedHole, setSelectedHole] = useState("");
   const [specialRequests, setSpecialRequests] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCartClosing, setIsCartClosing] = useState(false);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<{[itemId: string]: string[]}>({});
 
   // Function to format category names for display
   const formatCategoryName = (category: string) => {
@@ -66,9 +67,13 @@ export default function Dining({ userData }: DiningProps) {
   });
 
   const addToOrder = (itemId: string) => {
+    const options = selectedOptions[itemId] || [];
     setCurrentOrder(prev => ({
       ...prev,
-      [itemId]: (prev[itemId] || 0) + 1
+      [itemId]: {
+        quantity: (prev[itemId]?.quantity || 0) + 1,
+        options: options
+      }
     }));
     
     // Auto-open cart with animation
@@ -78,8 +83,11 @@ export default function Dining({ userData }: DiningProps) {
   const removeFromOrder = (itemId: string) => {
     setCurrentOrder(prev => {
       const newOrder = { ...prev };
-      if (newOrder[itemId] > 1) {
-        newOrder[itemId]--;
+      if (newOrder[itemId]?.quantity > 1) {
+        newOrder[itemId] = {
+          ...newOrder[itemId],
+          quantity: newOrder[itemId].quantity - 1
+        };
       } else {
         delete newOrder[itemId];
       }
@@ -90,6 +98,34 @@ export default function Dining({ userData }: DiningProps) {
   const clearOrder = () => {
     setCurrentOrder({});
     setSpecialRequests("");
+    setSelectedOptions({});
+  };
+
+  const toggleOption = (itemId: string, option: string) => {
+    setSelectedOptions(prev => {
+      const currentOptions = prev[itemId] || [];
+      const isSelected = currentOptions.includes(option);
+      
+      if (isSelected) {
+        return {
+          ...prev,
+          [itemId]: currentOptions.filter(opt => opt !== option)
+        };
+      } else {
+        return {
+          ...prev,
+          [itemId]: [...currentOptions, option]
+        };
+      }
+    });
+  };
+
+  const parseAvailableOptions = (availableSettings: string) => {
+    // Split by semicolon and clean up each option
+    return availableSettings
+      .split(';')
+      .map(option => option.trim())
+      .filter(option => option.length > 0);
   };
 
   const closeCart = () => {
@@ -101,18 +137,29 @@ export default function Dining({ userData }: DiningProps) {
   };
 
   const calculateTotal = () => {
-    return Object.entries(currentOrder).reduce((total, [itemId, quantity]) => {
+    return Object.entries(currentOrder).reduce((total, [itemId, orderItem]) => {
       const item = menuItems.find(item => item.id === itemId);
-      return total + (item ? parseFloat(item.price) * quantity : 0);
+      return total + (item ? parseFloat(item.price) * orderItem.quantity : 0);
     }, 0);
   };
 
   const placeOrder = () => {
     if (Object.keys(currentOrder).length === 0) return;
     
-    const orderItems = Object.entries(currentOrder).map(([itemId, quantity]) => 
-      JSON.stringify({ itemId, quantity })
-    );
+    const orderItems = Object.entries(currentOrder).map(([itemId, orderItem]) => {
+      const item = menuItems.find(m => m.id === itemId);
+      const itemName = item ? item.name : 'Unknown Item';
+      const displayName = orderItem.options.length > 0 
+        ? `${itemName} (${orderItem.options.join(', ')})` 
+        : itemName;
+      
+      return JSON.stringify({ 
+        itemId, 
+        quantity: orderItem.quantity,
+        name: displayName,
+        options: orderItem.options
+      });
+    });
     
     orderMutation.mutate({
       items: orderItems,
@@ -159,7 +206,7 @@ export default function Dining({ userData }: DiningProps) {
     ? menuItems.filter(item => availableCategories.includes(item.category))
     : menuItems.filter(item => item.category === selectedCategory);
 
-  const totalItems = Object.values(currentOrder).reduce((sum, count) => sum + count, 0);
+  const totalItems = Object.values(currentOrder).reduce((sum, orderItem) => sum + orderItem.quantity, 0);
   const orderTotal = calculateTotal();
 
   if (isLoading) {
@@ -306,9 +353,48 @@ export default function Dining({ userData }: DiningProps) {
                     
                     {/* Available options for expanded cards */}
                     {item.availableSettings && isExpanded && (
-                      <div className="mb-4 p-3 bg-green-50 border border-green-100 rounded-lg">
-                        <p className="text-sm font-semibold text-green-800 mb-2">Available Options:</p>
-                        <p className="text-sm text-green-700 leading-relaxed">{item.availableSettings}</p>
+                      <div className="mb-4 p-4 bg-green-50 border border-green-100 rounded-lg">
+                        <p className="text-sm font-semibold text-green-800 mb-3">Available Options:</p>
+                        <div className="grid grid-cols-1 gap-2">
+                          {parseAvailableOptions(item.availableSettings).map((option, index) => {
+                            const isSelected = selectedOptions[item.id]?.includes(option) || false;
+                            return (
+                              <button
+                                key={index}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleOption(item.id, option);
+                                }}
+                                className={`text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                                  isSelected
+                                    ? 'bg-green-200 text-green-800 border border-green-300'
+                                    : 'bg-white text-green-700 border border-green-200 hover:bg-green-100'
+                                }`}
+                              >
+                                <span className="flex items-center gap-2">
+                                  <span className={`w-4 h-4 rounded border flex items-center justify-center ${
+                                    isSelected ? 'bg-green-600 border-green-600' : 'border-green-300'
+                                  }`}>
+                                    {isSelected && (
+                                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                      </svg>
+                                    )}
+                                  </span>
+                                  {option}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {selectedOptions[item.id]?.length > 0 && (
+                          <div className="mt-3 p-2 bg-green-100 rounded-md">
+                            <p className="text-xs font-medium text-green-800 mb-1">Selected:</p>
+                            <p className="text-xs text-green-700">
+                              {selectedOptions[item.id].join(', ')}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -319,7 +405,7 @@ export default function Dining({ userData }: DiningProps) {
                       <span className="text-xl font-bold text-[#1B4332]">${item.price}</span>
                     </div>
                     
-                    {currentOrder[item.id] ? (
+                    {currentOrder[item.id]?.quantity ? (
                       <div className="flex items-center gap-2">
                         <Button
                           size="sm"
@@ -334,7 +420,7 @@ export default function Dining({ userData }: DiningProps) {
                           <Minus className="w-3 h-3" />
                         </Button>
                         <span className="font-medium text-sm min-w-[24px] text-center">
-                          {currentOrder[item.id]}
+                          {currentOrder[item.id]?.quantity}
                         </span>
                         <Button
                           size="sm"
@@ -403,7 +489,7 @@ export default function Dining({ userData }: DiningProps) {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {Object.entries(currentOrder).map(([itemId, quantity]) => {
+                    {Object.entries(currentOrder).map(([itemId, orderItem]) => {
                       const item = menuItems.find(m => m.id === itemId);
                       if (!item) return null;
                       
@@ -411,6 +497,11 @@ export default function Dining({ userData }: DiningProps) {
                         <div key={itemId} className="flex items-center space-x-3">
                           <div className="flex-1">
                             <h4 className="font-medium">{item.name}</h4>
+                            {orderItem.options.length > 0 && (
+                              <p className="text-xs text-green-600 font-medium">
+                                + {orderItem.options.join(', ')}
+                              </p>
+                            )}
                             <p className="text-sm text-gray-500">${item.price} each</p>
                           </div>
                           <div className="flex items-center space-x-2">
@@ -422,7 +513,7 @@ export default function Dining({ userData }: DiningProps) {
                             >
                               <Minus className="w-3 h-3" />
                             </Button>
-                            <span className="text-sm font-medium w-6 text-center">{quantity}</span>
+                            <span className="text-sm font-medium w-6 text-center">{orderItem.quantity}</span>
                             <Button
                               size="sm"
                               variant="outline"
