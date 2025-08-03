@@ -76,11 +76,15 @@ export default function AdminOrdersPage() {
         const itemId = parsed.itemId || parsed.id;
         const menuItem = getMenuItemDetails(itemId);
         
+        // Check if the parsed item has a custom name (with options) or use the display name
+        const itemName = parsed.name || menuItem?.name || `Item ${itemId?.slice(0, 8) || 'Unknown'}`;
+        
         return {
           id: itemId,
-          name: menuItem?.name || `Item ${itemId?.slice(0, 8) || 'Unknown'}`,
+          name: itemName,
           quantity: parsed.quantity || 1,
-          price: menuItem?.price || '0.00'
+          price: menuItem?.price || '0.00',
+          options: parsed.options || []
         };
       } catch (error) {
         console.error('Error parsing order item:', itemStr, error);
@@ -88,7 +92,8 @@ export default function AdminOrdersPage() {
           id: 'unknown', 
           name: `Raw: ${itemStr.slice(0, 20)}...`, 
           quantity: 1, 
-          price: '0.00' 
+          price: '0.00',
+          options: []
         };
       }
     });
@@ -306,12 +311,45 @@ export default function AdminOrdersPage() {
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <p className="font-medium text-sm">{item.name}</p>
-                              <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                              {item.options && item.options.length > 0 && (
+                                <p className="text-xs text-green-600 font-medium mt-1">
+                                  + {item.options.join(', ')}
+                                </p>
+                              )}
+                              <p className="text-xs text-muted-foreground mt-1">Qty: {item.quantity}</p>
                             </div>
                             <p className="font-medium text-sm">${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
                           </div>
                         </div>
                       ))}
+                    </div>
+                  </div>
+
+                  {/* Delivery Information */}
+                  <div className="border-t pt-4 mt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-2">Delivery Information:</h4>
+                        <div className="bg-blue-50 rounded-lg p-3">
+                          <p className="text-sm">
+                            <span className="font-medium">Method:</span> {order.deliveryOption || 'Clubhouse Pickup'}
+                          </p>
+                          {order.deliveryLocation && (
+                            <p className="text-sm mt-1">
+                              <span className="font-medium">Location:</span> {order.deliveryLocation}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {order.specialRequests && (
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">Special Requests / Allergens:</h4>
+                          <div className="bg-yellow-50 rounded-lg p-3">
+                            <p className="text-sm">{order.specialRequests}</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>

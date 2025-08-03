@@ -83,6 +83,9 @@ export const orders = pgTable("orders", {
   items: text("items").array().notNull(), // Array of serialized order items
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
   status: text("status").notNull().default("pending"), // pending, preparing, ready, delivered
+  deliveryOption: text("delivery_option").default("Clubhouse Pickup"), // "Clubhouse Pickup", "Deliver on Course"
+  deliveryLocation: text("delivery_location"), // e.g., "Hole 5" for on-course delivery
+  specialRequests: text("special_requests"), // Allergens, special instructions, etc.
   createdAt: timestamp("created_at").defaultNow(),
 });
 
