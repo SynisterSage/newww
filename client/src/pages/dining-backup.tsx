@@ -202,12 +202,12 @@ export default function Dining({ userData }: DiningProps) {
 
         {/* Category Tabs */}
         <div className="mb-8">
-          <div className="flex flex-wrap gap-2 overflow-x-auto pb-2">
+          <div className="flex flex-wrap gap-2">
             {["All", "Starters", "Salads", "Soups", "Pastas", "Entrees – Seafood", "Entrees – Meat", "Entrees – Chicken", "Casual", "Sandwiches", "Wraps", "Sides", "Chef Specialties", "Packanacks Picks", "Breakfast Corner"].map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-3 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
+                className={`px-3 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
                   selectedCategory === category
                     ? "bg-[#1B4332] text-white"
                     : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
@@ -233,7 +233,7 @@ export default function Dining({ userData }: DiningProps) {
               <Card 
                 key={item.id} 
                 className={`bg-white border-0 shadow-sm hover:shadow-lg transition-all duration-200 rounded-lg overflow-hidden cursor-pointer ${
-                  isExpanded ? 'h-auto' : 'h-52'
+                  isExpanded ? 'h-auto' : 'h-48'
                 } flex flex-col`}
                 onClick={() => setExpandedCard(isExpanded ? null : item.id)}
               >
@@ -312,7 +312,6 @@ export default function Dining({ userData }: DiningProps) {
           })}
         </div>
       </div>
-
       {/* Mobile Cart Modal */}
       {isCartOpen && (
         <div 
@@ -360,21 +359,35 @@ export default function Dining({ userData }: DiningProps) {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => removeFromOrder(itemId)}
-                              className="h-6 w-6 p-0"
+                              onClick={() => removeFromOrder(item.id)}
+                              className="h-8 w-8 p-0"
                             >
-                              <Minus className="w-3 h-3" />
+                              <Minus className="w-4 h-4" />
                             </Button>
-                            <span className="text-sm font-medium w-6 text-center">{quantity}</span>
+                            <span className="w-8 text-center">{quantity}</span>
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => addToOrder(itemId)}
-                              className="h-6 w-6 p-0"
+                              onClick={() => addToOrder(item.id)}
+                              className="h-8 w-8 p-0 border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white transition-colors"
                             >
-                              <Plus className="w-3 h-3" />
+                              <Plus className="w-4 h-4" />
                             </Button>
                           </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setCurrentOrder(prev => {
+                                const newOrder = { ...prev };
+                                delete newOrder[itemId];
+                                return newOrder;
+                              });
+                            }}
+                            className="h-8 w-8 p-0 text-red-500"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       );
                     })}
@@ -385,52 +398,66 @@ export default function Dining({ userData }: DiningProps) {
               {Object.keys(currentOrder).length > 0 && (
                 <div className="border-t p-4 space-y-4">
                   <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Delivery Option</label>
-                      <Select value={deliveryOption} onValueChange={setDeliveryOption}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Clubhouse Pickup">Clubhouse Pickup</SelectItem>
-                          <SelectItem value="Deliver on Course">Deliver on Course</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <Select value={deliveryOption} onValueChange={setDeliveryOption}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Clubhouse Pickup">Clubhouse Pickup</SelectItem>
+                        <SelectItem value="Deliver on Course">Deliver on Course</SelectItem>
+                      </SelectContent>
+                    </Select>
                     
                     {deliveryOption === "Deliver on Course" && (
-                      <div>
-                        <label className="block text-sm font-medium mb-1">Hole Number</label>
-                        <Select value={selectedHole} onValueChange={setSelectedHole}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select hole" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Array.from({ length: 18 }, (_, i) => i + 1).map((hole) => (
-                              <SelectItem key={hole} value={hole.toString()}>
-                                Hole {hole}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      <Select value={selectedHole} onValueChange={setSelectedHole}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Hole" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 9 }, (_, i) => (
+                            <SelectItem key={i + 1} value={`${i + 1}`}>
+                              Hole {i + 1}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     )}
+                    
+                    {/* Special Requests */}
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-2 block">
+                        Special Requests (Allergens, Notes)
+                      </label>
+                      <textarea
+                        value={specialRequests}
+                        onChange={(e) => setSpecialRequests(e.target.value)}
+                        placeholder="Any special requests, dietary restrictions, or allergen information..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1B4332] focus:border-transparent"
+                        rows={3}
+                      />
+                    </div>
                   </div>
                   
-                  <div className="flex items-center justify-between pt-2 border-t">
-                    <span className="font-semibold">Total: ${orderTotal.toFixed(2)}</span>
-                    <div className="flex space-x-2">
-                      <Button variant="outline" size="sm" onClick={clearOrder}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        onClick={placeOrder} 
-                        disabled={orderMutation.isPending}
-                        className="bg-[#1B4332] hover:bg-[#1B4332]/90"
-                      >
-                        {orderMutation.isPending ? "Placing..." : "Place Order"}
-                      </Button>
-                    </div>
+                  <div className="flex items-center justify-between text-lg font-semibold">
+                    <span>Total:</span>
+                    <span>${orderTotal.toFixed(2)}</span>
+                  </div>
+                  
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={clearOrder}
+                      className="flex-1"
+                    >
+                      Clear
+                    </Button>
+                    <Button
+                      onClick={placeOrder}
+                      disabled={orderMutation.isPending || (deliveryOption === "Deliver on Course" && !selectedHole)}
+                      className="flex-1"
+                    >
+                      {orderMutation.isPending ? "Placing..." : "Place Order"}
+                    </Button>
                   </div>
                 </div>
               )}
