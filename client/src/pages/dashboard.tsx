@@ -5,7 +5,7 @@ import { Calendar, Utensils, MapPin, User, Trophy, Clock, TrendingUp, DollarSign
 import { Link } from "wouter";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
-import type { User as UserType, TeeTime, Order } from "@shared/schema";
+import type { User as UserType, TeeTime, Order, MenuItem } from "@shared/schema";
 
 interface DashboardProps {
   userEmail?: string;
@@ -86,6 +86,11 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
 
   const { data: allOrders = [] } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
+  });
+
+  // Fetch menu items to map order items to names
+  const { data: menuItems = [] } = useQuery<MenuItem[]>({
+    queryKey: ['/api/menu'],
   });
 
   // Filter orders for current user only
@@ -251,20 +256,59 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
                 </div>
                 <div className="text-3xl font-bold text-golf-orange">{recentOrders.length}</div>
               </div>
-              <div className="max-h-32 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-stone-300 scrollbar-track-stone-100">
-                {recentOrders.map((order: Order, index: number) => (
-                  <div key={order.id || index} className="flex items-center justify-between text-sm py-1">
-                    <span className="text-muted-foreground">${order.total} • Clubhouse</span>
-                    <span className={`px-2 py-1 rounded text-xs capitalize ${
-                      order.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                      order.status === 'preparing' ? 'bg-orange-100 text-orange-700' :
-                      order.status === 'ready' ? 'bg-blue-100 text-blue-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {order.status || 'placed'}
-                    </span>
-                  </div>
-                ))}
+              <div className="max-h-48 overflow-y-auto space-y-3 scrollbar-thin scrollbar-thumb-stone-300 scrollbar-track-stone-100">
+                {recentOrders.map((order: Order, index: number) => {
+                  // Parse order items and get their names
+                  const orderItems = order.items.map(itemStr => {
+                    try {
+                      const parsed = JSON.parse(itemStr);
+                      const menuItem = menuItems.find(item => item.id === parsed.itemId);
+                      return {
+                        name: menuItem?.name || 'Unknown Item',
+                        quantity: parsed.quantity || 1
+                      };
+                    } catch {
+                      return { name: 'Unknown Item', quantity: 1 };
+                    }
+                  });
+
+                  // Create truncated items list
+                  const itemsText = orderItems.map(item => 
+                    `${item.quantity}x ${item.name.length > 25 ? item.name.substring(0, 25) + '...' : item.name}`
+                  ).join(', ');
+
+                  // Get delivery method
+                  const deliveryMethod = order.deliveryLocation ? 
+                    `Course (${order.deliveryLocation})` : 
+                    'Clubhouse Pickup';
+
+                  return (
+                    <div key={order.id || index} className="bg-stone-50 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-foreground">${order.total}</span>
+                        <span className={`px-2 py-1 rounded text-xs capitalize ${
+                          order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                          order.status === 'preparing' ? 'bg-orange-100 text-orange-700' :
+                          order.status === 'ready' ? 'bg-blue-100 text-blue-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {order.status || 'placed'}
+                        </span>
+                      </div>
+                      <div className="text-xs text-muted-foreground mb-1">
+                        {deliveryMethod}
+                      </div>
+                      <div className="text-xs text-gray-600 line-clamp-2">
+                        {itemsText}
+                      </div>
+                      {order.createdAt && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {format(new Date(order.createdAt), 'MMM dd, h:mm a')}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
                 {recentOrders.length === 0 && (
                   <p className="text-muted-foreground text-sm italic">No recent orders</p>
                 )}
