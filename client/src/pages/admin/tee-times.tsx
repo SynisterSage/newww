@@ -89,12 +89,8 @@ export default function AdminTeeTimesPage() {
   };
 
   const formatTime = (time: string) => {
-    // Convert 24-hour format to 12-hour format
-    const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
+    // Time is already in 12-hour AM/PM format from database, just return as is
+    return time;
   };
 
   const formatDate = (dateStr: string) => {
