@@ -1,0 +1,113 @@
+Starting Container
+
+npm warn config production Use `--omit=dev` instead.
+
+npm warn EBADENGINE Unsupported engine {
+
+npm warn EBADENGINE   package: 'eventsource-parser@3.0.3',
+
+npm warn EBADENGINE   required: { node: '>=20.0.0' },
+
+npm warn EBADENGINE   current: { node: 'v18.20.5', npm: '10.8.2' }
+
+npm warn EBADENGINE }
+
+npm warn EBADENGINE Unsupported engine {
+
+npm warn EBADENGINE   package: 'firebase-tools@14.11.2',
+
+npm warn EBADENGINE   required: { node: '>=20.0.0 || >=22.0.0' },
+
+npm warn EBADENGINE   current: { node: 'v18.20.5', npm: '10.8.2' }
+
+npm warn EBADENGINE }
+
+ 
+
+up to date, audited 1172 packages in 7s
+
+ 
+
+124 packages are looking for funding
+
+  run `npm fund` for details
+
+ 
+
+16 vulnerabilities (3 low, 8 moderate, 1 high, 4 critical)
+
+ 
+
+To address issues that do not require attention, run:
+
+  npm audit fix
+
+ 
+
+To address all issues possible (including breaking changes), run:
+
+  npm audit fix --force
+
+ 
+
+Some issues need review, and may require choosing
+
+a different dependency.
+
+ 
+
+Run `npm audit` for details.
+
+npm warn config production Use `--omit=dev` instead.
+
+ 
+
+> rest-express@1.0.0 build
+
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+ 
+
+vite v5.4.19 building for production...
+
+transforming...
+
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+
+  npx update-browserslist-db@latest
+
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+✓ 2032 modules transformed.
+
+rendering chunks...
+
+computing gzip size...
+
+../dist/public/index.html                   0.63 kB │ gzip:   0.39 kB
+
+../dist/public/assets/index-DqZ3KeBa.css   83.87 kB │ gzip:  14.33 kB
+
+../dist/public/assets/index-CLIjL_9o.js   488.78 kB │ gzip: 140.25 kB
+
+✓ built in 7.33s
+
+ 
+
+  dist/index.js  49.7kb
+
+ 
+
+⚡ Done in 14ms
+
+npm warn config production Use `--omit=dev` instead.
+
+ 
+
+  dist/prod.js  46.4kb
+
+ 
+
+⚡ Done in 13ms
+
+[server] serving on port 8080
