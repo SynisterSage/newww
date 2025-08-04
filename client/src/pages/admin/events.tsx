@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,6 +41,16 @@ export default function AdminEvents() {
   const [isRegistrationsDialogOpen, setIsRegistrationsDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedEventRegistrations, setSelectedEventRegistrations] = useState<EventRegistration[]>([]);
+
+  // Auto-refresh every 30 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events/all"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [queryClient]);
 
   // Fetch events (admin side gets all events including past ones for record keeping)
   const { data: allEvents = [], isLoading } = useQuery({

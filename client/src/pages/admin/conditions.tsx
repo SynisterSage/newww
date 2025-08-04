@@ -15,6 +15,15 @@ import type { CourseConditions, InsertCourseConditions } from "@shared/schema";
 export default function CourseConditionsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Auto-refresh every 30 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ["/api/course/conditions"] });
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [queryClient]);
   
   const { data: conditions, isLoading } = useQuery({
     queryKey: ["/api/course/conditions"],

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,17 @@ import { queryClient } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
 
 export default function AdminMembers() {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Auto-refresh every 30 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/members"] });
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [queryClient]);
 
   const { data: members, isLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/members"],

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Utensils, MapPin, User, Trophy, Clock, TrendingUp, DollarSign, Wind, Droplets, Sun } from "lucide-react";
+import { Calendar, Utensils, MapPin, User, Trophy, Clock, TrendingUp, DollarSign, Wind, Droplets, Sun, Car, Users } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
@@ -228,15 +228,39 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
                 </div>
                 <div className="text-3xl font-bold text-golf-green">{recentTeetimes.length}</div>
               </div>
-              <div className="max-h-32 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-stone-300 scrollbar-track-stone-100">
-                {recentTeetimes.map((teetime: TeeTime, index: number) => (
-                  <div key={teetime.id || index} className="flex items-center justify-between text-sm py-1">
-                    <span className="text-muted-foreground">{format(new Date(teetime.date), 'MMM dd')} • {teetime.time}</span>
-                    <span className="px-2 py-1 rounded text-xs bg-green-100 text-green-700">
-                      booked
-                    </span>
-                  </div>
-                ))}
+              <div className="max-h-48 overflow-y-auto space-y-3 scrollbar-thin scrollbar-thumb-stone-300 scrollbar-track-stone-100">
+                {recentTeetimes.map((teetime: TeeTime, index: number) => {
+                  // Find the user's booking index
+                  const userIndex = teetime.bookedBy?.indexOf(currentUser?.id || '') || 0;
+                  const transport = teetime.transportModes?.[userIndex] || 'riding';
+                  const holes = teetime.holesPlaying?.[userIndex] || '18';
+                  const playerType = teetime.playerTypes?.[userIndex] || 'member';
+                  
+                  return (
+                    <div key={teetime.id || index} className="bg-gray-50 rounded-lg p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-sm">{format(new Date(teetime.date), 'MMM dd')} • {teetime.time}</span>
+                        <span className="px-2 py-1 rounded text-xs bg-green-100 text-green-700 capitalize">
+                          {playerType}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Car className="w-3 h-3" />
+                          <span className="capitalize">{transport}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          <span>{holes} holes</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          <span>{teetime.bookedBy?.length || 0}/4 players</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
                 {recentTeetimes.length === 0 && (
                   <p className="text-muted-foreground text-sm italic">No recent tee times</p>
                 )}

@@ -15,11 +15,14 @@ export default function AdminTeeTimesPage() {
     return tomorrow.toISOString().split('T')[0];
   });
 
-  // Auto-refresh every minute to hide expired time slots in real-time
+  // Auto-refresh every 30 seconds for real-time updates
   useEffect(() => {
     const interval = setInterval(() => {
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes', selectedDate] });
-    }, 60000); // Refresh every minute
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/members'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/conditions'] });
+    }, 30000); // Refresh every 30 seconds for real-time updates
 
     return () => clearInterval(interval);
   }, [selectedDate, queryClient]);
