@@ -522,38 +522,21 @@ export default function Dining({ userData }: DiningProps) {
                             </div>
                           </div>
 
-                          {/* Selected Options */}
+                          {/* Simple Options Display */}
                           {orderItem.options.length > 0 && (
-                            <div className="mb-3 p-3 bg-green-50 rounded-md">
-                              <p className="text-xs font-semibold text-green-800 mb-2">Selected Options:</p>
-                              <div className="space-y-1">
-                                {orderItem.options.map((option, idx) => {
-                                  const optionPrice = getOptionPrice(option);
-                                  return (
-                                    <div key={idx} className="flex justify-between items-center text-sm">
-                                      <span className="text-green-700">• {option}</span>
-                                      {optionPrice > 0 && (
-                                        <span className="text-green-600 font-medium">+${optionPrice.toFixed(2)}</span>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
+                            <p className="text-xs text-green-600 font-medium mt-1">
+                              + {orderItem.options.join(', ')}
+                            </p>
                           )}
 
-                          {/* Price Summary */}
-                          <div className="pt-2 border-t border-gray-100">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">Total per item:</span>
-                              <span className="font-bold text-green-600">
-                                ${(parseFloat(item.price) + orderItem.options.reduce((total, option) => total + getOptionPrice(option), 0)).toFixed(2)}
-                              </span>
-                            </div>
-                            <div className="flex justify-between items-center text-xs text-gray-500 mt-1">
-                              <span>Quantity: {orderItem.quantity}</span>
-                              <span>Subtotal: ${((parseFloat(item.price) + orderItem.options.reduce((total, option) => total + getOptionPrice(option), 0)) * orderItem.quantity).toFixed(2)}</span>
-                            </div>
+                          {/* Simple Price Display */}
+                          <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
+                            <span className="text-sm text-gray-600">
+                              ${(parseFloat(item.price) + orderItem.options.reduce((total, option) => total + getOptionPrice(option), 0)).toFixed(2)} × {orderItem.quantity}
+                            </span>
+                            <span className="font-semibold text-gray-900">
+                              ${((parseFloat(item.price) + orderItem.options.reduce((total, option) => total + getOptionPrice(option), 0)) * orderItem.quantity).toFixed(2)}
+                            </span>
                           </div>
 
                           {/* Options selection in cart */}
