@@ -305,7 +305,7 @@ export default function Dining({ userData }: DiningProps) {
         </div>
 
         {/* Menu Items Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-6" style={{ gridAutoRows: 'min-content' }}>
           {filteredItems.map((item) => {
             const isExpanded = expandedCard === item.id;
             return (
@@ -313,8 +313,6 @@ export default function Dining({ userData }: DiningProps) {
                 key={item.id} 
                 className={`bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 rounded-xl overflow-hidden ${
                   item.availableSettings ? 'cursor-pointer' : ''
-                } ${
-                  isExpanded ? 'h-auto' : 'h-72'
                 } flex flex-col`}
                 onClick={() => {
                   // Only allow expansion if item has available settings
