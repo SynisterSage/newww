@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -29,14 +29,24 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  const [players, setPlayers] = useState<Player[]>([
-    {
-      name: `${userData.firstName} ${userData.lastName}`.trim() || userData.username,
-      type: "member",
-      transportMode: "riding",
-      holesPlaying: "18"
+  const [players, setPlayers] = useState<Player[]>(() => [{
+    name: `${userData.firstName} ${userData.lastName}`.trim() || userData.username,
+    type: "member",
+    transportMode: "riding",
+    holesPlaying: "18"
+  }]);
+
+  // Reset players when dialog opens to prevent state corruption
+  useEffect(() => {
+    if (open) {
+      setPlayers([{
+        name: `${userData.firstName} ${userData.lastName}`.trim() || userData.username,
+        type: "member",
+        transportMode: "riding",
+        holesPlaying: "18"
+      }]);
     }
-  ]);
+  }, [open, userData]);
 
   const addPlayer = () => {
     if (players.length < 4) {
@@ -63,6 +73,17 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
 
   const bookingMutation = useMutation({
     mutationFn: async () => {
+      // Debug logging for production troubleshooting
+      console.log('Booking mutation starting:', {
+        userId: userData.id,
+        playersCount: players.length,
+        players: players
+      });
+      
+      if (players.length === 0) {
+        throw new Error('No players to book - this should not happen');
+      }
+      
       const response = await apiRequest('PATCH', `/api/teetimes/${teeTime.id}/book`, {
         userId: userData.id,
         players: players
