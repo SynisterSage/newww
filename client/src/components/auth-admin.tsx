@@ -143,7 +143,7 @@ export function AuthAdmin({ onLogin }: AuthAdminProps) {
               <p className="font-medium text-slate-700">Contact 973-832-3997 for assistance</p>
               <div className="mt-3 text-xs text-gray-600">
                 <p>Demo credentials:</p>
-                <p>admin@packanackgolf.com / admin123</p>
+                <p>admin@golf.com / admin123</p>
               </div>
               <div className="mt-3">
                 <a 
