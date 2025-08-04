@@ -142,6 +142,43 @@ export default function Dining({ userData }: DiningProps) {
       .filter(option => option.length > 0);
   };
 
+  // Get price for specific options (some options have additional costs)
+  const getOptionPrice = (option: string) => {
+    const pricedOptions: {[key: string]: number} = {
+      'French Fries': 4.75,
+      'French Fries with Cheese': 6.00,
+      'French Fries with Cheese & Bacon': 8.50,
+      'Bacon': 3.00,
+      'Sautéed Onions': 2.00,
+      'American': 1.50,
+      'Cheddar': 1.50,
+      'Swiss Cheese': 1.50,
+      'Blue Cheese': 1.50,
+      'Sauerkraut': 1.00,
+      'Salsa': 1.00,
+      'Sour Cream': 1.00,
+      'Buffalo': 0, // Wing sauces are free
+      'BBQ': 0,
+      'Sweet Thai Chili': 0,
+      'Cajun': 0,
+      'Mushrooms': 2.00,
+      'Pepperoni': 2.50,
+      'Peppers': 1.50,
+      'Onions': 1.50,
+      // Salad dressings are typically free
+      'House-Made Balsamic': 0,
+      'Champagne': 0,
+      'Honey Mustard': 0,
+      'Thousand Island': 0,
+      'Ranch': 0,
+      'EVOO & Balsamic Vinegar': 0,
+      'Cole Slaw': 3.50,
+      'Fresh Fruit Salad': 4.00
+    };
+    
+    return pricedOptions[option] || 0;
+  };
+
   const closeCart = () => {
     setIsCartClosing(true);
     setTimeout(() => {
@@ -153,7 +190,14 @@ export default function Dining({ userData }: DiningProps) {
   const calculateTotal = () => {
     return Object.entries(currentOrder).reduce((total, [itemId, orderItem]) => {
       const item = menuItems.find(item => item.id === itemId);
-      return total + (item ? parseFloat(item.price) * orderItem.quantity : 0);
+      if (!item) return total;
+      
+      const basePrice = parseFloat(item.price);
+      const optionsPrice = orderItem.options.reduce((optionTotal, option) => {
+        return optionTotal + getOptionPrice(option);
+      }, 0);
+      
+      return total + ((basePrice + optionsPrice) * orderItem.quantity);
     }, 0);
   };
 
@@ -455,11 +499,28 @@ export default function Dining({ userData }: DiningProps) {
                             <div className="flex-1">
                               <h4 className="font-medium">{item.name}</h4>
                               {orderItem.options.length > 0 && (
-                                <p className="text-xs text-green-600 font-medium">
-                                  + {orderItem.options.join(', ')}
-                                </p>
+                                <div className="text-xs text-green-600 font-medium space-y-1">
+                                  {orderItem.options.map((option, idx) => {
+                                    const optionPrice = getOptionPrice(option);
+                                    return (
+                                      <p key={idx} className="flex justify-between">
+                                        <span>+ {option}</span>
+                                        {optionPrice > 0 && <span>+${optionPrice.toFixed(2)}</span>}
+                                      </p>
+                                    );
+                                  })}
+                                </div>
                               )}
-                              <p className="text-sm text-gray-500">${item.price} each</p>
+                              <div className="text-sm text-gray-500">
+                                <p>Base: ${item.price}</p>
+                                {orderItem.options.length > 0 && (() => {
+                                  const optionsTotal = orderItem.options.reduce((total, option) => total + getOptionPrice(option), 0);
+                                  return optionsTotal > 0 ? <p>Options: +${optionsTotal.toFixed(2)}</p> : null;
+                                })()}
+                                <p className="font-medium text-gray-700">
+                                  Total per item: ${(parseFloat(item.price) + orderItem.options.reduce((total, option) => total + getOptionPrice(option), 0)).toFixed(2)}
+                                </p>
+                              </div>
                             </div>
                             <div className="flex items-center space-x-2">
                               <Button
@@ -489,6 +550,7 @@ export default function Dining({ userData }: DiningProps) {
                               <div className="grid grid-cols-1 gap-1">
                                 {parseAvailableOptions(item.availableSettings).map((option, index) => {
                                   const isSelected = selectedOptions[itemId]?.includes(option) || false;
+                                  const optionPrice = getOptionPrice(option);
                                   return (
                                     <button
                                       key={index}
@@ -499,17 +561,24 @@ export default function Dining({ userData }: DiningProps) {
                                           : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-green-50'
                                       }`}
                                     >
-                                      <span className="flex items-center gap-2">
-                                        <span className={`w-3 h-3 rounded border flex items-center justify-center ${
-                                          isSelected ? 'bg-green-600 border-green-600' : 'border-gray-300'
-                                        }`}>
-                                          {isSelected && (
-                                            <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                            </svg>
-                                          )}
+                                      <span className="flex items-center justify-between w-full">
+                                        <span className="flex items-center gap-2">
+                                          <span className={`w-3 h-3 rounded border flex items-center justify-center ${
+                                            isSelected ? 'bg-green-600 border-green-600' : 'border-gray-300'
+                                          }`}>
+                                            {isSelected && (
+                                              <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                              </svg>
+                                            )}
+                                          </span>
+                                          {option}
                                         </span>
-                                        {option}
+                                        {optionPrice > 0 && (
+                                          <span className="text-green-600 font-medium">
+                                            +${optionPrice.toFixed(2)}
+                                          </span>
+                                        )}
                                       </span>
                                     </button>
                                   );
