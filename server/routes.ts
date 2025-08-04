@@ -110,14 +110,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newTransportModes = [...(teetime.transportModes || [])];
       const newHolesPlaying = [...(teetime.holesPlaying || [])];
 
-      // Add each player to the arrays
+      // Add each player to the arrays with validation
       players.forEach((player: any) => {
+        // Ensure player object has required properties
+        if (!player || typeof player !== 'object') {
+          throw new Error('Invalid player object');
+        }
+        
         newBookedBy.push(userId); // All players are associated with the booking user
-        newPlayerNames.push(player.name || "Unknown");
+        newPlayerNames.push(player.name || "Unknown Player");
         newPlayerTypes.push(player.type || "member");
         newTransportModes.push(player.transportMode || "riding");
         newHolesPlaying.push(player.holesPlaying || "18");
       });
+
+      // Ensure all arrays have the same length after updates
+      if (newBookedBy.length !== newPlayerNames.length || 
+          newPlayerNames.length !== newPlayerTypes.length ||
+          newPlayerTypes.length !== newTransportModes.length ||
+          newTransportModes.length !== newHolesPlaying.length) {
+        throw new Error('Array length mismatch in tee time data');
+      }
 
       const updatedTeetime = await storage.updateTeetime(id, {
         bookedBy: newBookedBy,

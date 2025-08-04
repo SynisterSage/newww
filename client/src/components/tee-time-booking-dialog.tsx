@@ -80,13 +80,27 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
         players: players
       });
       
-      if (players.length === 0) {
+      // Comprehensive validation to ensure arrays are never empty
+      if (!Array.isArray(players) || players.length === 0) {
         throw new Error('No players to book - this should not happen');
       }
       
+      // Validate each player object
+      const validatedPlayers = players.map((player, index) => {
+        if (!player || typeof player !== 'object') {
+          throw new Error(`Invalid player object at index ${index}`);
+        }
+        return {
+          name: player.name || `Player ${index + 1}`,
+          type: player.type || 'member',
+          transportMode: player.transportMode || 'riding',
+          holesPlaying: player.holesPlaying || '18'
+        };
+      });
+      
       const response = await apiRequest('PATCH', `/api/teetimes/${teeTime.id}/book`, {
         userId: userData.id,
-        players: players
+        players: validatedPlayers
       });
       return response.json();
     },
