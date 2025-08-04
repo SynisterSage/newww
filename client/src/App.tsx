@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Switch, Route, useLocation } from "wouter";
-import { queryClient } from "./lib/queryClient";
+import { queryClient, apiRequest } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -46,28 +46,16 @@ function Router() {
       }
 
       try {
-        const response = await fetch('/api/auth/verify', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ sessionToken }),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
+        const response = await apiRequest('POST', '/api/auth/verify', { sessionToken });
+        const data = await response.json();
           
-          if (data.type === 'member') {
-            setUserData(data);
-            setUserEmail(data.email);
-            setIsAuthenticated(true);
-          } else if (data.type === 'admin') {
-            setAdminData(data);
-            setIsAdminAuthenticated(true);
-          }
-        } else {
-          // Clear invalid session
-          localStorage.removeItem('sessionToken');
+        if (data.type === 'member') {
+          setUserData(data);
+          setUserEmail(data.email);
+          setIsAuthenticated(true);
+        } else if (data.type === 'admin') {
+          setAdminData(data);
+          setIsAdminAuthenticated(true);
         }
       } catch (error) {
         // Clear invalid session on error
