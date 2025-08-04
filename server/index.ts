@@ -3,6 +3,37 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// CORS middleware to allow Firebase deployment to access Replit backend
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    'https://pgcapp-12fba.web.app',
+    'https://pgcapp-12fba.firebaseapp.com',
+    'http://localhost:5173',
+    /\.replit\.dev$/
+  ];
+  
+  const origin = req.headers.origin;
+  
+  if (origin && (
+    allowedOrigins.includes(origin) ||
+    allowedOrigins.some(allowed => allowed instanceof RegExp && allowed.test(origin))
+  )) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+    return;
+  }
+  
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

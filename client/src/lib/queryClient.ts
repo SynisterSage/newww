@@ -9,7 +9,7 @@ async function throwIfResNotOk(res: Response) {
 
 // API base URL - use Replit backend when deployed to Firebase
 const API_BASE_URL = window.location.hostname.includes('web.app') 
-  ? 'https://c6acc066-6bfc-483a-8df1-c6a0b9b68e3c-00-3lh0a7i90lm12.riker.replit.dev'
+  ? 'https://c3f7a47b-7e08-447d-a50b-2802e105d002-00-workspace.picard.replit.dev'
   : '';
 
 export async function apiRequest(
