@@ -109,14 +109,21 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
       return response.json();
     },
     onSuccess: () => {
-      // Comprehensive cache invalidation for real-time updates
+      // Comprehensive cache invalidation for real-time updates (member + admin)
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes/user', userData?.id] });
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] }); // For dashboard stats
-      queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] === '/api/teetimes' || 
-        (Array.isArray(query.queryKey) && query.queryKey[0] === '/api/teetimes')
-      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/members'] });
+      
+      // Invalidate all tee time queries with date parameters (for admin dashboard & admin tee-times)
+      queryClient.invalidateQueries({ predicate: (query) => {
+        const key = query.queryKey;
+        return (
+          key[0] === '/api/teetimes' ||
+          key[0] === '/api/admin/members' ||
+          (Array.isArray(key) && key.length >= 2 && key[0] === '/api/teetimes')
+        );
+      }});
       toast({
         title: "Booking Cancelled",
         description: "You've left this tee time.",
