@@ -145,6 +145,14 @@ export function AuthAdmin({ onLogin }: AuthAdminProps) {
                 <p>Demo credentials:</p>
                 <p>admin@packanackgolf.com / admin123</p>
               </div>
+              <div className="mt-3">
+                <a 
+                  href="/" 
+                  className="inline-block text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  ← Back to Member Login
+                </a>
+              </div>
             </div>
           </form>
         </CardContent>
