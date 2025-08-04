@@ -313,7 +313,9 @@ export default function Dining({ userData }: DiningProps) {
                 key={item.id} 
                 className={`bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 rounded-xl overflow-hidden ${
                   item.availableSettings ? 'cursor-pointer' : ''
-                } h-72 flex flex-col`}
+                } ${
+                  isExpanded ? 'h-auto' : 'h-72'
+                } flex flex-col`}
                 onClick={() => {
                   // Only allow expansion if item has available settings
                   if (item.availableSettings) {
@@ -336,18 +338,65 @@ export default function Dining({ userData }: DiningProps) {
                     </div>
                     
                     {/* Title - Fixed height for consistency */}
-                    <div className="mb-3 h-16 flex items-start">
+                    <div className={`mb-3 ${isExpanded ? 'h-auto' : 'h-16'} flex items-start`}>
                       <h3 className="font-semibold text-gray-900 text-lg leading-tight">
                         {item.name}
                       </h3>
                     </div>
                     
                     {/* Description - Fixed height to maintain consistent layout */}
-                    <div className="text-sm text-gray-600 mb-4 h-20 flex items-start overflow-hidden">
-                      <p className="line-clamp-4">
+                    <div className={`text-sm text-gray-600 mb-4 ${isExpanded ? 'h-auto' : 'h-20'} flex items-start overflow-hidden`}>
+                      <p className={`${isExpanded ? '' : 'line-clamp-4'}`}>
                         {item.description}
                       </p>
                     </div>
+                    
+                    {/* Available options for expanded cards */}
+                    {item.availableSettings && isExpanded && (
+                      <div className="mb-4 p-4 bg-green-50 border border-green-100 rounded-lg">
+                        <p className="text-sm font-semibold text-green-800 mb-3">Available Options:</p>
+                        <div className="grid grid-cols-1 gap-2">
+                          {parseAvailableOptions(item.availableSettings).map((option, index) => {
+                            const isSelected = selectedOptions[item.id]?.includes(option) || false;
+                            return (
+                              <button
+                                key={index}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleOption(item.id, option);
+                                }}
+                                className={`text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                                  isSelected
+                                    ? 'bg-green-200 text-green-800 border border-green-300'
+                                    : 'bg-white text-green-700 border border-green-200 hover:bg-green-100'
+                                }`}
+                              >
+                                <span className="flex items-center gap-2">
+                                  <span className={`w-4 h-4 rounded border flex items-center justify-center ${
+                                    isSelected ? 'bg-green-600 border-green-600' : 'border-green-300'
+                                  }`}>
+                                    {isSelected && (
+                                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                      </svg>
+                                    )}
+                                  </span>
+                                  {option}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {selectedOptions[item.id]?.length > 0 && (
+                          <div className="mt-3 p-2 bg-green-100 rounded-md">
+                            <p className="text-xs font-medium text-green-800 mb-1">Selected:</p>
+                            <p className="text-xs text-green-700">
+                              {selectedOptions[item.id].join(', ')}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   
                   {/* Footer with price and add button */}
@@ -406,106 +455,6 @@ export default function Dining({ userData }: DiningProps) {
           })}
         </div>
       </div>
-
-      {/* Options Overlay */}
-      {expandedCard && menuItems.find(item => item.id === expandedCard) && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-          onClick={() => setExpandedCard(null)}
-        >
-          <div 
-            className="bg-white rounded-xl max-w-md w-full max-h-[80vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {(() => {
-              const item = menuItems.find(i => i.id === expandedCard);
-              if (!item) return null;
-              
-              return (
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-lg mb-1">{item.name}</h3>
-                      <p className="text-sm text-gray-600">${item.price}</p>
-                    </div>
-                    <button 
-                      onClick={() => setExpandedCard(null)}
-                      className="text-gray-400 hover:text-gray-600 p-1"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                  
-                  <div className="mb-6">
-                    <p className="text-sm font-semibold text-green-800 mb-3">Available Options:</p>
-                    <div className="grid grid-cols-1 gap-2">
-                      {parseAvailableOptions(item.availableSettings || '').map((option, index) => {
-                        const isSelected = selectedOptions[item.id]?.includes(option) || false;
-                        return (
-                          <button
-                            key={index}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleOption(item.id, option);
-                            }}
-                            className={`text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                              isSelected
-                                ? 'bg-green-200 text-green-800 border border-green-300'
-                                : 'bg-white text-green-700 border border-green-200 hover:bg-green-100'
-                            }`}
-                          >
-                            <span className="flex items-center gap-2">
-                              <span className={`w-4 h-4 rounded border flex items-center justify-center ${
-                                isSelected ? 'bg-green-600 border-green-600' : 'border-green-300'
-                              }`}>
-                                {isSelected && (
-                                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                  </svg>
-                                )}
-                              </span>
-                              {option}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {selectedOptions[item.id]?.length > 0 && (
-                      <div className="mt-3 p-2 bg-green-100 rounded-md">
-                        <p className="text-xs font-medium text-green-800 mb-1">Selected:</p>
-                        <p className="text-xs text-green-700">
-                          {selectedOptions[item.id].join(', ')}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex gap-3">
-                    <Button
-                      onClick={() => setExpandedCard(null)}
-                      variant="outline"
-                      className="flex-1"
-                    >
-                      Close
-                    </Button>
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        addToOrder(item);
-                        setExpandedCard(null);
-                      }}
-                      className="flex-1 bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-black"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add to Cart
-                    </Button>
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-        </div>
-      )}
 
       {/* Mobile Cart Modal */}
       {isCartOpen && (
