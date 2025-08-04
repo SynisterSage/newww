@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, User as UserIcon, Users, MapPin } from "lucide-react";
+import { Calendar, Clock, User as UserIcon, Users, MapPin, Car } from "lucide-react";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import type { TeeTime, User } from "@shared/schema";
@@ -44,10 +44,40 @@ export default function AdminTeeTimesPage() {
   const isToday = selectedDate === getTodayDate();
   const isTomorrow = selectedDate === getTomorrowDate();
 
+  // Function to check if a tee time is in the past
+  const isPastTime = (time: string, date: string) => {
+    if (!isToday) return false; // Only filter for today's date
+    
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    
+    // Parse time string (e.g., "7:00 AM" or "1:30 PM")
+    const timeMatch = time.match(/(\d+):(\d+)\s*(AM|PM)/);
+    if (!timeMatch) return false;
+    
+    let hour = parseInt(timeMatch[1]);
+    const minute = parseInt(timeMatch[2]);
+    const ampm = timeMatch[3];
+    
+    // Convert to 24-hour format
+    if (ampm === 'PM' && hour !== 12) hour += 12;
+    if (ampm === 'AM' && hour === 12) hour = 0;
+    
+    // Check if time has passed
+    if (hour < currentHour) return true;
+    if (hour === currentHour && minute <= currentMinute) return true;
+    
+    return false;
+  };
+
   // Fetch all tee times for the selected date
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', selectedDate],
   });
+
+  // Filter out past times
+  const availableTeetimes = teetimes.filter(teetime => !isPastTime(teetime.time, teetime.date));
 
   // Fetch all members to get user details
   const { data: members = [] } = useQuery<User[]>({
@@ -107,12 +137,12 @@ export default function AdminTeeTimesPage() {
   };
 
   // Calculate statistics
-  const availableTeetimes = teetimes.filter(tt => (tt.bookedBy?.length || 0) === 0);
-  const partialTeetimes = teetimes.filter(tt => {
+  const openSlots = teetimes.filter(tt => (tt.bookedBy?.length || 0) === 0);
+  const partialSlots = teetimes.filter(tt => {
     const players = tt.bookedBy?.length || 0;
     return players > 0 && players < (tt.maxPlayers || 4);
   });
-  const fullTeetimes = teetimes.filter(tt => (tt.bookedBy?.length || 0) >= (tt.maxPlayers || 4));
+  const fullSlots = teetimes.filter(tt => (tt.bookedBy?.length || 0) >= (tt.maxPlayers || 4));
   const totalBookedPlayers = teetimes.reduce((sum, tt) => sum + (tt.bookedBy?.length || 0), 0);
 
   if (isLoading) {
@@ -194,7 +224,7 @@ export default function AdminTeeTimesPage() {
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Clock className="h-6 w-6 text-green-600" />
               </div>
-              <p className="text-2xl font-bold text-gray-900">{availableTeetimes.length}</p>
+              <p className="text-2xl font-bold text-gray-900">{openSlots.length}</p>
               <p className="text-sm text-muted-foreground">Available Slots</p>
             </CardContent>
           </Card>
@@ -204,7 +234,7 @@ export default function AdminTeeTimesPage() {
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Users className="h-6 w-6 text-blue-600" />
               </div>
-              <p className="text-2xl font-bold text-gray-900">{partialTeetimes.length}</p>
+              <p className="text-2xl font-bold text-gray-900">{partialSlots.length}</p>
               <p className="text-sm text-muted-foreground">Partially Booked</p>
             </CardContent>
           </Card>
@@ -214,7 +244,7 @@ export default function AdminTeeTimesPage() {
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <MapPin className="h-6 w-6 text-red-600" />
               </div>
-              <p className="text-2xl font-bold text-gray-900">{fullTeetimes.length}</p>
+              <p className="text-2xl font-bold text-gray-900">{fullSlots.length}</p>
               <p className="text-sm text-muted-foreground">Full Slots</p>
             </CardContent>
           </Card>
@@ -232,34 +262,7 @@ export default function AdminTeeTimesPage() {
 
         {/* Tee Time Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {[...teetimes]
-            .filter((teetime) => {
-              // If viewing today's date, filter out past times
-              const today = new Date();
-              const isToday = selectedDate === today.toISOString().split('T')[0];
-              
-              if (!isToday) return true; // Show all times for future dates
-              
-              // For today, only show future times
-              const now = new Date();
-              const currentHour = now.getHours();
-              const currentMinute = now.getMinutes();
-              
-              // Parse the tee time
-              const timeMatch = teetime.time.match(/(\d+):(\d+)\s*(AM|PM)/);
-              if (!timeMatch) return true;
-              
-              let teeHour = parseInt(timeMatch[1]);
-              const teeMinute = parseInt(timeMatch[2]);
-              const ampm = timeMatch[3];
-              
-              // Convert to 24-hour format
-              if (ampm === 'PM' && teeHour !== 12) teeHour += 12;
-              if (ampm === 'AM' && teeHour === 12) teeHour = 0;
-              
-              // Compare with current time
-              return teeHour > currentHour || (teeHour === currentHour && teeMinute > currentMinute);
-            })
+          {availableTeetimes
             .sort((a, b) => a.time.localeCompare(b.time))
             .map((teetime) => {
             const statusInfo = getStatusInfo(teetime);
@@ -289,16 +292,37 @@ export default function AdminTeeTimesPage() {
                     {bookedMembers.length > 0 && (
                       <div className="space-y-2">
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                          Booked Members:
+                          Booked Players:
                         </p>
-                        {bookedMembers.map((member, index) => (
-                          <div key={index} className="flex items-center space-x-2 text-sm">
-                            <UserIcon className="w-4 h-4 text-golf-green" />
-                            <span className="text-foreground">
-                              {member?.firstName} {member?.lastName}
-                            </span>
-                          </div>
-                        ))}
+                        {bookedMembers.map((member, index) => {
+                          const playerType = teetime.playerTypes?.[index] || 'member';
+                          const transportMode = teetime.transportModes?.[index] || 'riding';
+                          const holesPlaying = teetime.holesPlaying?.[index] || '18';
+                          
+                          return (
+                            <div key={index} className="space-y-1">
+                              <div className="flex items-center space-x-2 text-sm">
+                                <UserIcon className="w-4 h-4 text-golf-green" />
+                                <span className="text-foreground font-medium">
+                                  {member?.firstName} {member?.lastName}
+                                </span>
+                                <span className="text-xs text-muted-foreground capitalize px-2 py-1 bg-gray-100 rounded">
+                                  {playerType}
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-3 ml-6 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Car className="w-3 h-3" />
+                                  <span className="capitalize">{transportMode}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  <span>{holesPlaying} holes</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
 

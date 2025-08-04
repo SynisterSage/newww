@@ -56,7 +56,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/teetimes/:id/book", async (req, res) => {
     try {
       const { id } = req.params;
-      const { userId, playerName } = req.body;
+      const { userId, playerName, playerType, transportMode, holesPlaying } = req.body;
       
       const teetime = await storage.getTeetimeById(id);
       if (!teetime) {
@@ -75,10 +75,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const newBookedBy = [...(teetime.bookedBy || []), userId];
       const newPlayerNames = [...(teetime.playerNames || []), playerName || 'Unknown'];
+      const newPlayerTypes = [...(teetime.playerTypes || []), playerType || 'member'];
+      const newTransportModes = [...(teetime.transportModes || []), transportMode || 'riding'];
+      const newHolesPlaying = [...(teetime.holesPlaying || []), holesPlaying || '18'];
       
       const updatedTeetime = await storage.updateTeetime(id, {
         bookedBy: newBookedBy,
-        playerNames: newPlayerNames
+        playerNames: newPlayerNames,
+        playerTypes: newPlayerTypes,
+        transportModes: newTransportModes,
+        holesPlaying: newHolesPlaying
       });
       
       res.json(updatedTeetime);
@@ -105,10 +111,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newBookedBy = teetime.bookedBy.filter(id => id !== userId);
       const userIndex = teetime.bookedBy.indexOf(userId);
       const newPlayerNames = teetime.playerNames?.filter((_, index) => index !== userIndex) || [];
+      const newPlayerTypes = teetime.playerTypes?.filter((_, index) => index !== userIndex) || [];
+      const newTransportModes = teetime.transportModes?.filter((_, index) => index !== userIndex) || [];
+      const newHolesPlaying = teetime.holesPlaying?.filter((_, index) => index !== userIndex) || [];
       
       const updatedTeetime = await storage.updateTeetime(id, {
         bookedBy: newBookedBy,
-        playerNames: newPlayerNames
+        playerNames: newPlayerNames,
+        playerTypes: newPlayerTypes,
+        transportModes: newTransportModes,
+        holesPlaying: newHolesPlaying
       });
       
       res.json(updatedTeetime);

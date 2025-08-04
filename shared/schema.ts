@@ -60,6 +60,9 @@ export const teetimes = pgTable("teetimes", {
   maxPlayers: integer("max_players").notNull().default(4),
   bookedBy: text("booked_by").array().default([]), // Array of user IDs who booked this slot
   playerNames: text("player_names").array().default([]), // Array of player names for display
+  playerTypes: text("player_types").array().default([]), // Array of "member" or "guest" for each player
+  transportModes: text("transport_modes").array().default([]), // Array of "riding" or "walking" for each player
+  holesPlaying: text("holes_playing").array().default([]), // Array of "9" or "18" for each player
   // Status is automatically calculated based on bookedBy array length
   isPremium: boolean("is_premium").default(false),
   price: decimal("price", { precision: 8, scale: 2 }).notNull().default("85.00"),

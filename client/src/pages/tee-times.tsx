@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useState } from "react";
-import { Calendar, Clock, Users, Plus, X, UserCheck } from "lucide-react";
+import { Calendar, Clock, Users, Plus, X, UserCheck, Car, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import type { TeeTime, User } from "@shared/schema";
+import { TeeTimeBookingDialog } from "@/components/tee-time-booking-dialog";
 
 interface TeeTimesProps {
   userData?: User;
@@ -18,6 +19,10 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split('T')[0];
+  });
+  const [bookingDialog, setBookingDialog] = useState<{ open: boolean; teeTime: TeeTime | null }>({
+    open: false,
+    teeTime: null
   });
 
   const getTodayDate = () => {
@@ -40,6 +45,33 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
   const isToday = selectedDate === getTodayDate();
   const isTomorrow = selectedDate === getTomorrowDate();
 
+  // Function to check if a tee time is in the past
+  const isPastTime = (time: string, date: string) => {
+    if (!isToday) return false; // Only filter for today's date
+    
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    
+    // Parse time string (e.g., "7:00 AM" or "1:30 PM")
+    const timeMatch = time.match(/(\d+):(\d+)\s*(AM|PM)/);
+    if (!timeMatch) return false;
+    
+    let hour = parseInt(timeMatch[1]);
+    const minute = parseInt(timeMatch[2]);
+    const ampm = timeMatch[3];
+    
+    // Convert to 24-hour format
+    if (ampm === 'PM' && hour !== 12) hour += 12;
+    if (ampm === 'AM' && hour === 12) hour = 0;
+    
+    // Check if time has passed
+    if (hour < currentHour) return true;
+    if (hour === currentHour && minute <= currentMinute) return true;
+    
+    return false;
+  };
+
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', selectedDate],
     refetchOnMount: true,
@@ -48,41 +80,22 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
     gcTime: 0, // Don't cache at all (TanStack Query v5)
   });
 
+  // Filter out past times
+  const availableTeetimes = teetimes.filter(teetime => !isPastTime(teetime.time, teetime.date));
+
   // Fetch user's existing bookings
   const { data: userTeetimes = [] } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes/user', userData?.id],
     enabled: !!userData?.id,
   });
 
-  const bookingMutation = useMutation({
-    mutationFn: async (teetimeId: string) => {
-      if (!userData?.id) {
-        throw new Error("User not logged in");
-      }
-      
-      const response = await apiRequest('PATCH', `/api/teetimes/${teetimeId}/book`, {
-        userId: userData.id,
-        playerName: `${userData.firstName} ${userData.lastName}`.trim() || userData.username
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/teetimes/user', userData?.id] });
-      queryClient.invalidateQueries({ queryKey: ['/api/orders'] }); // For dashboard stats
-      toast({
-        title: "Booking Confirmed",
-        description: "You've joined this tee time!",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Booking Failed",
-        description: error.message || "Unable to book this tee time. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
+  const openBookingDialog = (teeTime: TeeTime) => {
+    setBookingDialog({ open: true, teeTime });
+  };
+
+  const closeBookingDialog = () => {
+    setBookingDialog({ open: false, teeTime: null });
+  };
 
   const cancelMutation = useMutation({
     mutationFn: async (teetimeId: string) => {
@@ -113,9 +126,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
     },
   });
 
-  const handleBookTeeTime = (teetimeId: string) => {
-    bookingMutation.mutate(teetimeId);
-  };
+
 
   const handleCancelBooking = (teetimeId: string) => {
     cancelMutation.mutate(teetimeId);
@@ -266,34 +277,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
 
         {/* Tee Time Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {[...teetimes]
-            .filter((teetime) => {
-              // If viewing today's date, filter out past times
-              const today = new Date();
-              const isToday = selectedDate === today.toISOString().split('T')[0];
-              
-              if (!isToday) return true; // Show all times for future dates
-              
-              // For today, only show future times
-              const now = new Date();
-              const currentHour = now.getHours();
-              const currentMinute = now.getMinutes();
-              
-              // Parse the tee time
-              const timeMatch = teetime.time.match(/(\d+):(\d+)\s*(AM|PM)/);
-              if (!timeMatch) return true;
-              
-              let teeHour = parseInt(timeMatch[1]);
-              const teeMinute = parseInt(timeMatch[2]);
-              const ampm = timeMatch[3];
-              
-              // Convert to 24-hour format
-              if (ampm === 'PM' && teeHour !== 12) teeHour += 12;
-              if (ampm === 'AM' && teeHour === 12) teeHour = 0;
-              
-              // Compare with current time
-              return teeHour > currentHour || (teeHour === currentHour && teeMinute > currentMinute);
-            })
+          {availableTeetimes
             .sort((a, b) => a.time.localeCompare(b.time))
             .map((teetime) => {
             const statusInfo = getStatusInfo(teetime);
@@ -329,13 +313,32 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
                   {teetime.playerNames && teetime.playerNames.length > 0 && (
                     <div className="space-y-2">
                       <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Players</h4>
-                      <div className="max-h-12 overflow-y-auto space-y-1 pr-1">
-                        {teetime.playerNames.map((name, index) => (
-                          <div key={index} className="text-sm text-foreground flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-golf-green flex-shrink-0"></div>
-                            {name}
-                          </div>
-                        ))}
+                      <div className="max-h-16 overflow-y-auto space-y-1 pr-1">
+                        {teetime.playerNames.map((name, index) => {
+                          const playerType = teetime.playerTypes?.[index] || 'member';
+                          const transportMode = teetime.transportModes?.[index] || 'riding';
+                          const holesPlaying = teetime.holesPlaying?.[index] || '18';
+                          
+                          return (
+                            <div key={index} className="text-sm text-foreground">
+                              <div className="flex items-center gap-2 mb-1">
+                                <div className="w-2 h-2 rounded-full bg-golf-green flex-shrink-0"></div>
+                                <span className="font-medium">{name}</span>
+                                <span className="text-xs text-muted-foreground capitalize">({playerType})</span>
+                              </div>
+                              <div className="flex items-center gap-3 ml-4 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Car className="w-3 h-3" />
+                                  <span className="capitalize">{transportMode}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  <span>{holesPlaying} holes</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -363,11 +366,11 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
                       <Button
                         size="sm"
                         className="w-full bg-golf-green hover:bg-golf-green-light text-white"
-                        onClick={() => handleBookTeeTime(teetime.id)}
-                        disabled={bookingMutation.isPending}
+                        onClick={() => openBookingDialog(teetime)}
+                        data-testid={`button-join-tee-time-${teetime.id}`}
                       >
                         <Plus className="w-4 h-4 mr-2" />
-                        {bookingMutation.isPending ? "Joining..." : "Join Tee Time"}
+                        Join Tee Time
                       </Button>
                     ) : (
                       <Button
@@ -395,6 +398,16 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
               <p className="text-muted-foreground">There are no tee times scheduled for this date. Please select a different date.</p>
             </CardContent>
           </Card>
+        )}
+
+        {/* Booking Dialog */}
+        {userData && bookingDialog.teeTime && (
+          <TeeTimeBookingDialog
+            open={bookingDialog.open}
+            onOpenChange={closeBookingDialog}
+            teeTime={bookingDialog.teeTime}
+            userData={userData}
+          />
         )}
       </div>
     </div>

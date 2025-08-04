@@ -982,8 +982,12 @@ export class DatabaseStorage implements IStorage {
       // Check if tee times exist for the requested date
       const existingTeetimes = await db.select().from(teetimes).where(eq(teetimes.date, date));
       
-      // If no tee times exist or there are fewer than expected (45), generate them
-      if (existingTeetimes.length < 45) {
+      // Calculate expected number of 16-minute intervals from 7AM to 7PM
+      const totalMinutes = (19 - 7) * 60; // 12 hours * 60 minutes = 720 minutes
+      const expectedSlots = Math.floor(totalMinutes / 16) + 1; // +1 for the starting 7:00 AM slot
+      
+      // If no tee times exist or there are fewer than expected, generate them
+      if (existingTeetimes.length < expectedSlots) {
         await this.generateTeetimesForDate(date);
         // Fetch the newly created tee times
         return await db.select().from(teetimes).where(eq(teetimes.date, date));
@@ -1040,6 +1044,9 @@ export class DatabaseStorage implements IStorage {
           maxPlayers: 4,
           bookedBy: [],
           playerNames: [],
+          playerTypes: [],
+          transportModes: [],
+          holesPlaying: [],
           isPremium: false,
           price: "85.00"
         }));
