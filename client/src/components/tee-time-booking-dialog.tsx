@@ -111,15 +111,21 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/members'] });
       
-      // Invalidate all tee time queries with date parameters (for admin dashboard & admin tee-times)
-      queryClient.invalidateQueries({ predicate: (query) => {
-        const key = query.queryKey;
-        return (
-          key[0] === '/api/teetimes' ||
-          key[0] === '/api/admin/members' ||
-          (Array.isArray(key) && key.length >= 2 && key[0] === '/api/teetimes')
-        );
-      }});
+      // Get today's date for admin dashboard invalidation (use same format as admin dashboard)
+      const today = new Date().toISOString().split('T')[0]; // format: yyyy-mm-dd
+      queryClient.invalidateQueries({ queryKey: ['/api/teetimes', today] });
+      
+      // Invalidate ALL tee time queries (includes all date-specific queries for admin dashboard & admin tee-times)
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            key[0] === '/api/teetimes' ||
+            key[0] === '/api/admin/members' ||
+            (Array.isArray(key) && key.length >= 1 && key[0] === '/api/teetimes')
+          );
+        }
+      });
       toast({
         title: "Booking Confirmed",
         description: `Successfully booked tee time for ${players.length} player${players.length > 1 ? 's' : ''}!`,
