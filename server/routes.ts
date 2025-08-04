@@ -66,7 +66,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/teetimes/:id/book", async (req, res) => {
     try {
       const { id } = req.params;
-      const { userId, players } = req.body;
+      const { userId, players = [] } = req.body;
+      
+      // Validate required parameters
+      if (!id) {
+        return res.status(400).json({ message: "Tee time ID is required" });
+      }
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      if (!Array.isArray(players) || players.length === 0) {
+        return res.status(400).json({ message: "Players array is required and must not be empty" });
+      }
 
       const teetime = await storage.getTeetimeById(id);
       if (!teetime) {
@@ -117,11 +128,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Tee time booking error:", error);
       console.error("Error stack:", error.stack);
-      console.error("Booking data:", {
-        id,
-        userId: req.body.userId,
-        players: req.body.players,
-      });
+      console.error("Request params:", req.params);
+      console.error("Request body:", req.body);
       res
         .status(500)
         .json({ message: "Failed to book tee time", error: error.message });
