@@ -1,16 +1,19 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
-// CORS middleware to allow Firebase deployment to access Replit backend
+// CORS middleware to allow Firebase deployment and Railway to access backend
 app.use((req, res, next) => {
   const allowedOrigins = [
     'https://pgcapp-12fba.web.app',
     'https://pgcapp-12fba.firebaseapp.com',
+    'https://web-production-0a369.up.railway.app',
     'http://localhost:5173',
-    /\.replit\.dev$/
+    /\.replit\.dev$/,
+    /\.railway\.app$/
   ];
   
   const origin = req.headers.origin;
@@ -20,10 +23,14 @@ app.use((req, res, next) => {
     allowedOrigins.some(allowed => allowed instanceof RegExp && allowed.test(origin))
   )) {
     res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    // Log unrecognized origins for debugging
+    console.log('Unrecognized origin:', origin);
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
   }
   
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   
   if (req.method === 'OPTIONS') {
@@ -36,6 +43,7 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 app.use((req, res, next) => {
   const start = Date.now();

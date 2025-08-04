@@ -312,6 +312,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         adminUserId: null
       });
       
+      // Set session cookie for cross-domain access
+      res.cookie('sessionToken', session.sessionToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'none', // Required for cross-domain cookies
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
+        domain: process.env.NODE_ENV === 'production' ? '.railway.app' : undefined
+      });
+      
       // Return member data without password plus session token
       const { password: _, ...memberData } = member;
       res.json({ ...memberData, sessionToken: session.sessionToken });
@@ -341,6 +350,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: null
       });
       
+      // Set session cookie for cross-domain access
+      res.cookie('sessionToken', session.sessionToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'none', // Required for cross-domain cookies
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
+        domain: process.env.NODE_ENV === 'production' ? '.railway.app' : undefined
+      });
+      
       // Return admin user without password plus session token
       const { password: _, ...adminData } = adminUser;
       res.json({ ...adminData, sessionToken: session.sessionToken });
@@ -351,7 +369,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/verify", async (req, res) => {
     try {
-      const { sessionToken } = req.body;
+      // Check for session token in body or cookies
+      const sessionToken = req.body.sessionToken || req.cookies.sessionToken;
       
       if (!sessionToken) {
         return res.status(401).json({ message: "No session token provided" });
@@ -386,11 +405,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/logout", async (req, res) => {
     try {
-      const { sessionToken } = req.body;
+      // Check for session token in body or cookies
+      const sessionToken = req.body.sessionToken || req.cookies.sessionToken;
       
       if (sessionToken) {
         await storage.deleteSession(sessionToken);
       }
+      
+      // Clear the session cookie
+      res.clearCookie('sessionToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'none',
+        domain: process.env.NODE_ENV === 'production' ? '.railway.app' : undefined
+      });
       
       res.json({ message: "Logged out successfully" });
     } catch (error) {
