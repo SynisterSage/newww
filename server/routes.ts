@@ -1,7 +1,15 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertTeetimeSchema, insertOrderSchema, insertRoundSchema, insertUserSchema, insertCourseConditionsSchema, insertEventSchema, insertEventRegistrationSchema } from "@shared/schema";
+import {
+  insertTeetimeSchema,
+  insertOrderSchema,
+  insertRoundSchema,
+  insertUserSchema,
+  insertCourseConditionsSchema,
+  insertEventSchema,
+  insertEventRegistrationSchema,
+} from "@shared/schema";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 
@@ -24,7 +32,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(teetime);
     } catch (error: any) {
       console.error("Tee time validation error:", error);
-      res.status(400).json({ message: "Invalid tee time data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid tee time data", error: error.message });
     }
   });
 
@@ -33,8 +43,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       const userTeetimes = await storage.getTeetimes();
-      const filteredTeetimes = userTeetimes.filter(teetime => 
-        teetime.bookedBy?.includes(userId)
+      const filteredTeetimes = userTeetimes.filter((teetime) =>
+        teetime.bookedBy?.includes(userId),
       );
       res.json(filteredTeetimes);
     } catch (error) {
@@ -57,24 +67,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { userId, players } = req.body;
-      
+
       const teetime = await storage.getTeetimeById(id);
       if (!teetime) {
         return res.status(404).json({ message: "Tee time not found" });
       }
-      
+
       const currentPlayers = teetime.bookedBy?.length || 0;
       const availableSpots = teetime.maxPlayers - currentPlayers;
-      
+
       if (players.length > availableSpots) {
-        return res.status(400).json({ message: `Only ${availableSpots} spots available` });
+        return res
+          .status(400)
+          .json({ message: `Only ${availableSpots} spots available` });
       }
-      
+
       // Check if user already booked this tee time
       if (teetime.bookedBy?.includes(userId)) {
-        return res.status(400).json({ message: "You have already booked this tee time" });
+        return res
+          .status(400)
+          .json({ message: "You have already booked this tee time" });
       }
-      
+
       // Add all players to the tee time - one booking entry for the member who books
       const newBookedBy = [...(teetime.bookedBy || [])];
       const newPlayerNames = [...(teetime.playerNames || [])];
@@ -85,26 +99,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Add each player to the arrays
       players.forEach((player: any) => {
         newBookedBy.push(userId); // All players are associated with the booking user
-        newPlayerNames.push(player.name || 'Unknown');
-        newPlayerTypes.push(player.type || 'member');
-        newTransportModes.push(player.transportMode || 'riding');
-        newHolesPlaying.push(player.holesPlaying || '18');
+        newPlayerNames.push(player.name || "Unknown");
+        newPlayerTypes.push(player.type || "member");
+        newTransportModes.push(player.transportMode || "riding");
+        newHolesPlaying.push(player.holesPlaying || "18");
       });
-      
+
       const updatedTeetime = await storage.updateTeetime(id, {
         bookedBy: newBookedBy,
         playerNames: newPlayerNames,
         playerTypes: newPlayerTypes,
         transportModes: newTransportModes,
-        holesPlaying: newHolesPlaying
+        holesPlaying: newHolesPlaying,
       });
-      
+
       res.json(updatedTeetime);
     } catch (error: any) {
       console.error("Tee time booking error:", error);
       console.error("Error stack:", error.stack);
-      console.error("Booking data:", { id, userId: req.body.userId, players: req.body.players });
-      res.status(500).json({ message: "Failed to book tee time", error: error.message });
+      console.error("Booking data:", {
+        id,
+        userId: req.body.userId,
+        players: req.body.players,
+      });
+      res
+        .status(500)
+        .json({ message: "Failed to book tee time", error: error.message });
     }
   });
 
@@ -113,16 +133,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { userId } = req.body;
-      
+
       const teetime = await storage.getTeetimeById(id);
       if (!teetime) {
         return res.status(404).json({ message: "Tee time not found" });
       }
-      
+
       if (!teetime.bookedBy?.includes(userId)) {
-        return res.status(400).json({ message: "You haven't booked this tee time" });
+        return res
+          .status(400)
+          .json({ message: "You haven't booked this tee time" });
       }
-      
+
       // Remove ALL players associated with this user (including their guests)
       const indicesToRemove: number[] = [];
       teetime.bookedBy.forEach((id, index) => {
@@ -130,22 +152,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
           indicesToRemove.push(index);
         }
       });
-      
+
       // Filter out all entries at the indices we found
-      const newBookedBy = teetime.bookedBy.filter((_, index) => !indicesToRemove.includes(index));
-      const newPlayerNames = teetime.playerNames?.filter((_, index) => !indicesToRemove.includes(index)) || [];
-      const newPlayerTypes = teetime.playerTypes?.filter((_, index) => !indicesToRemove.includes(index)) || [];
-      const newTransportModes = teetime.transportModes?.filter((_, index) => !indicesToRemove.includes(index)) || [];
-      const newHolesPlaying = teetime.holesPlaying?.filter((_, index) => !indicesToRemove.includes(index)) || [];
-      
+      const newBookedBy = teetime.bookedBy.filter(
+        (_, index) => !indicesToRemove.includes(index),
+      );
+      const newPlayerNames =
+        teetime.playerNames?.filter(
+          (_, index) => !indicesToRemove.includes(index),
+        ) || [];
+      const newPlayerTypes =
+        teetime.playerTypes?.filter(
+          (_, index) => !indicesToRemove.includes(index),
+        ) || [];
+      const newTransportModes =
+        teetime.transportModes?.filter(
+          (_, index) => !indicesToRemove.includes(index),
+        ) || [];
+      const newHolesPlaying =
+        teetime.holesPlaying?.filter(
+          (_, index) => !indicesToRemove.includes(index),
+        ) || [];
+
       const updatedTeetime = await storage.updateTeetime(id, {
         bookedBy: newBookedBy,
         playerNames: newPlayerNames,
         playerTypes: newPlayerTypes,
         transportModes: newTransportModes,
-        holesPlaying: newHolesPlaying
+        holesPlaying: newHolesPlaying,
       });
-      
+
       res.json(updatedTeetime);
     } catch (error) {
       res.status(500).json({ message: "Failed to cancel tee time booking" });
@@ -157,12 +193,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const updates = req.body;
-      
+
       const teetime = await storage.getTeetimeById(id);
       if (!teetime) {
         return res.status(404).json({ message: "Tee time not found" });
       }
-      
+
       const updatedTeetime = await storage.updateTeetime(id, updates);
       res.json(updatedTeetime);
     } catch (error) {
@@ -174,26 +210,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/menu", async (req, res) => {
     try {
       const { category } = req.query;
-      
+
       // Determine which menu to show based on current time
       // Lunch: before 6:30 PM, Dinner: 6:30 PM and after
       const now = new Date();
       const currentHour = now.getHours();
       const currentMinute = now.getMinutes();
-      const currentTimeIn24 = currentHour + (currentMinute / 60);
-      
+      const currentTimeIn24 = currentHour + currentMinute / 60;
+
       // 6:30 PM = 18.5 in 24-hour format
       const dinnerStartTime = 18.5;
-      const mealType = currentTimeIn24 >= dinnerStartTime ? 'dinner' : 'lunch';
-      
-      const menuItems = await storage.getMenuItems(category as string, mealType);
+      const mealType = currentTimeIn24 >= dinnerStartTime ? "dinner" : "lunch";
+
+      const menuItems = await storage.getMenuItems(
+        category as string,
+        mealType,
+      );
       res.json(menuItems);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch menu items" });
     }
   });
 
-  // Order routes  
+  // Order routes
   app.get("/api/orders", async (req, res) => {
     try {
       const orders = await storage.getOrders(); // Get all orders
@@ -270,11 +309,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const updates = req.body;
       const round = await storage.updateRound(id, updates);
-      
+
       if (!round) {
         return res.status(404).json({ message: "Round not found" });
       }
-      
+
       res.json(round);
     } catch (error) {
       res.status(500).json({ message: "Failed to update round" });
@@ -291,13 +330,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, phone } = memberAuthSchema.parse(req.body);
       const member = await storage.authenticateMember(email, phone);
-      
+
       if (!member) {
-        return res.status(401).json({ message: "Invalid credentials. Please verify your email and phone number." });
+        return res
+          .status(401)
+          .json({
+            message:
+              "Invalid credentials. Please verify your email and phone number.",
+          });
       }
-      
+
       if (!member.isActive) {
-        return res.status(401).json({ message: "Member account is inactive. Please contact the club office." });
+        return res
+          .status(401)
+          .json({
+            message:
+              "Member account is inactive. Please contact the club office.",
+          });
       }
 
       // Create session token
@@ -309,9 +358,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: member.id,
         sessionToken,
         expiresAt,
-        adminUserId: null
+        adminUserId: null,
       });
-      
+
       // Return member data without password plus session token
       const { password: _, ...memberData } = member;
       res.json({ ...memberData, sessionToken: session.sessionToken });
@@ -324,7 +373,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = adminLoginSchema.parse(req.body);
       const adminUser = await storage.authenticateAdmin(email, password);
-      
+
       if (!adminUser) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
@@ -338,9 +387,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         adminUserId: adminUser.id,
         sessionToken,
         expiresAt,
-        userId: null
+        userId: null,
       });
-      
+
       // Return admin user without password plus session token
       const { password: _, ...adminData } = adminUser;
       res.json({ ...adminData, sessionToken: session.sessionToken });
@@ -352,13 +401,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/verify", async (req, res) => {
     try {
       const { sessionToken } = req.body;
-      
+
       if (!sessionToken) {
         return res.status(401).json({ message: "No session token provided" });
       }
 
       const session = await storage.getSessionByToken(sessionToken);
-      
+
       if (!session || session.expiresAt < new Date()) {
         return res.status(401).json({ message: "Invalid or expired session" });
       }
@@ -368,17 +417,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const user = await storage.getUser(session.userId);
         if (user && user.isActive) {
           const { password: _, ...userData } = user;
-          return res.json({ ...userData, sessionToken, type: 'member' });
+          return res.json({ ...userData, sessionToken, type: "member" });
         }
       } else if (session.adminUserId) {
         const admin = await storage.getAdminUser(session.adminUserId);
         if (admin && admin.isActive) {
           const { password: _, ...adminData } = admin;
-          return res.json({ ...adminData, sessionToken, type: 'admin' });
+          return res.json({ ...adminData, sessionToken, type: "admin" });
         }
       }
 
-      return res.status(401).json({ message: "Session user not found or inactive" });
+      return res
+        .status(401)
+        .json({ message: "Session user not found or inactive" });
     } catch (error) {
       res.status(500).json({ message: "Failed to verify session" });
     }
@@ -387,11 +438,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/logout", async (req, res) => {
     try {
       const { sessionToken } = req.body;
-      
+
       if (sessionToken) {
         await storage.deleteSession(sessionToken);
       }
-      
+
       res.json({ message: "Logged out successfully" });
     } catch (error) {
       res.status(500).json({ message: "Logout failed" });
@@ -403,11 +454,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const user = await storage.getUser(id);
-      
+
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       res.json(user);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch user" });
@@ -421,13 +472,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const updates = req.body;
-      
+
       // Get the user first, then create a new user with updates
       const existingUser = await storage.getUser(id);
       if (!existingUser) {
         return res.status(404).json({ message: "Member not found" });
       }
-      
+
       // For now, return the existing user - proper update implementation would need more work
       res.json(existingUser);
     } catch (error) {
@@ -438,15 +489,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/members/bulk", async (req, res) => {
     try {
       const { memberIds, status, handicap } = req.body;
-      
+
       if (!memberIds || !Array.isArray(memberIds) || memberIds.length === 0) {
         return res.status(400).json({ message: "Member IDs are required" });
       }
-      
+
       const updates: any = {};
       if (status) updates.memberStatus = status;
       if (handicap !== undefined) updates.handicap = handicap;
-      
+
       const updatedMembers = [];
       for (const memberId of memberIds) {
         const existingMember = await storage.getUser(memberId);
@@ -455,7 +506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           updatedMembers.push(existingMember);
         }
       }
-      
+
       res.json({ updated: updatedMembers.length, members: updatedMembers });
     } catch (error) {
       res.status(500).json({ message: "Failed to bulk update members" });
@@ -472,11 +523,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = adminLoginSchema.parse(req.body);
       const adminUser = await storage.authenticateAdmin(email, password);
-      
+
       if (!adminUser) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
-      
+
       // Return admin user without password
       const { password: _, ...adminData } = adminUser;
       res.json(adminData);
@@ -489,11 +540,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const adminUser = await storage.getAdminUser(id);
-      
+
       if (!adminUser || !adminUser.isActive) {
         return res.status(404).json({ message: "Admin not found" });
       }
-      
+
       // Return admin user without password
       const { password: _, ...adminData } = adminUser;
       res.json(adminData);
@@ -501,8 +552,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to verify admin" });
     }
   });
-
-
 
   // Admin member management routes
   app.get("/api/admin/members", async (req, res) => {
@@ -519,16 +568,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { status } = req.body;
-      
-      if (!status || !['pending', 'preparing', 'ready', 'delivered'].includes(status)) {
+
+      if (
+        !status ||
+        !["pending", "preparing", "ready", "delivered"].includes(status)
+      ) {
         return res.status(400).json({ message: "Valid status is required" });
       }
-      
+
       const order = await storage.updateOrder(id, { status });
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
-      
+
       res.json(order);
     } catch (error) {
       res.status(500).json({ message: "Failed to update order status" });
@@ -540,82 +592,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Load all members directly from pre-processed data to avoid file system issues
       const membersFromCSV = [
-        "Allerton, Keith", "Amoruso, Robert", "Avedissian, Christian", "Avedissian, Jason", "Axberg, George",
-        "Baker, William J.", "Barchie, Eric", "Barwick, Robert", "Batikha, Charles", "Bauer, Leo",
-        "Bayley, Robert", "Becker, Rosemarie", "Berg, Aaron", "Betz, William", "Betz, William P",
-        "Biagini, Randy", "Bianchi, Kyle", "Blake, Jim", "Bolton, Jonathan", "Bowie, David",
-        "Brillo, Steven", "Brino, Rosalie", "Brown, Ryan", "Burggraf, Michael", "Byram, John",
-        "Cadematori, Michael", "Cahill, Jack", "Campbell, Clare", "Caporrimo, Jim", "Carmody, Tom",
-        "Castellamare, Benjamin", "Cerbone, Steve", "Chanfrau, Michael", "Cianci, Angelo", "Colicchio, Phil",
-        "Connolly, Matt", "Considine, Daniel", "Coppolecchia, Matthew", "Corradino, Desiree", "Crank, William",
-        "Crawford, Brian", "Cremona, Nick", "DeBuono, Robert", "DeJoy, John", "DeLuca, Peter",
-        "DeNardo, Michael", "DeNunzio, Robert", "DiCiaula, Joseph", "DiMaggio, Thomas", "DiStefano, Salvatore"
+        "Allerton, Keith",
+        "Amoruso, Robert",
+        "Avedissian, Christian",
+        "Avedissian, Jason",
+        "Axberg, George",
+        "Baker, William J.",
+        "Barchie, Eric",
+        "Barwick, Robert",
+        "Batikha, Charles",
+        "Bauer, Leo",
+        "Bayley, Robert",
+        "Becker, Rosemarie",
+        "Berg, Aaron",
+        "Betz, William",
+        "Betz, William P",
+        "Biagini, Randy",
+        "Bianchi, Kyle",
+        "Blake, Jim",
+        "Bolton, Jonathan",
+        "Bowie, David",
+        "Brillo, Steven",
+        "Brino, Rosalie",
+        "Brown, Ryan",
+        "Burggraf, Michael",
+        "Byram, John",
+        "Cadematori, Michael",
+        "Cahill, Jack",
+        "Campbell, Clare",
+        "Caporrimo, Jim",
+        "Carmody, Tom",
+        "Castellamare, Benjamin",
+        "Cerbone, Steve",
+        "Chanfrau, Michael",
+        "Cianci, Angelo",
+        "Colicchio, Phil",
+        "Connolly, Matt",
+        "Considine, Daniel",
+        "Coppolecchia, Matthew",
+        "Corradino, Desiree",
+        "Crank, William",
+        "Crawford, Brian",
+        "Cremona, Nick",
+        "DeBuono, Robert",
+        "DeJoy, John",
+        "DeLuca, Peter",
+        "DeNardo, Michael",
+        "DeNunzio, Robert",
+        "DiCiaula, Joseph",
+        "DiMaggio, Thomas",
+        "DiStefano, Salvatore",
       ];
-      
-      let membershipTypes = ["A", "AG", "AGH", "G", "H", "HM", "AGG+75", "G+75"];
+
+      let membershipTypes = [
+        "A",
+        "AG",
+        "AGH",
+        "G",
+        "H",
+        "HM",
+        "AGG+75",
+        "G+75",
+      ];
       let paymentStatuses = ["Paid", "Payment Plan", "Partial Payment"];
-      
+
       let syncedCount = 0;
       let errorCount = 0;
       let processedCount = 0;
       let skipCount = 0;
-      
+
       // Process each member from the list
       for (let index = 0; index < membersFromCSV.length; index++) {
         const fullName = membersFromCSV[index];
-        const [lastName, firstName] = fullName.split(', ');
-        
+        const [lastName, firstName] = fullName.split(", ");
+
         if (firstName && lastName) {
           processedCount++;
-          const cleanFirstName = firstName.replace(/[^a-zA-Z\s]/g, '').trim();
-          const cleanLastName = lastName.replace(/[^a-zA-Z\s]/g, '').trim();
-          
+          const cleanFirstName = firstName.replace(/[^a-zA-Z\s]/g, "").trim();
+          const cleanLastName = lastName.replace(/[^a-zA-Z\s]/g, "").trim();
+
           if (cleanFirstName && cleanLastName) {
             const memberClass = membershipTypes[index % membershipTypes.length];
-            const paymentStatus = paymentStatuses[index % paymentStatuses.length];
-            
+            const paymentStatus =
+              paymentStatuses[index % paymentStatuses.length];
+
             const memberData = {
-              username: `${cleanFirstName.toLowerCase().replace(/\s+/g, '.')}.${cleanLastName.toLowerCase().replace(/\s+/g, '.')}`,
+              username: `${cleanFirstName.toLowerCase().replace(/\s+/g, ".")}.${cleanLastName.toLowerCase().replace(/\s+/g, ".")}`,
               password: "password123",
-              email: `${cleanFirstName.toLowerCase().replace(/\s+/g, '.')}.${cleanLastName.toLowerCase().replace(/\s+/g, '.')}@email.com`,
+              email: `${cleanFirstName.toLowerCase().replace(/\s+/g, ".")}.${cleanLastName.toLowerCase().replace(/\s+/g, ".")}@email.com`,
               firstName: cleanFirstName,
               lastName: cleanLastName,
               phone: `(973) ${Math.floor(Math.random() * 900 + 100)}-${Math.floor(Math.random() * 9000 + 1000)}`,
-              memberNumber: `${memberClass}${String(processedCount + 100).padStart(3, '0')}`,
+              memberNumber: `${memberClass}${String(processedCount + 100).padStart(3, "0")}`,
               memberStatus: paymentStatus,
               membershipType: memberClass,
-              accountBalance: paymentStatus === 'Paid' ? '0.00' : `${Math.floor(Math.random() * 400 + 100)}.00`,
-              isActive: true
+              accountBalance:
+                paymentStatus === "Paid"
+                  ? "0.00"
+                  : `${Math.floor(Math.random() * 400 + 100)}.00`,
+              isActive: true,
             };
-            
+
             try {
               await storage.createUser(memberData);
               syncedCount++;
-              console.log(`✓ Added: ${memberData.firstName} ${memberData.lastName} (${memberData.memberNumber})`);
+              console.log(
+                `✓ Added: ${memberData.firstName} ${memberData.lastName} (${memberData.memberNumber})`,
+              );
             } catch (error: any) {
-              if (error.message.includes('UNIQUE constraint failed') || error.message.includes('unique')) {
+              if (
+                error.message.includes("UNIQUE constraint failed") ||
+                error.message.includes("unique")
+              ) {
                 skipCount++;
                 // console.log(`~ Skip duplicate: ${memberData.firstName} ${memberData.lastName}`);
               } else {
                 errorCount++;
-                console.log(`✗ Error syncing member ${memberData.firstName} ${memberData.lastName}:`, error.message);
+                console.log(
+                  `✗ Error syncing member ${memberData.firstName} ${memberData.lastName}:`,
+                  error.message,
+                );
               }
             }
           }
         }
       }
-      
+
       const totalMembers = await storage.getAllUsers();
-      res.json({ 
+      res.json({
         message: "Member data synchronized successfully",
         totalMembers: totalMembers.length,
         newMembers: syncedCount,
         processed: processedCount,
         skipped: skipCount,
-        errors: errorCount
+        errors: errorCount,
       });
     } catch (error: any) {
-      console.error('Sync error:', error);
+      console.error("Sync error:", error);
       res.status(500).json({ message: `Sync failed: ${error.message}` });
     }
   });
@@ -625,16 +738,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Reset tee time bookings - clear all playerNames and bookedBy arrays
       await storage.resetTeeTimeBookings();
-      
+
       // Reset event registrations
       await storage.resetEventRegistrations();
-      
+
       // Reset orders
       await storage.resetOrders();
-      
+
       // Reset course notices (hazard notes and maintenance notes)
       await storage.resetCourseNotices();
-      
+
       res.json({ message: "Test data reset successfully" });
     } catch (error) {
       console.error("Reset test data error:", error);
@@ -659,7 +772,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(conditions);
     } catch (error: any) {
       console.error("Course conditions validation error:", error);
-      res.status(400).json({ message: "Invalid course conditions data", error: error.message });
+      res
+        .status(400)
+        .json({
+          message: "Invalid course conditions data",
+          error: error.message,
+        });
     }
   });
 
@@ -668,27 +786,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const events = await storage.getEvents();
       const { userId } = req.query;
-      
+
       // Filter out past events
-      const currentEvents = events.filter(event => {
+      const currentEvents = events.filter((event) => {
         const eventDateTime = new Date(`${event.date}T${event.time}`);
         return eventDateTime >= new Date();
       });
-      
+
       // Add registration count and user registration status to each event
       const eventsWithMetadata = await Promise.all(
         currentEvents.map(async (event) => {
           const registrations = await storage.getEventRegistrations(event.id);
-          const isRegistered = userId ? registrations.some(reg => reg.userId === userId) : false;
-          
+          const isRegistered = userId
+            ? registrations.some((reg) => reg.userId === userId)
+            : false;
+
           return {
             ...event,
             registrationCount: registrations.length,
-            isRegistered
+            isRegistered,
           };
-        })
+        }),
       );
-      
+
       res.json(eventsWithMetadata);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch events" });
@@ -699,18 +819,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/events/all", async (req, res) => {
     try {
       const events = await storage.getEvents();
-      
+
       // Add registration count to each event (no filtering for admin)
       const eventsWithCounts = await Promise.all(
         events.map(async (event) => {
           const registrations = await storage.getEventRegistrations(event.id);
           return {
             ...event,
-            registrationCount: registrations.length
+            registrationCount: registrations.length,
           };
-        })
+        }),
       );
-      
+
       res.json(eventsWithCounts);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch events" });
@@ -721,11 +841,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const event = await storage.getEventById(id);
-      
+
       if (!event) {
         return res.status(404).json({ message: "Event not found" });
       }
-      
+
       res.json(event);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch event" });
@@ -739,7 +859,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(event);
     } catch (error: any) {
       console.error("Event validation error:", error);
-      res.status(400).json({ message: "Invalid event data", error: error.message });
+      res
+        .status(400)
+        .json({ message: "Invalid event data", error: error.message });
     }
   });
 
@@ -747,12 +869,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const updates = req.body;
-      
+
       const event = await storage.updateEvent(id, updates);
       if (!event) {
         return res.status(404).json({ message: "Event not found" });
       }
-      
+
       res.json(event);
     } catch (error) {
       res.status(500).json({ message: "Failed to update event" });
@@ -774,24 +896,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const registrations = await storage.getEventRegistrations(id);
-      
+
       // Get user details for each registration
       const registrationsWithUsers = await Promise.all(
         registrations.map(async (reg) => {
           const user = reg.userId ? await storage.getUser(reg.userId) : null;
           return {
             ...reg,
-            user: user ? { 
-              id: user.id, 
-              firstName: user.firstName, 
-              lastName: user.lastName, 
-              email: user.email,
-              memberNumber: user.memberNumber
-            } : null
+            user: user
+              ? {
+                  id: user.id,
+                  firstName: user.firstName,
+                  lastName: user.lastName,
+                  email: user.email,
+                  memberNumber: user.memberNumber,
+                }
+              : null,
           };
-        })
+        }),
       );
-      
+
       res.json(registrationsWithUsers);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch event registrations" });
@@ -802,35 +926,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { userId, notes } = req.body;
-      
+
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
       }
-      
+
       // Check if user is already registered
       const existingRegistrations = await storage.getEventRegistrations(id);
-      const alreadyRegistered = existingRegistrations.some(reg => reg.userId === userId);
-      
+      const alreadyRegistered = existingRegistrations.some(
+        (reg) => reg.userId === userId,
+      );
+
       if (alreadyRegistered) {
-        return res.status(400).json({ message: "User is already registered for this event" });
+        return res
+          .status(400)
+          .json({ message: "User is already registered for this event" });
       }
-      
+
       // Check event capacity
       const event = await storage.getEventById(id);
       if (!event) {
         return res.status(404).json({ message: "Event not found" });
       }
-      
+
       if (existingRegistrations.length >= event.maxSignups) {
         return res.status(400).json({ message: "Event is full" });
       }
-      
+
       const registrationData = {
         eventId: id,
         userId,
         notes: notes || null,
       };
-      
+
       const registration = await storage.registerForEvent(registrationData);
       res.status(201).json(registration);
     } catch (error: any) {
@@ -842,7 +970,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/events/:id/register/:userId", async (req, res) => {
     try {
       const { id, userId } = req.params;
-      
+
       await storage.unregisterFromEvent(id, userId);
       res.json({ message: "Successfully unregistered from event" });
     } catch (error) {
@@ -854,21 +982,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       const registrations = await storage.getUserEventRegistrations(userId);
-      
+
       // Get event details for each registration
       const registrationsWithEvents = await Promise.all(
         registrations.map(async (reg) => {
-          const event = reg.eventId ? await storage.getEventById(reg.eventId) : null;
+          const event = reg.eventId
+            ? await storage.getEventById(reg.eventId)
+            : null;
           return {
             ...reg,
-            event
+            event,
           };
-        })
+        }),
       );
-      
+
       res.json(registrationsWithEvents);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch user event registrations" });
+      res
+        .status(500)
+        .json({ message: "Failed to fetch user event registrations" });
     }
   });
 
