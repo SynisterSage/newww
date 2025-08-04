@@ -10,9 +10,8 @@ import type { TeeTime, User } from "@shared/schema";
 export default function AdminTeeTimesPage() {
   const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState(() => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
+    const today = new Date();
+    return today.toISOString().split('T')[0];
   });
 
   // Auto-refresh every 30 seconds for real-time updates
@@ -122,6 +121,11 @@ export default function AdminTeeTimesPage() {
   };
 
   const formatTime = (time: string) => {
+    // If time already has AM/PM, return as is
+    if (time.includes('AM') || time.includes('PM')) {
+      return time;
+    }
+    
     // Convert 24-hour format to 12-hour format
     const [hours, minutes] = time.split(':');
     const hour = parseInt(hours);
@@ -264,7 +268,7 @@ export default function AdminTeeTimesPage() {
         </div>
 
         {/* Tee Time Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {availableTeetimes
             .sort((a, b) => a.time.localeCompare(b.time))
             .map((teetime) => {
@@ -273,28 +277,28 @@ export default function AdminTeeTimesPage() {
 
             return (
               <Card key={teetime.id} className="border-0 shadow-sm bg-white">
-                <CardContent className="p-6">
-                  <div className="text-center mb-4">
-                    <div className="w-12 h-12 bg-golf-green rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Clock className="h-6 w-6 text-white" />
+                <CardContent className="p-4">
+                  <div className="text-center mb-3">
+                    <div className="w-10 h-10 bg-golf-green rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Clock className="h-5 w-5 text-white" />
                     </div>
-                    <p className="font-bold text-xl text-foreground mb-2">{formatTime(teetime.time)}</p>
-                    <Badge className={`${statusInfo.color} border`}>
+                    <p className="font-bold text-lg text-foreground mb-2">{formatTime(teetime.time)}</p>
+                    <Badge className={`${statusInfo.color} border text-xs`}>
                       {statusInfo.text}
                     </Badge>
                   </div>
 
                   {/* Player Details */}
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <div className="text-center">
-                      <p className="text-sm text-muted-foreground mb-2">
+                      <p className="text-xs text-muted-foreground mb-2">
                         Players: {statusInfo.players}
                       </p>
                     </div>
 
                     {bookedMembers.length > 0 && (
-                      <div className="space-y-2">
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide text-center">
                           Booked Players:
                         </p>
                         {bookedMembers.map((member, index) => {
@@ -303,17 +307,17 @@ export default function AdminTeeTimesPage() {
                           const holesPlaying = teetime.holesPlaying?.[index] || '18';
                           
                           return (
-                            <div key={index} className="space-y-1">
-                              <div className="flex items-center space-x-2 text-sm">
-                                <UserIcon className="w-4 h-4 text-golf-green" />
+                            <div key={index} className="space-y-1 text-center">
+                              <div className="flex items-center justify-center space-x-1 text-xs">
+                                <UserIcon className="w-3 h-3 text-golf-green" />
                                 <span className="text-foreground font-medium">
                                   {member?.firstName} {member?.lastName}
                                 </span>
-                                <span className="text-xs text-muted-foreground capitalize px-2 py-1 bg-gray-100 rounded">
+                                <span className="text-xs text-muted-foreground capitalize px-1 py-0.5 bg-gray-100 rounded">
                                   {playerType}
                                 </span>
                               </div>
-                              <div className="flex items-center space-x-3 ml-6 text-xs text-muted-foreground">
+                              <div className="flex items-center justify-center space-x-2 text-xs text-muted-foreground">
                                 <div className="flex items-center gap-1">
                                   <Car className="w-3 h-3" />
                                   <span className="capitalize">{transportMode}</span>
