@@ -7,9 +7,11 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-// API base URL - use Replit backend when deployed to Firebase
+// API base URL - when deployed to Firebase, the API calls will fail 
+// This is expected since we're deploying only the frontend to Firebase
+// Users will need to run the full app on Replit for complete functionality
 const API_BASE_URL = window.location.hostname.includes('web.app') 
-  ? 'https://c3f7a47b-7e08-447d-a50b-2802e105d002-00-workspace.picard.replit.dev'
+  ? 'https://demo-api-endpoint'  // This will fail gracefully 
   : '';
 
 export async function apiRequest(
