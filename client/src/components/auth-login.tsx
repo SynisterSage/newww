@@ -142,7 +142,7 @@ export function AuthLogin({ onLogin }: AuthLoginProps) {
               <p className="font-medium text-golf-green">(973) 694-9754</p>
               <div className="mt-3 text-xs text-gray-600">
                 <p>Demo credentials:</p>
-                <p>ravipatel@packanackgolf.com / (973) 188-6921</p>
+                <p>keith.allerton@email.com / (973) 333-9593</p>
               </div>
               <div className="mt-2 text-xs text-gray-500">
                 <p>Only utilized for desktop, mobile soon</p>

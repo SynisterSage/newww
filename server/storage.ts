@@ -921,20 +921,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async authenticateMember(email: string, phone: string): Promise<User | null> {
-    // Clean phone number for matching (remove formatting)
-    const cleanPhone = phone.replace(/\D/g, '');
-    
-    // Get all users with matching email first
-    const usersWithEmail = await db.select().from(users)
-      .where(eq(users.email, email.toLowerCase()));
-    
-    // Find user with matching cleaned phone number
-    const user = usersWithEmail.find(u => {
-      if (!u.phone) return false;
-      const userCleanPhone = u.phone.replace(/\D/g, '');
-      return userCleanPhone === cleanPhone;
-    });
-    
+    const [user] = await db.select().from(users)
+      .where(and(eq(users.email, email), eq(users.phone, phone)));
     return user || null;
   }
 
