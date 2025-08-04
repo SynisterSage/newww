@@ -141,25 +141,11 @@ export function AuthLogin({ onLogin }: AuthLoginProps) {
               <p>For assistance, contact the pro shop</p>
               <p className="font-medium text-golf-green">(973) 694-9754</p>
               <div className="mt-3 text-xs text-gray-600">
-                <p>Sample Member Logins:</p>
-                
-                <div className="mt-2 space-y-1">
-                  <p className="font-medium">Keith Allerton</p>
-                  <p>keith.allerton@email.com</p>
-                  <p>(973) 333-9593</p>
-                </div>
-                
-                <div className="mt-2 space-y-1">
-                  <p className="font-medium">Robert Amoruso</p>
-                  <p>robert.amoruso@email.com</p>
-                  <p>(973) 659-8604</p>
-                </div>
-                
-                <div className="mt-2 space-y-1">
-                  <p className="font-medium">Randy Biagini</p>
-                  <p>randy.biagini@email.com</p>
-                  <p>(973) 352-8796</p>
-                </div>
+                <p>Demo credentials:</p>
+                <p>ravipatel@packanackgolf.com / (973) 188-6921</p>
+              </div>
+              <div className="mt-2 text-xs text-gray-500">
+                <p>Only utilized for desktop, mobile soon</p>
               </div>
               <div className="mt-3">
                 <a 
