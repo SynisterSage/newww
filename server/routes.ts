@@ -120,12 +120,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "You haven't booked this tee time" });
       }
       
-      const newBookedBy = teetime.bookedBy.filter(id => id !== userId);
-      const userIndex = teetime.bookedBy.indexOf(userId);
-      const newPlayerNames = teetime.playerNames?.filter((_, index) => index !== userIndex) || [];
-      const newPlayerTypes = teetime.playerTypes?.filter((_, index) => index !== userIndex) || [];
-      const newTransportModes = teetime.transportModes?.filter((_, index) => index !== userIndex) || [];
-      const newHolesPlaying = teetime.holesPlaying?.filter((_, index) => index !== userIndex) || [];
+      // Remove ALL players associated with this user (including their guests)
+      const indicesToRemove: number[] = [];
+      teetime.bookedBy.forEach((id, index) => {
+        if (id === userId) {
+          indicesToRemove.push(index);
+        }
+      });
+      
+      // Filter out all entries at the indices we found
+      const newBookedBy = teetime.bookedBy.filter((_, index) => !indicesToRemove.includes(index));
+      const newPlayerNames = teetime.playerNames?.filter((_, index) => !indicesToRemove.includes(index)) || [];
+      const newPlayerTypes = teetime.playerTypes?.filter((_, index) => !indicesToRemove.includes(index)) || [];
+      const newTransportModes = teetime.transportModes?.filter((_, index) => !indicesToRemove.includes(index)) || [];
+      const newHolesPlaying = teetime.holesPlaying?.filter((_, index) => !indicesToRemove.includes(index)) || [];
       
       const updatedTeetime = await storage.updateTeetime(id, {
         bookedBy: newBookedBy,
