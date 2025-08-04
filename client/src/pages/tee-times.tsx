@@ -286,7 +286,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
             return (
               <Card 
                 key={teetime.id} 
-                className="border border-gray-200 transition-all duration-200 hover:shadow-md hover:border-golf-green/30 h-full flex flex-col"
+                className="border border-gray-200 transition-all duration-200 hover:shadow-md hover:border-golf-green/30"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -302,7 +302,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
                   </div>
                 </CardHeader>
                 
-                <CardContent className="space-y-4 flex-1 flex flex-col">
+                <CardContent className="space-y-4">
                   {/* Status Badge */}
                   <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${statusInfo.color}`}>
                     <Users className="w-3 h-3 mr-1" />

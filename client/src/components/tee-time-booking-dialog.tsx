@@ -42,7 +42,7 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
     if (players.length < 4) {
       setPlayers([...players, {
         name: "",
-        type: "guest",
+        type: "member",
         transportMode: "riding",
         holesPlaying: "18"
       }]);
