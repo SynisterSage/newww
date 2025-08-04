@@ -7,12 +7,8 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-// API base URL - when deployed to Firebase, the API calls will fail 
-// This is expected since we're deploying only the frontend to Firebase
-// Users will need to run the full app on Replit for complete functionality
-const API_BASE_URL = window.location.hostname.includes('web.app') 
-  ? 'https://demo-api-endpoint'  // This will fail gracefully 
-  : '';
+// API base URL - always use relative URLs for local development and Replit deployment
+const API_BASE_URL = '';
 
 export async function apiRequest(
   method: string,
