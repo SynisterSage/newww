@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Phone } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
 
 interface AuthLoginProps {
