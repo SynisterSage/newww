@@ -14,7 +14,17 @@ export default function AdminTeeTimesPage() {
     return today.toISOString().split('T')[0];
   });
 
+  // Auto-refresh every 30 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['/api/teetimes', selectedDate] });
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/members'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/conditions'] });
+    }, 30000); // Refresh every 30 seconds for real-time updates
 
+    return () => clearInterval(interval);
+  }, [selectedDate, queryClient]);
 
   const getTodayDate = () => {
     const today = new Date();
@@ -63,21 +73,17 @@ export default function AdminTeeTimesPage() {
     return false;
   };
 
-  // Fetch all tee times for the selected date with real-time updates
+  // Fetch all tee times for the selected date
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', selectedDate],
-    refetchInterval: 3000, // Refetch every 3 seconds for real-time updates
-    refetchIntervalInBackground: true, // Continue polling even when tab is not active
   });
 
   // Filter out past times
   const availableTeetimes = teetimes.filter(teetime => !isPastTime(teetime.time, teetime.date));
 
-  // Fetch all members to get user details with real-time updates
+  // Fetch all members to get user details
   const { data: members = [] } = useQuery<User[]>({
     queryKey: ['/api/admin/members'],
-    refetchInterval: 10000, // Refetch every 10 seconds for member updates
-    refetchIntervalInBackground: true,
   });
 
   // Get member details by user ID

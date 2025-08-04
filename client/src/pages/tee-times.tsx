@@ -74,21 +74,19 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
 
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', selectedDate],
-    refetchInterval: 3000, // Refetch every 3 seconds for real-time updates
-    refetchIntervalInBackground: true, // Continue polling even when tab is not active
     refetchOnMount: true,
     refetchOnWindowFocus: true,
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache at all (TanStack Query v5)
   });
 
   // Filter out past times
   const availableTeetimes = teetimes.filter(teetime => !isPastTime(teetime.time, teetime.date));
 
-  // Fetch user's existing bookings with real-time updates
+  // Fetch user's existing bookings
   const { data: userTeetimes = [] } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes/user', userData?.id],
     enabled: !!userData?.id,
-    refetchInterval: 3000, // Refetch every 3 seconds for real-time updates
-    refetchIntervalInBackground: true,
   });
 
   const openBookingDialog = (teeTime: TeeTime) => {
