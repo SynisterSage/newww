@@ -432,8 +432,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const session = await storage.getSessionByToken(sessionToken);
 
-      if (!session || session.expiresAt < new Date()) {
-        return res.status(401).json({ message: "Invalid or expired session" });
+      if (!session) {
+        return res.status(401).json({ message: "Session not found" });
+      }
+
+      if (session.expiresAt < new Date()) {
+        console.log(`Session expired: ${session.expiresAt} < ${new Date()}`);
+        await storage.deleteSession(sessionToken); // Clean up expired session
+        return res.status(401).json({ message: "Session expired" });
       }
 
       // Get user or admin based on session
@@ -455,6 +461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .status(401)
         .json({ message: "Session user not found or inactive" });
     } catch (error) {
+      console.error("Session verification error:", error);
       res.status(500).json({ message: "Failed to verify session" });
     }
   });

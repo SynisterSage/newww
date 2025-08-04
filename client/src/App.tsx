@@ -39,10 +39,32 @@ function Router() {
   useEffect(() => {
     const verifySession = async () => {
       const sessionToken = localStorage.getItem('sessionToken');
+      const lastVerified = localStorage.getItem('lastSessionVerified');
+      const now = Date.now();
       
       if (!sessionToken) {
         setIsLoading(false);
         return;
+      }
+
+      // Only verify session if it hasn't been verified in the last 5 minutes
+      if (lastVerified && (now - parseInt(lastVerified)) < 5 * 60 * 1000) {
+        const cachedUserType = localStorage.getItem('userType');
+        const cachedUserData = localStorage.getItem('userData');
+        
+        if (cachedUserData && cachedUserType) {
+          const data = JSON.parse(cachedUserData);
+          if (cachedUserType === 'member') {
+            setUserData(data);
+            setUserEmail(data.email);
+            setIsAuthenticated(true);
+          } else if (cachedUserType === 'admin') {
+            setAdminData(data);
+            setIsAdminAuthenticated(true);
+          }
+          setIsLoading(false);
+          return;
+        }
       }
 
       try {
@@ -53,13 +75,21 @@ function Router() {
           setUserData(data);
           setUserEmail(data.email);
           setIsAuthenticated(true);
+          localStorage.setItem('userType', 'member');
+          localStorage.setItem('userData', JSON.stringify(data));
         } else if (data.type === 'admin') {
           setAdminData(data);
           setIsAdminAuthenticated(true);
+          localStorage.setItem('userType', 'admin');
+          localStorage.setItem('userData', JSON.stringify(data));
         }
+        localStorage.setItem('lastSessionVerified', now.toString());
       } catch (error) {
         // Clear invalid session on error
         localStorage.removeItem('sessionToken');
+        localStorage.removeItem('userType');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('lastSessionVerified');
       }
       
       setIsLoading(false);
@@ -211,7 +241,11 @@ function Router() {
       } catch (error) {
         console.error('Logout error:', error);
       }
+      // Clear all session-related data
       localStorage.removeItem('sessionToken');
+      localStorage.removeItem('userType');
+      localStorage.removeItem('userData');
+      localStorage.removeItem('lastSessionVerified');
     }
     
     // Show logout animation for 1.5 seconds
