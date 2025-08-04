@@ -86,6 +86,8 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
 
   const { data: allOrders = [] } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
+    refetchInterval: 5000, // Refetch every 5 seconds to see status updates
+    refetchIntervalInBackground: true,
   });
 
   // Fetch menu items to map order items to names

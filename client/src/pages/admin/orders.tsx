@@ -13,9 +13,11 @@ export default function AdminOrdersPage() {
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  // Fetch all orders
+  // Fetch all orders with auto-refresh
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
+    refetchInterval: 3000, // Refetch every 3 seconds for real-time updates
+    refetchIntervalInBackground: true, // Continue polling even when tab is not active
   });
 
   // Fetch all members to get user details
