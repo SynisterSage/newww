@@ -307,96 +307,40 @@ export default function Dining({ userData }: DiningProps) {
         {/* Menu Items Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-6">
           {filteredItems.map((item) => {
-            const isExpanded = expandedCard === item.id;
             return (
               <Card 
                 key={item.id} 
-                className={`bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 rounded-xl overflow-hidden ${
-                  item.availableSettings ? 'cursor-pointer' : ''
-                } ${
-                  isExpanded ? 'h-auto' : 'h-72'
-                } flex flex-col`}
-                onClick={() => {
-                  // Only allow expansion if item has available settings
-                  if (item.availableSettings) {
-                    setExpandedCard(isExpanded ? null : item.id);
-                  }
-                }}
+                className="bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 rounded-xl overflow-hidden h-72 flex flex-col relative"
               >
+                {/* Options indicator */}
+                {item.availableSettings && (
+                  <div className="absolute top-3 right-3 bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                    Has Options
+                  </div>
+                )}
+                
                 <CardContent className="p-5 flex flex-col h-full">
                   <div className="flex-1 flex flex-col">
-                    {/* Header with category badge and expand indicator */}
+                    {/* Header with category badge */}
                     <div className="flex items-start justify-between mb-3">
                       <span className="bg-green-100 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap">
                         {formatCategoryName(item.category)}
                       </span>
-                      {item.availableSettings && (
-                        <span className="text-xs text-gray-400 font-medium">
-                          {isExpanded ? 'Click to collapse' : 'Click for options'}
-                        </span>
-                      )}
                     </div>
                     
                     {/* Title - Fixed height for consistency */}
-                    <div className={`mb-3 ${isExpanded ? 'h-auto' : 'h-16'} flex items-start`}>
+                    <div className="mb-3 h-16 flex items-start">
                       <h3 className="font-semibold text-gray-900 text-lg leading-tight">
                         {item.name}
                       </h3>
                     </div>
                     
                     {/* Description - Fixed height to maintain consistent layout */}
-                    <div className={`text-sm text-gray-600 mb-4 ${isExpanded ? 'h-auto' : 'h-20'} flex items-start overflow-hidden`}>
-                      <p className={`${isExpanded ? '' : 'line-clamp-4'}`}>
+                    <div className="text-sm text-gray-600 mb-4 h-20 flex items-start overflow-hidden">
+                      <p className="line-clamp-4">
                         {item.description}
                       </p>
                     </div>
-                    
-                    {/* Available options for expanded cards */}
-                    {item.availableSettings && isExpanded && (
-                      <div className="mb-4 p-4 bg-green-50 border border-green-100 rounded-lg">
-                        <p className="text-sm font-semibold text-green-800 mb-3">Available Options:</p>
-                        <div className="grid grid-cols-1 gap-2">
-                          {parseAvailableOptions(item.availableSettings).map((option, index) => {
-                            const isSelected = selectedOptions[item.id]?.includes(option) || false;
-                            return (
-                              <button
-                                key={index}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleOption(item.id, option);
-                                }}
-                                className={`text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                                  isSelected
-                                    ? 'bg-green-200 text-green-800 border border-green-300'
-                                    : 'bg-white text-green-700 border border-green-200 hover:bg-green-100'
-                                }`}
-                              >
-                                <span className="flex items-center gap-2">
-                                  <span className={`w-4 h-4 rounded border flex items-center justify-center ${
-                                    isSelected ? 'bg-green-600 border-green-600' : 'border-green-300'
-                                  }`}>
-                                    {isSelected && (
-                                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                      </svg>
-                                    )}
-                                  </span>
-                                  {option}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                        {selectedOptions[item.id]?.length > 0 && (
-                          <div className="mt-3 p-2 bg-green-100 rounded-md">
-                            <p className="text-xs font-medium text-green-800 mb-1">Selected:</p>
-                            <p className="text-xs text-green-700">
-                              {selectedOptions[item.id].join(', ')}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
                   
                   {/* Footer with price and add button */}
@@ -494,35 +438,73 @@ export default function Dining({ userData }: DiningProps) {
                       if (!item) return null;
                       
                       return (
-                        <div key={itemId} className="flex items-center space-x-3">
-                          <div className="flex-1">
-                            <h4 className="font-medium">{item.name}</h4>
-                            {orderItem.options.length > 0 && (
-                              <p className="text-xs text-green-600 font-medium">
-                                + {orderItem.options.join(', ')}
-                              </p>
-                            )}
-                            <p className="text-sm text-gray-500">${item.price} each</p>
+                        <div key={itemId} className="border border-gray-200 rounded-lg p-3">
+                          <div className="flex items-center space-x-3 mb-3">
+                            <div className="flex-1">
+                              <h4 className="font-medium">{item.name}</h4>
+                              {orderItem.options.length > 0 && (
+                                <p className="text-xs text-green-600 font-medium">
+                                  + {orderItem.options.join(', ')}
+                                </p>
+                              )}
+                              <p className="text-sm text-gray-500">${item.price} each</p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => removeFromOrder(itemId)}
+                                className="h-6 w-6 p-0"
+                              >
+                                <Minus className="w-3 h-3" />
+                              </Button>
+                              <span className="text-sm font-medium w-6 text-center">{orderItem.quantity}</span>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => addToOrder(itemId)}
+                                className="h-6 w-6 p-0"
+                              >
+                                <Plus className="w-3 h-3" />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => removeFromOrder(itemId)}
-                              className="h-6 w-6 p-0"
-                            >
-                              <Minus className="w-3 h-3" />
-                            </Button>
-                            <span className="text-sm font-medium w-6 text-center">{orderItem.quantity}</span>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => addToOrder(itemId)}
-                              className="h-6 w-6 p-0"
-                            >
-                              <Plus className="w-3 h-3" />
-                            </Button>
-                          </div>
+                          
+                          {/* Options selection in cart */}
+                          {item.availableSettings && (
+                            <div className="border-t pt-3">
+                              <p className="text-xs font-medium text-gray-700 mb-2">Available Options:</p>
+                              <div className="grid grid-cols-1 gap-1">
+                                {parseAvailableOptions(item.availableSettings).map((option, index) => {
+                                  const isSelected = selectedOptions[itemId]?.includes(option) || false;
+                                  return (
+                                    <button
+                                      key={index}
+                                      onClick={() => toggleOption(itemId, option)}
+                                      className={`text-left px-2 py-1 rounded text-xs transition-colors ${
+                                        isSelected
+                                          ? 'bg-green-200 text-green-800 border border-green-300'
+                                          : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-green-50'
+                                      }`}
+                                    >
+                                      <span className="flex items-center gap-2">
+                                        <span className={`w-3 h-3 rounded border flex items-center justify-center ${
+                                          isSelected ? 'bg-green-600 border-green-600' : 'border-gray-300'
+                                        }`}>
+                                          {isSelected && (
+                                            <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                            </svg>
+                                          )}
+                                        </span>
+                                        {option}
+                                      </span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
