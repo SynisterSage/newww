@@ -268,7 +268,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create session token
       const sessionToken = randomUUID();
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 days
 
       const session = await storage.createSession({
         userId: member.id,
@@ -297,7 +297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create session token
       const sessionToken = randomUUID();
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 1); // 1 day for admin
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 days for admin
 
       const session = await storage.createSession({
         adminUserId: adminUser.id,
