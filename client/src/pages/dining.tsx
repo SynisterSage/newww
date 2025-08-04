@@ -386,7 +386,7 @@ export default function Dining({ userData }: DiningProps) {
                     
                     {/* Title - Fixed height for consistency */}
                     <div className="mb-3 h-16 flex items-start">
-                      <h3 className="font-semibold text-gray-900 text-lg leading-tight">
+                      <h3 className="font-semibold text-gray-900 text-lg leading-tight mt-[9px] mb-[9px]">
                         {item.name}
                       </h3>
                     </div>
@@ -459,7 +459,6 @@ export default function Dining({ userData }: DiningProps) {
           })}
         </div>
       </div>
-
       {/* Mobile Cart Modal */}
       {isCartOpen && (
         <div 
