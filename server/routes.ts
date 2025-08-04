@@ -102,6 +102,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedTeetime);
     } catch (error: any) {
       console.error("Tee time booking error:", error);
+      console.error("Error stack:", error.stack);
+      console.error("Booking data:", { id, userId: req.body.userId, players: req.body.players });
       res.status(500).json({ message: "Failed to book tee time", error: error.message });
     }
   });
