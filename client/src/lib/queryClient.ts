@@ -7,8 +7,10 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-// API base URL - always use relative URLs for local development and Replit deployment
-const API_BASE_URL = '';
+// API base URL - detect environment for deployment
+const API_BASE_URL = import.meta.env.PROD 
+  ? 'https://pgc-backend-production.up.railway.app' // Your Railway backend URL (update after deployment)
+  : '';
 
 export async function apiRequest(
   method: string,
