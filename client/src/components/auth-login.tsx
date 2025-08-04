@@ -18,19 +18,7 @@ export function AuthLogin({ onLogin }: AuthLoginProps) {
   const loginMutation = useMutation({
     mutationFn: async (credentials: { email: string; phone: string }) => {
       try {
-        const response = await fetch("/api/auth/member", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(credentials),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Authentication failed");
-        }
-
+        const response = await apiRequest("POST", "/api/auth/member", credentials);
         const data = await response.json();
         // Store session token in localStorage
         if (data.sessionToken) {

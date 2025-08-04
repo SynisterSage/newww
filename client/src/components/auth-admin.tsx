@@ -20,18 +20,7 @@ export function AuthAdmin({ onLogin }: AuthAdminProps) {
   const loginMutation = useMutation({
     mutationFn: async (credentials: { email: string; password: string }) => {
       try {
-        const response = await fetch("/api/auth/admin", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(credentials),
-        });
-
-        if (!response.ok) {
-          throw new Error("Invalid credentials");
-        }
-
+        const response = await apiRequest("POST", "/api/auth/admin", credentials);
         const data = await response.json();
         // Store session token in localStorage
         if (data.sessionToken) {
