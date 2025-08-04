@@ -391,11 +391,15 @@ export default function Dining({ userData }: DiningProps) {
                       </h3>
                     </div>
                     
-                    {/* Description - Fixed height to maintain consistent layout */}
-                    <div className="text-sm text-gray-600 mb-4 h-20 flex items-start overflow-hidden">
-                      <p className="line-clamp-4">
-                        {item.description}
-                      </p>
+                    {/* Description - Scrollable with clear scroll indicator */}
+                    <div className="text-sm text-gray-600 mb-4 h-20 relative">
+                      <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pr-2">
+                        <p className="leading-relaxed">
+                          {item.description}
+                        </p>
+                      </div>
+                      {/* Scroll indicator - subtle gradient at bottom */}
+                      <div className="absolute bottom-0 left-0 right-2 h-3 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
                     </div>
                   </div>
                   
