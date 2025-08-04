@@ -67,8 +67,8 @@ export default function ConditionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F6F0]">
-      <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto pb-20 lg:pb-8">
+    <div className="min-h-screen bg-[#F8F6F0] p-4 sm:p-6 lg:p-8">
+      <div className="max-w-4xl mx-auto pb-20 lg:pb-8">
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>

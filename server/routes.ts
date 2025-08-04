@@ -100,8 +100,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.json(updatedTeetime);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to book tee time" });
+    } catch (error: any) {
+      console.error("Tee time booking error:", error);
+      res.status(500).json({ message: "Failed to book tee time", error: error.message });
     }
   });
 
