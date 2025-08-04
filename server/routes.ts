@@ -75,8 +75,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
       }
-      if (!Array.isArray(players) || players.length === 0) {
-        return res.status(400).json({ message: "Players array is required and must not be empty" });
+      if (!Array.isArray(players)) {
+        return res.status(400).json({ message: "Players must be an array", received: typeof players, value: players });
+      }
+      if (players.length === 0) {
+        return res.status(400).json({ message: "At least one player is required", playersLength: players.length });
       }
 
       const teetime = await storage.getTeetimeById(id);
