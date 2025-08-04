@@ -3,11 +3,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { TeeTime, User } from "@shared/schema";
-import { Users, Car, MapPin, Clock } from "lucide-react";
+import { Users, Car, MapPin, Clock, Plus, Minus, UserPlus } from "lucide-react";
 
 interface TeeTimeBookingDialogProps {
   open: boolean;
@@ -16,22 +18,54 @@ interface TeeTimeBookingDialogProps {
   userData: User;
 }
 
+interface Player {
+  name: string;
+  type: "member" | "guest";
+  transportMode: "riding" | "walking";
+  holesPlaying: "9" | "18";
+}
+
 export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: TeeTimeBookingDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  const [playerType, setPlayerType] = useState<"member" | "guest">("member");
-  const [transportMode, setTransportMode] = useState<"riding" | "walking">("riding");
-  const [holesPlaying, setHolesPlaying] = useState<"9" | "18">("18");
+  const [players, setPlayers] = useState<Player[]>([
+    {
+      name: `${userData.firstName} ${userData.lastName}`.trim() || userData.username,
+      type: "member",
+      transportMode: "riding",
+      holesPlaying: "18"
+    }
+  ]);
+
+  const addPlayer = () => {
+    if (players.length < 4) {
+      setPlayers([...players, {
+        name: "",
+        type: "guest",
+        transportMode: "riding",
+        holesPlaying: "18"
+      }]);
+    }
+  };
+
+  const removePlayer = (index: number) => {
+    if (players.length > 1 && index > 0) { // Can't remove the booking member
+      setPlayers(players.filter((_, i) => i !== index));
+    }
+  };
+
+  const updatePlayer = (index: number, field: keyof Player, value: string) => {
+    const updated = [...players];
+    updated[index] = { ...updated[index], [field]: value };
+    setPlayers(updated);
+  };
 
   const bookingMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest('PATCH', `/api/teetimes/${teeTime.id}/book`, {
         userId: userData.id,
-        playerName: `${userData.firstName} ${userData.lastName}`.trim() || userData.username,
-        playerType,
-        transportMode,
-        holesPlaying
+        players: players
       });
       return response.json();
     },
@@ -41,13 +75,16 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       toast({
         title: "Booking Confirmed",
-        description: "You've successfully joined this tee time!",
+        description: `Successfully booked tee time for ${players.length} player${players.length > 1 ? 's' : ''}!`,
       });
       onOpenChange(false);
       // Reset form
-      setPlayerType("member");
-      setTransportMode("riding");
-      setHolesPlaying("18");
+      setPlayers([{
+        name: `${userData.firstName} ${userData.lastName}`.trim() || userData.username,
+        type: "member",
+        transportMode: "riding",
+        holesPlaying: "18"
+      }]);
     },
     onError: (error: any) => {
       toast({
@@ -94,73 +131,114 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
         </DialogHeader>
 
         <div className="space-y-6 pt-4">
-          {/* Player Type Selection */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Player Type
-            </Label>
-            <RadioGroup
-              value={playerType}
-              onValueChange={(value: "member" | "guest") => setPlayerType(value)}
-              className="flex gap-4"
-              data-testid="radio-group-player-type"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="member" id="member" data-testid="radio-member" />
-                <Label htmlFor="member" className="cursor-pointer">Member</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="guest" id="guest" data-testid="radio-guest" />
-                <Label htmlFor="guest" className="cursor-pointer">Guest</Label>
-              </div>
-            </RadioGroup>
-          </div>
+          {/* Players List */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Players ({players.length}/4)
+              </Label>
+              {players.length < 4 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addPlayer}
+                  className="flex items-center gap-1"
+                  data-testid="button-add-player"
+                >
+                  <Plus className="w-3 h-3" />
+                  Add Player
+                </Button>
+              )}
+            </div>
 
-          {/* Transport Mode Selection */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <Car className="w-4 h-4" />
-              Transportation
-            </Label>
-            <RadioGroup
-              value={transportMode}
-              onValueChange={(value: "riding" | "walking") => setTransportMode(value)}
-              className="flex gap-4"
-              data-testid="radio-group-transport-mode"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="riding" id="riding" data-testid="radio-riding" />
-                <Label htmlFor="riding" className="cursor-pointer">Cart (Riding)</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="walking" id="walking" data-testid="radio-walking" />
-                <Label htmlFor="walking" className="cursor-pointer">Walking</Label>
-              </div>
-            </RadioGroup>
-          </div>
+            {players.map((player, index) => (
+              <div key={index} className="border rounded-lg p-4 space-y-3 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">
+                    {index === 0 ? 'Booking Member' : `Player ${index + 1}`}
+                  </span>
+                  {index > 0 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removePlayer(index)}
+                      className="text-red-600 hover:text-red-700"
+                      data-testid={`button-remove-player-${index}`}
+                    >
+                      <Minus className="w-3 h-3" />
+                    </Button>
+                  )}
+                </div>
 
-          {/* Holes Playing Selection */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
-              Holes Playing
-            </Label>
-            <RadioGroup
-              value={holesPlaying}
-              onValueChange={(value: "9" | "18") => setHolesPlaying(value)}
-              className="flex gap-4"
-              data-testid="radio-group-holes-playing"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="18" id="eighteen" data-testid="radio-eighteen-holes" />
-                <Label htmlFor="eighteen" className="cursor-pointer">18 Holes</Label>
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <Label className="text-xs text-gray-500">Name</Label>
+                    <Input
+                      value={player.name}
+                      onChange={(e) => updatePlayer(index, 'name', e.target.value)}
+                      placeholder={index === 0 ? "Your name" : "Player name"}
+                      disabled={index === 0}
+                      className="mt-1"
+                      data-testid={`input-player-name-${index}`}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <Label className="text-xs text-gray-500">Type</Label>
+                      <Select
+                        value={player.type}
+                        onValueChange={(value) => updatePlayer(index, 'type', value)}
+                        disabled={index === 0}
+                      >
+                        <SelectTrigger className="mt-1" data-testid={`select-player-type-${index}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="member">Member</SelectItem>
+                          <SelectItem value="guest">Guest</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-gray-500">Transport</Label>
+                      <Select
+                        value={player.transportMode}
+                        onValueChange={(value) => updatePlayer(index, 'transportMode', value)}
+                      >
+                        <SelectTrigger className="mt-1" data-testid={`select-transport-${index}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="riding">Riding</SelectItem>
+                          <SelectItem value="walking">Walking</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-gray-500">Holes</Label>
+                      <Select
+                        value={player.holesPlaying}
+                        onValueChange={(value) => updatePlayer(index, 'holesPlaying', value)}
+                      >
+                        <SelectTrigger className="mt-1" data-testid={`select-holes-${index}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="9">9 Holes</SelectItem>
+                          <SelectItem value="18">18 Holes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="9" id="nine" data-testid="radio-nine-holes" />
-                <Label htmlFor="nine" className="cursor-pointer">9 Holes</Label>
-              </div>
-            </RadioGroup>
+            ))}
           </div>
 
           {/* Booking Summary */}
@@ -168,16 +246,12 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
             <h4 className="font-medium text-sm text-golf-green">Booking Summary</h4>
             <div className="text-xs space-y-1 text-gray-600">
               <div className="flex justify-between">
-                <span>Player:</span>
-                <span className="capitalize">{playerType}</span>
+                <span>Total Players:</span>
+                <span>{players.length}</span>
               </div>
               <div className="flex justify-between">
-                <span>Transport:</span>
-                <span className="capitalize">{transportMode}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Holes:</span>
-                <span>{holesPlaying} holes</span>
+                <span>Available Spots:</span>
+                <span>{maxPlayers - currentPlayers - players.length} remaining</span>
               </div>
               <div className="flex justify-between font-medium pt-2 border-t">
                 <span>Green Fee:</span>

@@ -56,7 +56,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/teetimes/:id/book", async (req, res) => {
     try {
       const { id } = req.params;
-      const { userId, playerName, playerType, transportMode, holesPlaying } = req.body;
+      const { userId, players } = req.body;
       
       const teetime = await storage.getTeetimeById(id);
       if (!teetime) {
@@ -64,8 +64,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const currentPlayers = teetime.bookedBy?.length || 0;
-      if (currentPlayers >= teetime.maxPlayers) {
-        return res.status(400).json({ message: "Tee time is full" });
+      const availableSpots = teetime.maxPlayers - currentPlayers;
+      
+      if (players.length > availableSpots) {
+        return res.status(400).json({ message: `Only ${availableSpots} spots available` });
       }
       
       // Check if user already booked this tee time
@@ -73,11 +75,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "You have already booked this tee time" });
       }
       
-      const newBookedBy = [...(teetime.bookedBy || []), userId];
-      const newPlayerNames = [...(teetime.playerNames || []), playerName || 'Unknown'];
-      const newPlayerTypes = [...(teetime.playerTypes || []), playerType || 'member'];
-      const newTransportModes = [...(teetime.transportModes || []), transportMode || 'riding'];
-      const newHolesPlaying = [...(teetime.holesPlaying || []), holesPlaying || '18'];
+      // Add all players to the tee time - one booking entry for the member who books
+      const newBookedBy = [...(teetime.bookedBy || [])];
+      const newPlayerNames = [...(teetime.playerNames || [])];
+      const newPlayerTypes = [...(teetime.playerTypes || [])];
+      const newTransportModes = [...(teetime.transportModes || [])];
+      const newHolesPlaying = [...(teetime.holesPlaying || [])];
+
+      // Add each player to the arrays
+      players.forEach((player: any) => {
+        newBookedBy.push(userId); // All players are associated with the booking user
+        newPlayerNames.push(player.name || 'Unknown');
+        newPlayerTypes.push(player.type || 'member');
+        newTransportModes.push(player.transportMode || 'riding');
+        newHolesPlaying.push(player.holesPlaying || '18');
+      });
       
       const updatedTeetime = await storage.updateTeetime(id, {
         bookedBy: newBookedBy,

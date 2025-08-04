@@ -128,7 +128,7 @@ export default function AdminTeeTimesPage() {
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+    const date = new Date(dateStr + 'T12:00:00'); // Add time to avoid timezone issues
     return date.toLocaleDateString('en-US', { 
       month: 'long', 
       day: 'numeric', 
