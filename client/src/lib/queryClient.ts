@@ -7,12 +7,18 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+// API base URL - use Replit backend when deployed to Firebase
+const API_BASE_URL = window.location.hostname.includes('web.app') 
+  ? 'https://c6acc066-6bfc-483a-8df1-c6a0b9b68e3c-00-3lh0a7i90lm12.riker.replit.dev'
+  : '';
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const fullUrl = API_BASE_URL + url;
+  const res = await fetch(fullUrl, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
@@ -29,7 +35,8 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey.join("/") as string, {
+    const url = API_BASE_URL + queryKey.join("/");
+    const res = await fetch(url, {
       credentials: "include",
     });
 
