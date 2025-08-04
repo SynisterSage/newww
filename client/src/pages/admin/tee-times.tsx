@@ -10,9 +10,8 @@ import type { TeeTime, User } from "@shared/schema";
 export default function AdminTeeTimesPage() {
   const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState(() => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
+    const today = new Date();
+    return today.toISOString().split('T')[0];
   });
 
   // Auto-refresh every minute to hide expired time slots in real-time
@@ -232,29 +231,37 @@ export default function AdminTeeTimesPage() {
             .filter((teetime) => {
               // If viewing today's date, filter out past times
               const today = new Date();
-              const isToday = selectedDate === today.toISOString().split('T')[0];
+              const selectedDateStr = selectedDate;
+              const todayStr = today.toISOString().split('T')[0];
               
-              if (!isToday) return true; // Show all times for future dates
+              // If not today, show all times
+              if (selectedDateStr !== todayStr) return true;
               
               // For today, only show future times
               const now = new Date();
               const currentHour = now.getHours();
               const currentMinute = now.getMinutes();
               
-              // Parse the tee time
-              const timeMatch = teetime.time.match(/(\d+):(\d+)\s*(AM|PM)/);
-              if (!timeMatch) return true;
+              // Parse the tee time - handle formats like "7:00 AM", "12:30 PM", "1:15 PM"
+              const timeMatch = teetime.time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+              if (!timeMatch) return false; // Skip malformed times
               
               let teeHour = parseInt(timeMatch[1]);
               const teeMinute = parseInt(timeMatch[2]);
-              const ampm = timeMatch[3];
+              const ampm = timeMatch[3].toUpperCase();
               
               // Convert to 24-hour format
-              if (ampm === 'PM' && teeHour !== 12) teeHour += 12;
-              if (ampm === 'AM' && teeHour === 12) teeHour = 0;
+              if (ampm === 'PM' && teeHour !== 12) {
+                teeHour += 12;
+              } else if (ampm === 'AM' && teeHour === 12) {
+                teeHour = 0;
+              }
               
-              // Compare with current time
-              return teeHour > currentHour || (teeHour === currentHour && teeMinute > currentMinute);
+              // Compare with current time - only show if tee time is in the future
+              const currentTotalMinutes = currentHour * 60 + currentMinute;
+              const teeTotalMinutes = teeHour * 60 + teeMinute;
+              
+              return teeTotalMinutes > currentTotalMinutes;
             })
             .sort((a, b) => a.time.localeCompare(b.time))
             .map((teetime) => {
