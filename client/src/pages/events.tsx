@@ -40,7 +40,10 @@ export default function Events({ userData }: EventsProps) {
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch events");
       return response.json();
-    }
+    },
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always consider data stale for real-time updates
   }) as { data: EventWithRegistration[], isLoading: boolean };
 
   // Register for event mutation
@@ -49,7 +52,14 @@ export default function Events({ userData }: EventsProps) {
       return await apiRequest("POST", `/api/events/${eventId}/register`, { userId: currentUserId, notes });
     },
     onSuccess: () => {
+      // Invalidate all event-related queries for real-time updates
       queryClient.invalidateQueries({ queryKey: ["/api/events", currentUserId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/all"] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === "/api/events" || 
+        (Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events")
+      });
       setIsRegisterDialogOpen(false);
       setSelectedEvent(null);
       toast({
@@ -72,7 +82,14 @@ export default function Events({ userData }: EventsProps) {
       return await apiRequest("DELETE", `/api/events/${eventId}/register/${currentUserId}`);
     },
     onSuccess: () => {
+      // Invalidate all event-related queries for real-time updates
       queryClient.invalidateQueries({ queryKey: ["/api/events", currentUserId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/all"] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === "/api/events" || 
+        (Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events")
+      });
       toast({
         title: "Unregistered Successfully",
         description: "You have been removed from the event",

@@ -37,7 +37,12 @@ export default function AdminOrdersPage() {
       return response.json();
     },
     onSuccess: () => {
+      // Comprehensive cache invalidation for real-time updates
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === '/api/orders' || 
+        (Array.isArray(query.queryKey) && query.queryKey[0] === '/api/orders')
+      });
       toast({
         title: "Order Updated",
         description: "Order status has been updated successfully.",

@@ -59,7 +59,10 @@ export default function AdminEvents() {
       const response = await fetch("/api/events/all");
       if (!response.ok) throw new Error("Failed to fetch events");
       return response.json();
-    }
+    },
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always consider data stale for real-time updates
   }) as { data: EventWithRegistrations[], isLoading: boolean };
 
   // Filter out ended events from display
@@ -74,7 +77,13 @@ export default function AdminEvents() {
       return await apiRequest("POST", "/api/events", eventData);
     },
     onSuccess: () => {
+      // Invalidate all event-related queries for real-time updates
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/all"] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === "/api/events" || 
+        (Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events")
+      });
       setIsCreateDialogOpen(false);
       toast({
         title: "Success",
@@ -96,7 +105,13 @@ export default function AdminEvents() {
       return await apiRequest("PATCH", `/api/events/${id}`, updates);
     },
     onSuccess: () => {
+      // Invalidate all event-related queries for real-time updates
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/all"] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === "/api/events" || 
+        (Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events")
+      });
       setIsEditDialogOpen(false);
       setSelectedEvent(null);
       toast({
@@ -119,7 +134,13 @@ export default function AdminEvents() {
       return await apiRequest("DELETE", `/api/events/${id}`);
     },
     onSuccess: () => {
+      // Invalidate all event-related queries for real-time updates
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/all"] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === "/api/events" || 
+        (Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events")
+      });
       toast({
         title: "Success",
         description: "Event deleted successfully",

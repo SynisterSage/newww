@@ -105,9 +105,14 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
       return response.json();
     },
     onSuccess: () => {
+      // Comprehensive cache invalidation for real-time updates across all pages
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
       queryClient.invalidateQueries({ queryKey: ['/api/teetimes/user', userData.id] });
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === '/api/teetimes' || 
+        (Array.isArray(query.queryKey) && query.queryKey[0] === '/api/teetimes')
+      });
       toast({
         title: "Booking Confirmed",
         description: `Successfully booked tee time for ${players.length} player${players.length > 1 ? 's' : ''}!`,

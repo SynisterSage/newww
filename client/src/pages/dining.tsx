@@ -48,7 +48,12 @@ export default function Dining({ userData }: DiningProps) {
       return response.json();
     },
     onSuccess: () => {
+      // Comprehensive cache invalidation for real-time updates
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === '/api/orders' || 
+        (Array.isArray(query.queryKey) && query.queryKey[0] === '/api/orders')
+      });
       setCurrentOrder({});
       setSpecialRequests("");
       closeCart();
