@@ -140,43 +140,20 @@ export function AuthLogin({ onLogin }: AuthLoginProps) {
             <div className="text-center text-sm text-muted-foreground">
               <p>For assistance, contact the pro shop</p>
               <p className="font-medium text-golf-green">(973) 694-9754</p>
-              
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="text-xs text-gray-600">
-                  <p className="font-medium mb-2">Sample Member Logins:</p>
-                  <div className="bg-gray-50 p-2 rounded text-xs mb-2">
-                    <p className="font-medium">Ravi Patel</p>
-                    <p>ravipatel@packanackgolf.com</p>
-                    <p>(973) 188-6921</p>
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <div className="bg-gray-50 p-2 rounded text-xs">
-                      <p className="font-medium">Keith Allerton</p>
-                      <p>keith.allerton@email.com</p>
-                      <p>(973) 335-4567</p>
-                    </div>
-                    <div className="bg-gray-50 p-2 rounded text-xs">
-                      <p className="font-medium">Robert Amoruso</p>
-                      <p>robert.amoruso@email.com</p>
-                      <p>(973) 694-2134</p>
-                    </div>
-                    <div className="bg-gray-50 p-2 rounded text-xs">
-                      <p className="font-medium">Randy Biagini</p>
-                      <p>randy.biagini@email.com</p>
-                      <p>(973) 556-7788</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-3">
-                  <a 
-                    href="/admin" 
-                    className="inline-block text-xs text-gray-500 hover:text-gray-700 transition-colors"
-                  >
-                    Staff Portal
-                  </a>
-                </div>
+              <div className="mt-3 text-xs text-gray-600">
+                <p>Demo credentials:</p>
+                <p>ravipatel@packanackgolf.com / (973) 188-6921</p>
+              </div>
+              <div className="mt-2 text-xs text-gray-500">
+                <p>Only utilized for desktop, mobile soon</p>
+              </div>
+              <div className="mt-3">
+                <a 
+                  href="/admin" 
+                  className="inline-block text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  Staff Portal
+                </a>
               </div>
             </div>
           </form>
