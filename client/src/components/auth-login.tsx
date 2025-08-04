@@ -141,9 +141,15 @@ export function AuthLogin({ onLogin }: AuthLoginProps) {
               <p>For assistance, contact the pro shop</p>
               <p className="font-medium text-golf-green">(973) 694-9754</p>
               
-              <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
+              <div className="mt-4 pt-4 border-t border-gray-200">
                 <div className="text-xs text-gray-600">
                   <p className="font-medium mb-2">Sample Member Logins:</p>
+                  <div className="bg-gray-50 p-2 rounded text-xs mb-2">
+                    <p className="font-medium">Ravi Patel</p>
+                    <p>ravipatel@packanackgolf.com</p>
+                    <p>(973) 188-6921</p>
+                  </div>
+                  
                   <div className="space-y-1">
                     <div className="bg-gray-50 p-2 rounded text-xs">
                       <p className="font-medium">Keith Allerton</p>
@@ -162,12 +168,15 @@ export function AuthLogin({ onLogin }: AuthLoginProps) {
                     </div>
                   </div>
                 </div>
-                <a 
-                  href="/admin" 
-                  className="inline-block text-xs text-gray-500 hover:text-gray-700 transition-colors"
-                >
-                  Staff Portal
-                </a>
+                
+                <div className="mt-3">
+                  <a 
+                    href="/admin" 
+                    className="inline-block text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    Staff Portal
+                  </a>
+                </div>
               </div>
             </div>
           </form>
