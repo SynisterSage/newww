@@ -54,11 +54,13 @@ function Router() {
         
         if (cachedUserData && cachedUserType) {
           const data = JSON.parse(cachedUserData);
+
           if (cachedUserType === 'member') {
             setUserData(data);
             setUserEmail(data.email);
             setIsAuthenticated(true);
           } else if (cachedUserType === 'admin') {
+
             setAdminData(data);
             setIsAdminAuthenticated(true);
           }
@@ -70,6 +72,8 @@ function Router() {
       try {
         const response = await apiRequest('POST', '/api/auth/verify', { sessionToken });
         const data = await response.json();
+        
+
           
         if (data.type === 'member') {
           setUserData(data);
@@ -78,6 +82,7 @@ function Router() {
           localStorage.setItem('userType', 'member');
           localStorage.setItem('userData', JSON.stringify(data));
         } else if (data.type === 'admin') {
+
           setAdminData(data);
           setIsAdminAuthenticated(true);
           localStorage.setItem('userType', 'admin');
@@ -85,6 +90,7 @@ function Router() {
         }
         localStorage.setItem('lastSessionVerified', now.toString());
       } catch (error) {
+
         // Clear invalid session on error
         localStorage.removeItem('sessionToken');
         localStorage.removeItem('userType');
@@ -105,8 +111,13 @@ function Router() {
   };
 
   const handleAdminLogin = (data: AdminUser) => {
+
     setAdminData(data);
     setIsAdminAuthenticated(true);
+    // Store session data for admin
+    localStorage.setItem('userType', 'admin');
+    localStorage.setItem('userData', JSON.stringify(data));
+    localStorage.setItem('lastSessionVerified', Date.now().toString());
   };
 
   // Show logout animation

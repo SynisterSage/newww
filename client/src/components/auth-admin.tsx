@@ -32,6 +32,7 @@ export function AuthAdmin({ onLogin }: AuthAdminProps) {
       }
     },
     onSuccess: (adminData) => {
+
       setError("");
       onLogin(adminData);
     },
