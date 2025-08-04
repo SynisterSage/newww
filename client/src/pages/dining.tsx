@@ -106,17 +106,31 @@ export default function Dining({ userData }: DiningProps) {
       const currentOptions = prev[itemId] || [];
       const isSelected = currentOptions.includes(option);
       
+      let newOptions;
       if (isSelected) {
-        return {
-          ...prev,
-          [itemId]: currentOptions.filter(opt => opt !== option)
-        };
+        newOptions = currentOptions.filter(opt => opt !== option);
       } else {
-        return {
-          ...prev,
-          [itemId]: [...currentOptions, option]
-        };
+        newOptions = [...currentOptions, option];
       }
+      
+      // Update the current order with new options if item is already in cart
+      setCurrentOrder(orderPrev => {
+        if (orderPrev[itemId]) {
+          return {
+            ...orderPrev,
+            [itemId]: {
+              ...orderPrev[itemId],
+              options: newOptions
+            }
+          };
+        }
+        return orderPrev;
+      });
+      
+      return {
+        ...prev,
+        [itemId]: newOptions
+      };
     });
   };
 
@@ -312,20 +326,18 @@ export default function Dining({ userData }: DiningProps) {
                 key={item.id} 
                 className="bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 rounded-xl overflow-hidden h-72 flex flex-col relative"
               >
-                {/* Options indicator */}
-                {item.availableSettings && (
-                  <div className="absolute top-3 right-3 bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                    Has Options
-                  </div>
-                )}
-                
                 <CardContent className="p-5 flex flex-col h-full">
                   <div className="flex-1 flex flex-col">
-                    {/* Header with category badge */}
+                    {/* Header with category badge and options indicator */}
                     <div className="flex items-start justify-between mb-3">
                       <span className="bg-green-100 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap">
                         {formatCategoryName(item.category)}
                       </span>
+                      {item.availableSettings && (
+                        <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                          Has Options
+                        </span>
+                      )}
                     </div>
                     
                     {/* Title - Fixed height for consistency */}
