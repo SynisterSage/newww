@@ -9,7 +9,7 @@ async function throwIfResNotOk(res: Response) {
 
 // API base URL - detect environment for deployment
 const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://pgc-backend-production.up.railway.app' // Your Railway backend URL (update after deployment)
+  ? 'https://web-production-0a369.up.railway.app' // Your Railway backend URL
   : '';
 
 export async function apiRequest(
