@@ -124,6 +124,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
         newHolesPlaying.push(player.holesPlaying || "18");
       });
 
+      // Check for existing array length mismatches and repair if needed
+      const existingArrays = [
+        teetime.bookedBy || [],
+        teetime.playerNames || [],
+        teetime.playerTypes || [],
+        teetime.transportModes || [],
+        teetime.holesPlaying || []
+      ];
+      
+      const hasExistingMismatch = existingArrays.some(arr => arr.length !== existingArrays[0].length);
+      
+      if (hasExistingMismatch) {
+        console.log(`Repairing corrupted tee time ${id} - clearing mismatched arrays`);
+        // Clear all existing arrays to fix corruption
+        const updatedTeetime = await storage.updateTeetime(id, {
+          bookedBy: [],
+          playerNames: [],
+          playerTypes: [],
+          transportModes: [],
+          holesPlaying: [],
+        });
+        
+        // Refresh the teetime object with clean data
+        const cleanTeetime = await storage.getTeetimeById(id);
+        if (cleanTeetime) {
+          teetime.bookedBy = cleanTeetime.bookedBy;
+          teetime.playerNames = cleanTeetime.playerNames;
+          teetime.playerTypes = cleanTeetime.playerTypes;
+          teetime.transportModes = cleanTeetime.transportModes;
+          teetime.holesPlaying = cleanTeetime.holesPlaying;
+        }
+        
+        // Reset the arrays to start fresh
+        newBookedBy.length = 0;
+        newPlayerNames.length = 0;
+        newPlayerTypes.length = 0;
+        newTransportModes.length = 0;
+        newHolesPlaying.length = 0;
+        
+        // Re-add the new players
+        players.forEach((player: any) => {
+          newBookedBy.push(userId);
+          newPlayerNames.push(player.name || "Unknown Player");
+          newPlayerTypes.push(player.type || "member");
+          newTransportModes.push(player.transportMode || "riding");
+          newHolesPlaying.push(player.holesPlaying || "18");
+        });
+      }
+
       // Ensure all arrays have the same length after updates
       if (newBookedBy.length !== newPlayerNames.length || 
           newPlayerNames.length !== newPlayerTypes.length ||
