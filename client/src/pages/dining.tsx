@@ -388,7 +388,7 @@ export default function Dining({ userData }: DiningProps) {
                         {formatCategoryName(item.category)}
                       </span>
                       {item.availableSettings && (
-                        <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                        <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-normal">
                           Has Options
                         </span>
                       )}
