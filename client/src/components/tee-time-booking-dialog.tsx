@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { TeeTime, User } from "@shared/schema";
-import { Users, Car, MapPin, Clock, Plus, Minus, UserPlus } from "lucide-react";
+import { Users, Car, MapPin, Clock, Plus, Minus, UserPlus, Check, ChevronDown } from "lucide-react";
 
 interface TeeTimeBookingDialogProps {
   open: boolean;
@@ -36,6 +38,16 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
     holesPlaying: "18"
   }]);
 
+  // State for autocomplete dropdowns
+  const [openAutocomplete, setOpenAutocomplete] = useState<{ [key: number]: boolean }>({});
+
+  // Fetch all members for autocomplete
+  const { data: allMembers = [] } = useQuery<User[]>({
+    queryKey: ['/api/admin/members'],
+    enabled: open, // Only fetch when dialog is open
+    staleTime: 30000, // Cache for 30 seconds
+  });
+
   // Reset players when dialog opens to prevent state corruption
   useEffect(() => {
     if (open) {
@@ -45,6 +57,7 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
         transportMode: "riding",
         holesPlaying: "18"
       }]);
+      setOpenAutocomplete({}); // Reset autocomplete states
     }
   }, [open, userData]);
 
@@ -69,6 +82,36 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
     const updated = [...players];
     updated[index] = { ...updated[index], [field]: value };
     setPlayers(updated);
+  };
+
+  // Helper function to get member suggestions
+  const getMemberSuggestions = (searchTerm: string) => {
+    if (!searchTerm || searchTerm.length < 2) return [];
+    
+    return allMembers
+      .filter(member => {
+        const fullName = `${member.firstName || ''} ${member.lastName || ''}`.trim();
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          fullName.toLowerCase().includes(searchLower) ||
+          (member.firstName && member.firstName.toLowerCase().includes(searchLower)) ||
+          (member.lastName && member.lastName.toLowerCase().includes(searchLower))
+        );
+      })
+      .slice(0, 8) // Limit to 8 suggestions
+      .map(member => ({
+        id: member.id,
+        name: `${member.firstName || ''} ${member.lastName || ''}`.trim(),
+        membershipClass: member.membershipClass,
+        username: member.username
+      }));
+  };
+
+  // Handle member selection from autocomplete
+  const selectMember = (index: number, memberName: string) => {
+    updatePlayer(index, 'name', memberName);
+    updatePlayer(index, 'type', 'member'); // Auto-set to member when selecting from database
+    setOpenAutocomplete(prev => ({ ...prev, [index]: false }));
   };
 
   const bookingMutation = useMutation({
@@ -224,14 +267,71 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                   <div className="grid grid-cols-12 gap-3 items-start">
                     {/* Name */}
                     <div className="col-span-4 space-y-1">
-                      <Input
-                        value={player.name}
-                        onChange={(e) => updatePlayer(index, 'name', e.target.value)}
-                        placeholder={index === 0 ? "Your name" : "Player name"}
-                        disabled={index === 0}
-                        className="h-8 text-sm"
-                        data-testid={`input-player-name-${index}`}
-                      />
+                      {index === 0 ? (
+                        // First player (booking member) - no autocomplete
+                        <Input
+                          value={player.name}
+                          onChange={(e) => updatePlayer(index, 'name', e.target.value)}
+                          placeholder="Your name"
+                          disabled={true}
+                          className="h-8 text-sm"
+                          data-testid={`input-player-name-${index}`}
+                        />
+                      ) : (
+                        // Additional players - with member autocomplete
+                        <Popover 
+                          open={openAutocomplete[index] || false} 
+                          onOpenChange={(open) => setOpenAutocomplete(prev => ({ ...prev, [index]: open }))}
+                        >
+                          <PopoverTrigger asChild>
+                            <div className="relative">
+                              <Input
+                                value={player.name}
+                                onChange={(e) => {
+                                  updatePlayer(index, 'name', e.target.value);
+                                  setOpenAutocomplete(prev => ({ ...prev, [index]: e.target.value.length >= 2 }));
+                                }}
+                                placeholder="Search member name or type guest name"
+                                className="h-8 text-sm pr-8"
+                                data-testid={`input-player-name-${index}`}
+                              />
+                              {player.name.length >= 2 && (
+                                <ChevronDown className="absolute right-2 top-2 h-4 w-4 text-gray-400" />
+                              )}
+                            </div>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80 p-0" align="start">
+                            <Command>
+                              <div className="px-3 py-2 text-xs font-medium text-gray-600 border-b">
+                                Search Members ({allMembers.length} total)
+                              </div>
+                              <CommandEmpty className="px-3 py-2 text-xs text-gray-500">
+                                {player.name.length < 2 
+                                  ? "Type at least 2 characters to search members" 
+                                  : "No members found. Continue typing for guest name."}
+                              </CommandEmpty>
+                              <CommandGroup>
+                                {getMemberSuggestions(player.name).map((member) => (
+                                  <CommandItem
+                                    key={member.id}
+                                    onSelect={() => selectMember(index, member.name)}
+                                    className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-50"
+                                  >
+                                    <Users className="w-4 h-4 text-golf-green" />
+                                    <div className="flex-1">
+                                      <div className="text-sm font-medium">{member.name}</div>
+                                      <div className="text-xs text-gray-500">
+                                        {member.membershipClass ? `${member.membershipClass} Member` : 'Member'}
+                                      </div>
+                                    </div>
+                                    <Check className="w-4 h-4 text-golf-green opacity-0 group-data-[selected]:opacity-100" />
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      )}
                       {index === 0 && (
                         <div className="text-xs text-golf-green">Booking Member</div>
                       )}
