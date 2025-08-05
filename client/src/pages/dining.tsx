@@ -381,7 +381,7 @@ export default function Dining({ userData }: DiningProps) {
                 className="bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 rounded-xl overflow-hidden h-72 flex flex-col relative"
               >
                 <CardContent className="p-5 flex flex-col h-full">
-                  <div className="flex-1 flex flex-col">
+                  <div className="flex-1 flex flex-col pt-[0px] pb-[0px] mt-[-1px] mb-[-1px]">
                     {/* Header with category badge and options indicator */}
                     <div className="flex items-start justify-between mb-3">
                       <span className="bg-green-100 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap">
