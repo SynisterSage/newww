@@ -42,6 +42,11 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 // Core API routes for Vercel
 app.post("/api/auth/member", async (req, res) => {
   try {
@@ -67,11 +72,15 @@ app.post("/api/auth/verify", async (req, res) => {
     if (!sessionToken) {
       return res.status(401).json({ error: "Session token required" });
     }
-    const isValid = await storage.verifySession(sessionToken);
-    if (!isValid) {
+    const session = await storage.getSessionByToken(sessionToken);
+    if (!session || session.expiresAt < new Date()) {
       return res.status(401).json({ error: "Invalid session" });
     }
-    res.json(isValid);
+    const user = await storage.getUser(session.userId);
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+    res.json({ id: user.id, firstName: user.firstName, lastName: user.lastName, memberNumber: user.memberNumber });
   } catch (error) {
     res.status(500).json({ error: "Session verification failed" });
   }
@@ -88,7 +97,7 @@ app.get("/api/events", async (req, res) => {
 
 app.get("/api/events/all", async (req, res) => {
   try {
-    const events = await storage.getAllEvents();
+    const events = await storage.getEvents();
     res.json(events);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch all events" });
