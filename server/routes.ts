@@ -818,10 +818,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const events = await storage.getEvents();
       const { userId } = req.query;
 
-      // Filter out past events
+      // Filter out past events (only filter if event is more than 1 day past)
       const currentEvents = events.filter((event) => {
         const eventDateTime = new Date(`${event.date}T${event.time}`);
-        return eventDateTime >= new Date();
+        const now = new Date();
+        const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        return eventDateTime >= oneDayAgo; // Show events from last 24 hours and future
       });
 
       // Add registration count and user registration status to each event

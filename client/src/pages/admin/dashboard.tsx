@@ -48,25 +48,55 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
     return orderDate.toDateString() === today.toDateString();
   }).length;
 
-  // Filter tee times with actual bookings (playerNames array has entries)
-  const bookedTeetimes = teetimes.filter(t => t.playerNames && t.playerNames.length > 0);
+  // Filter tee times with actual bookings (bookedBy array has entries and is today's bookings)
+  const bookedTeetimes = teetimes.filter(t => {
+    const hasBookings = t.bookedBy && t.bookedBy.length > 0;
+    const isToday = t.date === today;
+    return hasBookings && isToday;
+  });
+
+  // Sort recent orders by creation date (most recent first)
+  const recentOrders = [...orders]
+    .filter(o => o.createdAt) // Only orders with timestamp
+    .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
+    .slice(0, 3);
+
+  // Sort recent tee times by booking time (most recent first)  
+  const recentTeetimes = [...bookedTeetimes]
+    .sort((a, b) => {
+      // Sort by time slot (later times first for today)
+      const timeA = a.time.includes('PM') ? parseInt(a.time) + 12 : parseInt(a.time);
+      const timeB = b.time.includes('PM') ? parseInt(b.time) + 12 : parseInt(b.time);
+      return timeB - timeA;
+    })
+    .slice(0, 3);
   
   const recentActivity = [
-    ...bookedTeetimes.slice(0, 3).map(t => ({
-      type: 'tee-time',
-      title: `Tee Time Booking - ${t.time}`,
-      subtitle: `${t.playerNames?.join(', ') || 'No players'} • ${t.holes} holes`,
-      time: format(new Date(t.date), 'MMM dd'),
-      status: 'booked'
-    })),
-    ...orders.slice(0, 3).map(o => {
+    ...recentTeetimes.map(t => {
+      const playersList = t.playerNames?.filter(name => name && name.trim()) || [];
+      const memberNames = t.bookedBy?.map(userId => {
+        const member = members.find(m => m.id === userId);
+        return member ? `${member.firstName} ${member.lastName}` : 'Member';
+      }).filter(Boolean) || [];
+      
+      const displayNames = playersList.length > 0 ? playersList : memberNames;
+      
+      return {
+        type: 'tee-time',
+        title: `Tee Time - ${t.time}`,
+        subtitle: `${displayNames.join(', ') || 'Players'} • ${t.holes || '18'} holes`,
+        time: format(new Date(t.date), 'MMM dd'),
+        status: 'booked'
+      };
+    }),
+    ...recentOrders.map(o => {
       const member = members.find(m => m.id === o.userId);
-      const memberName = member ? `${member.firstName} ${member.lastName}` : 'Unknown Member';
+      const memberName = member ? `${member.firstName} ${member.lastName}` : 'Member';
       return {
         type: 'order',
         title: `Food Order - ${memberName}`,
         subtitle: `${o.items.length} items • $${o.total}`,
-        time: format(new Date(o.createdAt || Date.now()), 'MMM dd'),
+        time: format(new Date(o.createdAt || Date.now()), 'MMM dd, h:mm a'),
         status: o.status
       };
     })
