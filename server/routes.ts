@@ -87,20 +87,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Tee time not found" });
       }
 
+      // Check if user already booked this tee time
+      // Allow editing existing bookings by checking if this is an edit operation
+      const isEdit = teetime.bookedBy?.includes(userId);
+      if (isEdit) {
+        // For edits, remove existing booking first to allow updates
+        const userBookingIndexes: number[] = [];
+        teetime.bookedBy?.forEach((bookedUserId, index) => {
+          if (bookedUserId === userId) {
+            userBookingIndexes.push(index);
+          }
+        });
+        
+        // Remove user's existing booking data from all arrays
+        userBookingIndexes.reverse().forEach(index => {
+          teetime.bookedBy?.splice(index, 1);
+          teetime.playerNames?.splice(index, 1);
+          teetime.playerTypes?.splice(index, 1);
+          teetime.transportModes?.splice(index, 1);
+          teetime.holesPlaying?.splice(index, 1);
+        });
+      }
+
+      // Check availability AFTER removing existing booking (for edits)
       const currentPlayers = teetime.bookedBy?.length || 0;
       const availableSpots = teetime.maxPlayers - currentPlayers;
 
       if (players.length > availableSpots) {
+        console.log(`Booking failed - availability check: current: ${currentPlayers}, max: ${teetime.maxPlayers}, requesting: ${players.length}, available: ${availableSpots}`);
         return res
           .status(400)
-          .json({ message: `Only ${availableSpots} spots available` });
-      }
-
-      // Check if user already booked this tee time
-      if (teetime.bookedBy?.includes(userId)) {
-        return res
-          .status(400)
-          .json({ message: "You have already booked this tee time" });
+          .json({ message: `Only ${availableSpots} spots available. Current: ${currentPlayers}, Requesting: ${players.length}` });
       }
 
       // Add all players to the tee time - one booking entry for the member who books
@@ -111,10 +128,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newHolesPlaying = [...(teetime.holesPlaying || [])];
 
       // Add each player to the arrays with validation
-      players.forEach((player: any) => {
+      players.forEach((player: any, index: number) => {
         // Ensure player object has required properties
         if (!player || typeof player !== 'object') {
-          throw new Error('Invalid player object');
+          throw new Error(`Invalid player object at index ${index}: ${JSON.stringify(player)}`);
+        }
+        
+        // Skip empty player names (allow partial fills)
+        if (!player.name || player.name.trim() === '') {
+          return; // Skip this player, don't add to arrays
         }
         
         newBookedBy.push(userId); // All players are associated with the booking user
