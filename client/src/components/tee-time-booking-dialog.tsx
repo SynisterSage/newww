@@ -18,6 +18,7 @@ interface TeeTimeBookingDialogProps {
   onOpenChange: (open: boolean) => void;
   teeTime: TeeTime;
   userData: User;
+  mode?: "book" | "edit";
 }
 
 interface Player {
@@ -27,7 +28,7 @@ interface Player {
   holesPlaying: "9" | "18";
 }
 
-export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: TeeTimeBookingDialogProps) {
+export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData, mode = "book" }: TeeTimeBookingDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -48,21 +49,37 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
     staleTime: 30000, // Cache for 30 seconds
   });
 
-  // Reset players when dialog opens to prevent state corruption
+  // Initialize players based on mode (book new or edit existing)
   useEffect(() => {
     if (open) {
-      setPlayers([{
-        name: `${userData.firstName} ${userData.lastName}`.trim() || userData.username,
-        type: "member",
-        transportMode: "riding",
-        holesPlaying: "18"
-      }]);
+      if (mode === "edit" && teeTime.playerNames && teeTime.playerNames.length > 0) {
+        // Edit mode: populate with existing booking data
+        const existingPlayers: Player[] = teeTime.playerNames.map((name, index) => ({
+          name: name || "",
+          type: (teeTime.playerTypes?.[index] as "member" | "guest") || "member",
+          transportMode: (teeTime.transportModes?.[index] as "riding" | "walking") || "riding",
+          holesPlaying: (teeTime.holesPlaying?.[index] as "9" | "18") || "18"
+        }));
+        setPlayers(existingPlayers);
+      } else {
+        // Book mode: start with just the booking user
+        setPlayers([{
+          name: `${userData.firstName} ${userData.lastName}`.trim() || userData.username,
+          type: "member",
+          transportMode: "riding",
+          holesPlaying: "18"
+        }]);
+      }
       setOpenAutocomplete({}); // Reset autocomplete states
     }
-  }, [open, userData]);
+  }, [open, userData, mode, teeTime]);
 
   const addPlayer = () => {
-    if (players.length < 4) {
+    // In edit mode, check current tee time capacity + new players
+    const currentPlayerCount = teeTime.playerNames?.filter(name => name && name.trim()).length || 0;
+    const maxPlayersAllowed = mode === "edit" ? (4 - currentPlayerCount + players.length) : 4;
+    
+    if (players.length < maxPlayersAllowed && players.length < 4) {
       setPlayers([...players, {
         name: "",
         type: "member",
@@ -183,8 +200,10 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
         }
       });
       toast({
-        title: "Booking Confirmed",
-        description: `Successfully booked tee time for ${players.length} player${players.length > 1 ? 's' : ''}!`,
+        title: mode === "edit" ? "Booking Updated" : "Booking Confirmed",
+        description: mode === "edit" 
+          ? `Successfully updated tee time with ${players.length} player${players.length > 1 ? 's' : ''}!`
+          : `Successfully booked tee time for ${players.length} player${players.length > 1 ? 's' : ''}!`,
       });
       onOpenChange(false);
       // Reset form
@@ -212,7 +231,8 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
   const maxPlayers = teeTime.maxPlayers || 4;
   const isUserBooked = teeTime.bookedBy?.includes(userData.id);
 
-  if (isUserBooked) {
+  // Don't show dialog if user is trying to book (not edit) when already booked
+  if (mode === "book" && isUserBooked) {
     return null;
   }
 
@@ -222,7 +242,7 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
             <Clock className="w-5 h-5 text-golf-green" />
-            Join Tee Time
+            {mode === "edit" ? "Edit Tee Time" : "Join Tee Time"}
           </DialogTitle>
           <DialogDescription>
             <div className="space-y-1 text-sm text-gray-600">
@@ -470,7 +490,9 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
               className="flex-1 bg-golf-green hover:bg-golf-green/90 text-white"
               data-testid="button-confirm-booking"
             >
-              {bookingMutation.isPending ? "Booking..." : "Confirm Booking"}
+{bookingMutation.isPending 
+                ? (mode === "edit" ? "Updating..." : "Booking...") 
+                : (mode === "edit" ? "Update Booking" : "Confirm Booking")}
             </Button>
           </div>
         </div>
