@@ -18,15 +18,14 @@ This is a premium golf club management system built for Packanack Golf Club as a
 - Fixed 500 error in events API and restored automatic cleanup with proper date-based filtering
 - Both member and admin event pages use consistent real-time updates for registration counts and event data
 
-✓ **Complete Authentication System Fix** (August 5, 2025):
-- Fixed critical corrupted server/storage.ts file that had thousands of syntax errors preventing all logins
-- Restored clean DatabaseStorage implementation with proper authentication methods
-- Updated database schema with missing columns (payment_status, membership_class, etc.)
-- Event deletion now properly removes events from database instead of marking inactive
-- All authentication routes working for both members and admins with 30-minute session duration
-- Admin credentials working: admin@golf.com/admin123 and afergyy@gmail.com/Booly1969!
-- Member authentication working with email/phone verification against 259-member database
-- Authentication system fully operational with proper session management and real-time updates
+✓ **Complete Query Cache Invalidation System Fix** (August 5, 2025):
+- Replaced constant auto-refresh with proper cache invalidation to prevent closing popup dialogs
+- Events pages no longer require page switch to refresh - use refetchQueries for immediate updates
+- Tee time bookings now show instantly in admin dashboard recent activity via comprehensive cache invalidation
+- Today's tee times count updates properly in dashboard stats
+- Active orders display correctly with proper filtering by date
+- Added course conditions management card to admin dashboard (5th card next to manage tee times and kitchen orders)
+- All mutations (events, tee times, orders) use comprehensive cache invalidation for real-time sync across all pages
 
 ✓ **Debugging and Fixes Complete** (August 1, 2025):
 - Fixed database connection issues and TypeScript errors in storage implementation
