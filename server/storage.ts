@@ -70,9 +70,7 @@ export interface IStorage {
   unregisterFromEvent(eventId: string, userId: string): Promise<void>;
   
   // Reset methods for admin
-  resetTeeTimeBookings(): Promise<void>;
-  resetEventRegistrations(): Promise<void>;
-  resetOrders(): Promise<void>;
+  resetTestData(): Promise<void>;
   resetCourseNotices(): Promise<void>;
 }
 
@@ -878,6 +876,42 @@ export class MemStorage implements IStorage {
     }
   }
 
+  // Reset test data for admin
+  async resetTestData(): Promise<void> {
+    // Reset all events (mark as inactive)
+    this.events.forEach(event => {
+      this.events.set(event.id, { ...event, isActive: false });
+    });
+    
+    // Clear all event registrations
+    this.eventRegistrations.clear();
+    
+    // Clear all orders
+    this.orders.clear();
+    
+    // Reset all tee time bookings (clear bookedBy and playerNames)
+    this.teetimes.forEach(teetime => {
+      this.teetimes.set(teetime.id, {
+        ...teetime,
+        bookedBy: [],
+        playerNames: []
+      });
+    });
+    
+    // Reset course conditions to default
+    this.currentConditions = {
+      id: "default",
+      weather: "sunny",
+      temperature: 72,
+      windSpeed: 5,
+      conditions: "excellent",
+      cartPathOnly: false,
+      courseStatus: "open",
+      notes: "Course in excellent condition",
+      lastUpdated: new Date()
+    };
+  }
+
   // Reset methods for admin (MemStorage)
   async resetTeeTimeBookings(): Promise<void> {
     this.teetimes.forEach((teetime, id) => {
@@ -1270,6 +1304,36 @@ export class DatabaseStorage implements IStorage {
     await db.update(courseConditions).set({
       hazardNotes: null,
       maintenanceNotes: []
+    });
+  }
+
+  // Reset all test data for admin
+  async resetTestData(): Promise<void> {
+    // Reset all events (mark as inactive)
+    await db.update(events).set({ isActive: false });
+    
+    // Clear all event registrations
+    await db.delete(eventRegistrations);
+    
+    // Clear all orders
+    await db.delete(orders);
+    
+    // Reset all tee time bookings (clear bookedBy and playerNames)
+    await db.update(teetimes).set({
+      bookedBy: [],
+      playerNames: []
+    });
+    
+    // Reset course conditions to default
+    await db.update(courseConditions).set({
+      weather: "sunny",
+      temperature: 72,
+      windSpeed: 5,
+      conditions: "excellent",
+      cartPathOnly: false,
+      courseStatus: "open",
+      notes: "Course in excellent condition",
+      lastUpdated: new Date()
     });
   }
 }

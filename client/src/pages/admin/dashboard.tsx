@@ -1,10 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, UtensilsCrossed, Users, Clock, CheckCircle, AlertCircle, TrendingUp, Trophy } from "lucide-react";
+import { Calendar, UtensilsCrossed, Users, Clock, CheckCircle, AlertCircle, TrendingUp, Trophy, RotateCcw } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 import type { TeeTime, Order, User } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 interface AdminDashboardProps {
   adminEmail?: string;
@@ -12,6 +14,8 @@ interface AdminDashboardProps {
 
 export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
   const today = format(new Date(), 'yyyy-MM-dd');
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   
   const { data: teetimes = [] } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', today],
@@ -40,6 +44,29 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
     staleTime: 0, // Always fetch fresh data
   });
 
+  // Reset test data mutation
+  const resetTestDataMutation = useMutation({
+    mutationFn: () => apiRequest("/api/admin/reset-test-data", "POST"),
+    onSuccess: () => {
+      toast({
+        title: "Test data reset successfully",
+        description: "All events, bookings, orders, and conditions have been reset.",
+      });
+      // Invalidate all related queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/course/conditions'] });
+    },
+    onError: () => {
+      toast({
+        title: "Error resetting test data",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Calculate stats
   const todaysTeetimes = teetimes.length;
   const pendingOrders = orders.filter(o => {
@@ -48,11 +75,22 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
     return orderDate.toDateString() === today.toDateString();
   }).length;
 
-  // Filter tee times with actual bookings (bookedBy array has entries and is today's bookings)
+  // Filter tee times with actual bookings (bookedBy array has entries or playerNames has entries)
   const bookedTeetimes = teetimes.filter(t => {
-    const hasBookings = t.bookedBy && t.bookedBy.length > 0;
+    const hasBookingsById = t.bookedBy && t.bookedBy.length > 0;
+    const hasBookingsByName = t.playerNames && t.playerNames.length > 0 && t.playerNames.some(name => name && name.trim());
     const isToday = t.date === today;
-    return hasBookings && isToday;
+    
+    console.log(`Tee time ${t.time} on ${t.date}:`, {
+      hasBookingsById,
+      hasBookingsByName, 
+      bookedBy: t.bookedBy,
+      playerNames: t.playerNames,
+      isToday,
+      today
+    });
+    
+    return (hasBookingsById || hasBookingsByName) && isToday;
   });
 
   // Sort recent orders by creation date (most recent first)
@@ -109,7 +147,19 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-3xl font-bold text-blue-800">Admin Dashboard{adminEmail ? `, ${adminEmail}` : ""}</h1>
-            <div className="text-sm text-muted-foreground">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => resetTestDataMutation.mutate()}
+                disabled={resetTestDataMutation.isPending}
+                className="flex items-center gap-2"
+                data-testid="button-reset-test-data"
+              >
+                <RotateCcw className="w-4 h-4" />
+                {resetTestDataMutation.isPending ? 'Resetting...' : 'Reset Test Data'}
+              </Button>
+              <div className="text-sm text-muted-foreground">
               {new Date().toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -120,6 +170,7 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
                 minute: '2-digit',
                 hour12: true
               })}
+              </div>
             </div>
           </div>
           <p className="text-muted-foreground">Manage club operations and member requests</p>

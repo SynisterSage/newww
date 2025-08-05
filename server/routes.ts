@@ -1037,6 +1037,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin reset test data endpoint
+  app.post("/api/admin/reset-test-data", async (req, res) => {
+    try {
+      await storage.resetTestData();
+      res.json({ message: "Test data reset successfully" });
+    } catch (error) {
+      console.error("Reset test data error:", error);
+      res.status(500).json({ message: "Failed to reset test data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
