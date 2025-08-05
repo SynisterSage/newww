@@ -73,6 +73,12 @@ export interface IStorage {
   // Reset methods for admin
   resetTestData(): Promise<void>;
   resetCourseNotices(): Promise<void>;
+  
+  // Cleanup methods
+  cleanupExpiredTeetimes(): Promise<number>;
+  resetTeeTimeBookings(): Promise<void>;
+  resetEventRegistrations(): Promise<void>;
+  resetOrders(): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -1344,6 +1350,47 @@ export class DatabaseStorage implements IStorage {
       hazardNotes: null,
       maintenanceNotes: []
     });
+  }
+
+  // Clean up expired tee time bookings (past times should not keep booking data)
+  async cleanupExpiredTeetimes(): Promise<number> {
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes(); // current time in minutes
+    const today = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    // Get all tee times for today that are in the past
+    const todayTeetimes = await db.select().from(teetimes).where(eq(teetimes.date, today));
+    
+    let cleanedCount = 0;
+    
+    for (const teetime of todayTeetimes) {
+      // Parse tee time (format: "7:00 AM" or "1:15 PM")
+      const [time, period] = teetime.time.split(' ');
+      const [hours, minutes] = time.split(':').map(Number);
+      const teetimeMinutes = ((period === 'PM' && hours !== 12) ? hours + 12 : (period === 'AM' && hours === 12) ? 0 : hours) * 60 + minutes;
+      
+      // If tee time is in the past and has booking data, clear it
+      if (teetimeMinutes < currentTime && 
+          ((teetime.playerNames && teetime.playerNames.length > 0) || 
+           (teetime.bookedBy && teetime.bookedBy.length > 0))) {
+        
+        console.log(`Cleaning expired tee time ${teetime.id} at ${teetime.time} - clearing booking data`);
+        
+        await db.update(teetimes)
+          .set({
+            bookedBy: [],
+            playerNames: [],
+            playerTypes: [],
+            transportModes: [],
+            holesPlaying: []
+          })
+          .where(eq(teetimes.id, teetime.id));
+        
+        cleanedCount++;
+      }
+    }
+    
+    return cleanedCount;
   }
 
   // Automatically mark ended events as inactive

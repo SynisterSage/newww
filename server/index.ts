@@ -69,6 +69,34 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
+  
+  // Get storage instance to run cleanup
+  const { storage } = await import('./routes');
+  
+  // Run initial cleanup on server start
+  if (storage && 'cleanupExpiredTeetimes' in storage) {
+    try {
+      const cleaned = await storage.cleanupExpiredTeetimes();
+      if (cleaned > 0) {
+        log(`🧹 Cleaned ${cleaned} expired tee time bookings on startup`);
+      }
+    } catch (error) {
+      log(`Failed to clean expired tee times: ${error}`);
+    }
+    
+    // Set up periodic cleanup every hour
+    setInterval(async () => {
+      try {
+        const cleaned = await storage.cleanupExpiredTeetimes();
+        if (cleaned > 0) {
+          log(`🧹 Cleaned ${cleaned} expired tee time bookings`);
+        }
+      } catch (error) {
+        log(`Failed to clean expired tee times: ${error}`);
+      }
+    }, 60 * 60 * 1000); // 1 hour
+  }
+  
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

@@ -126,7 +126,7 @@ export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminN
                         
                         const result = await response.json();
                         if (response.ok) {
-                          alert(`Successfully repaired ${result.repairedCount} corrupted tee time slots`);
+                          alert(`Repair completed!\n• Fixed ${result.repairedCount} corrupted slots\n• Cleaned ${result.expiredCleaned} expired bookings\n• Checked ${result.totalChecked} total slots`);
                           // Refresh page to show updated data
                           window.location.reload();
                         } else {

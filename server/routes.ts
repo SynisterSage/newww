@@ -877,9 +877,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Also clean up expired tee times to prevent future corruption
+      const expiredCleaned = await storage.cleanupExpiredTeetimes();
+
       res.json({ 
         message: `Repair completed successfully`, 
         repairedCount,
+        expiredCleaned,
         totalChecked: allTeetimes.length
       });
     } catch (error) {
