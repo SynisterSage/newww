@@ -1,6 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { neon } from '@neondatabase/serverless';
-import { randomUUID } from 'crypto';
 
 // CORS headers
 const setCORSHeaders = (res: VercelResponse) => {
@@ -26,24 +25,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const sql = neon(process.env.DATABASE_URL);
 
     if (req.method === 'GET') {
-      const orders = await sql`SELECT * FROM orders ORDER BY created_at DESC`;
-      res.status(200).json(orders);
-    } else if (req.method === 'POST') {
-      const { userId, items, totalAmount, status, notes } = req.body;
-      
-      const orderId = randomUUID();
-      const order = await sql`
-        INSERT INTO orders (id, user_id, items, total_amount, status, notes, created_at)
-        VALUES (${orderId}, ${userId}, ${JSON.stringify(items)}, ${totalAmount}, ${status || 'pending'}, ${notes || ''}, NOW())
-        RETURNING *
-      `;
-      
-      res.status(201).json(order[0]);
+      const menu = await sql`SELECT * FROM menu_items ORDER BY category ASC, name ASC`;
+      res.status(200).json(menu);
     } else {
       res.status(405).json({ message: 'Method not allowed' });
     }
   } catch (error: any) {
-    console.error('Orders API Error:', error);
+    console.error('Menu API Error:', error);
     res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 }

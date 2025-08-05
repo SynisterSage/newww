@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { storage } from "../server/storage";
-import { insertEventSchema } from "../shared/schema";
+import { neon } from '@neondatabase/serverless';
+import { randomUUID } from 'crypto';
 
 // CORS headers
 const setCORSHeaders = (res: VercelResponse) => {
@@ -19,18 +19,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL not configured');
+    }
+    
+    const sql = neon(process.env.DATABASE_URL);
+
     if (req.method === 'GET') {
-      const events = await storage.getEvents();
+      const events = await sql`SELECT * FROM events ORDER BY date ASC`;
       res.status(200).json(events);
     } else if (req.method === 'POST') {
-      const eventData = insertEventSchema.parse(req.body);
-      const event = await storage.createEvent(eventData);
-      res.status(201).json(event);
+      const { title, description, date, time, location, category, price, maxParticipants } = req.body;
+      
+      const eventId = randomUUID();
+      const event = await sql`
+        INSERT INTO events (id, title, description, date, time, location, category, price, max_participants, current_participants)
+        VALUES (${eventId}, ${title}, ${description}, ${date}, ${time}, ${location}, ${category}, ${price || 0}, ${maxParticipants || 50}, 0)
+        RETURNING *
+      `;
+      
+      res.status(201).json(event[0]);
     } else {
       res.status(405).json({ message: 'Method not allowed' });
     }
   } catch (error: any) {
-    console.error('API Error:', error);
+    console.error('Events API Error:', error);
     res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 }

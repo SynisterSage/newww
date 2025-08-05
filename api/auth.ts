@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { storage } from "../server/storage";
+import { neon } from '@neondatabase/serverless';
 
 // CORS headers
 const setCORSHeaders = (res: VercelResponse) => {
@@ -38,11 +38,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           res.status(401).json({ success: false, message: 'Invalid admin credentials' });
         }
       } else {
-        // Member authentication
-        const users = await storage.getUsers();
-        const user = users.find(u => u.email === email && u.phone === phone);
-        if (user) {
-          res.status(200).json({ success: true, user });
+        // Member authentication using direct database query
+        if (!process.env.DATABASE_URL) {
+          throw new Error('DATABASE_URL not configured');
+        }
+        
+        const sql = neon(process.env.DATABASE_URL);
+        const users = await sql`SELECT * FROM users WHERE email = ${email} AND phone = ${phone} LIMIT 1`;
+        
+        if (users.length > 0) {
+          res.status(200).json({ success: true, user: users[0] });
         } else {
           res.status(401).json({ success: false, message: 'Invalid member credentials' });
         }
