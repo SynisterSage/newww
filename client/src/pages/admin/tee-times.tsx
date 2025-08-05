@@ -485,25 +485,30 @@ export default function AdminTeeTimesPage() {
                       </div>
                       
                       {/* Middle - Player Details */}
-                      <div className="flex-1 mx-8">
+                      <div className="flex-1 mx-6">
                         {bookedPlayers.length > 0 ? (
-                          <div className="space-y-2">
-                            <p className="text-sm font-medium text-muted-foreground">Booked Players:</p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <Users className="w-4 h-4 text-blue-600" />
+                              <span className="text-sm font-medium text-muted-foreground">
+                                Booked Players ({bookedPlayers.length})
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
                               {bookedPlayers.map((player, index) => {
                                 const transportMode = teetime.transportModes?.[index] || 'riding';
                                 const holesPlaying = teetime.holesPlaying?.[index] || '18';
                                 
                                 return (
-                                  <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                                    <UserCheck className="w-4 h-4 text-blue-600" />
-                                    <div className="flex-1">
-                                      <p className="text-sm font-medium text-foreground">
+                                  <div key={index} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                    <UserCheck className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-medium text-foreground truncate">
                                         {player.firstName} {player.lastName}
                                       </p>
-                                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                        <span className={`capitalize px-2 py-0.5 rounded ${
-                                          player.isGuest ? 'bg-orange-200 text-orange-800' : 'bg-gray-200 text-gray-700'
+                                      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-1">
+                                        <span className={`capitalize px-2 py-0.5 rounded text-xs font-medium ${
+                                          player.isGuest ? 'bg-orange-200 text-orange-800' : 'bg-blue-200 text-blue-800'
                                         }`}>
                                           {player.type}
                                         </span>
@@ -523,9 +528,12 @@ export default function AdminTeeTimesPage() {
                             </div>
                           </div>
                         ) : (
-                          <div className="text-center text-muted-foreground italic">
-                            <p>No bookings yet</p>
-                            <p className="text-xs">Available for booking</p>
+                          <div className="flex items-center justify-center text-muted-foreground italic py-6">
+                            <div className="text-center">
+                              <Calendar className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                              <p className="text-sm">No bookings yet</p>
+                              <p className="text-xs">Available for booking</p>
+                            </div>
                           </div>
                         )}
                       </div>

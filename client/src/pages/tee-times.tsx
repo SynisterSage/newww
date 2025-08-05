@@ -483,25 +483,49 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
                       
                       {/* Middle - Player Info */}
                       <div className="flex-1 mx-6">
-                        {(teetime.playerNames && teetime.playerNames.filter(name => name && name.trim()).length > 0) && (
-                          <div className="flex items-center gap-2">
-                            <Users className="w-4 h-4 text-muted-foreground" />
-                            <div className="space-y-1">
+                        {(teetime.playerNames && teetime.playerNames.filter(name => name && name.trim()).length > 0) ? (
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <Users className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-sm font-medium text-muted-foreground">
+                                Booked Players ({teetime.playerNames.filter(name => name && name.trim()).length})
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                               {teetime.playerNames.filter(name => name && name.trim()).map((name, index) => {
-                                const player = teetime.playerDetails?.[index];
-                                const transportMode = player?.transportMode || 'walking';
-                                const holesPlaying = player?.holesPlaying || '18';
+                                const playerType = teetime.playerTypes?.[index] || 'member';
+                                const transportMode = teetime.transportModes?.[index] || 'walking';
+                                const holesPlaying = teetime.holesPlaying?.[index] || '18';
                                 
                                 return (
-                                  <div key={index} className="text-sm">
-                                    <span className="font-medium">{name}</span>
-                                    <span className="text-muted-foreground ml-2">
-                                      • {transportMode} • {holesPlaying} holes
-                                    </span>
+                                  <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                    <UserCheck className="w-4 h-4 text-[#08452e] flex-shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-medium text-foreground truncate">{name}</p>
+                                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                                        <span className={`capitalize px-2 py-0.5 rounded text-xs font-medium ${
+                                          playerType === 'guest' ? 'bg-orange-100 text-orange-700' : 'bg-gray-200 text-gray-700'
+                                        }`}>
+                                          {playerType}
+                                        </span>
+                                        <div className="flex items-center gap-1">
+                                          <Car className="w-3 h-3" />
+                                          <span className="capitalize">{transportMode}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <MapPin className="w-3 h-3" />
+                                          <span>{holesPlaying} holes</span>
+                                        </div>
+                                      </div>
+                                    </div>
                                   </div>
                                 );
                               })}
                             </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center text-muted-foreground italic py-4">
+                            <p>Available for booking</p>
                           </div>
                         )}
                       </div>
