@@ -162,8 +162,8 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" data-testid="dialog-tee-time-booking">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-2xl max-h-[85vh] flex flex-col" data-testid="dialog-tee-time-booking">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
             <Clock className="w-5 h-5 text-golf-green" />
             Join Tee Time
@@ -183,71 +183,68 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 pt-4">
-          {/* Players List */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                Players ({players.length}/4)
-              </Label>
-              {players.length < 4 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addPlayer}
-                  className="flex items-center gap-1"
-                  data-testid="button-add-player"
-                >
-                  <Plus className="w-3 h-3" />
-                  Add Player
-                </Button>
-              )}
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto space-y-4 min-h-0">
+          {/* Players Table Header */}
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Players ({players.length}/4)
+            </Label>
+            {players.length < 4 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addPlayer}
+                className="flex items-center gap-1"
+                data-testid="button-add-player"
+              >
+                <Plus className="w-3 h-3" />
+                Add Player
+              </Button>
+            )}
+          </div>
+
+          {/* Players Table */}
+          <div className="border rounded-lg overflow-hidden">
+            <div className="bg-gray-50 px-4 py-2 border-b">
+              <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-600">
+                <div className="col-span-4">Name</div>
+                <div className="col-span-2">Type</div>
+                <div className="col-span-2">Transport</div>
+                <div className="col-span-2">Holes</div>
+                <div className="col-span-2">Action</div>
+              </div>
             </div>
+            
+            <div className="divide-y">
+              {players.map((player, index) => (
+                <div key={index} className="px-4 py-3 hover:bg-gray-50/50">
+                  <div className="grid grid-cols-12 gap-2 items-center">
+                    {/* Name */}
+                    <div className="col-span-4">
+                      <Input
+                        value={player.name}
+                        onChange={(e) => updatePlayer(index, 'name', e.target.value)}
+                        placeholder={index === 0 ? "Your name" : "Player name"}
+                        disabled={index === 0}
+                        className="h-8 text-sm"
+                        data-testid={`input-player-name-${index}`}
+                      />
+                      {index === 0 && (
+                        <div className="text-xs text-golf-green mt-1">Booking Member</div>
+                      )}
+                    </div>
 
-            {players.map((player, index) => (
-              <div key={index} className="border rounded-lg p-4 space-y-3 bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">
-                    {index === 0 ? 'Booking Member' : `Player ${index + 1}`}
-                  </span>
-                  {index > 0 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removePlayer(index)}
-                      className="text-red-600 hover:text-red-700"
-                      data-testid={`button-remove-player-${index}`}
-                    >
-                      <Minus className="w-3 h-3" />
-                    </Button>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 gap-3">
-                  <div>
-                    <Label className="text-xs text-gray-500">Name</Label>
-                    <Input
-                      value={player.name}
-                      onChange={(e) => updatePlayer(index, 'name', e.target.value)}
-                      placeholder={index === 0 ? "Your name" : "Player name"}
-                      disabled={index === 0}
-                      className="mt-1"
-                      data-testid={`input-player-name-${index}`}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2">
-                    <div>
-                      <Label className="text-xs text-gray-500">Type</Label>
+                    {/* Type */}
+                    <div className="col-span-2">
                       <Select
                         value={player.type}
                         onValueChange={(value) => updatePlayer(index, 'type', value)}
                         disabled={index === 0}
                       >
-                        <SelectTrigger className="mt-1" data-testid={`select-player-type-${index}`}>
+                        <SelectTrigger className="h-8 text-sm" data-testid={`select-player-type-${index}`}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -257,13 +254,13 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                       </Select>
                     </div>
 
-                    <div>
-                      <Label className="text-xs text-gray-500">Transport</Label>
+                    {/* Transport */}
+                    <div className="col-span-2">
                       <Select
                         value={player.transportMode}
                         onValueChange={(value) => updatePlayer(index, 'transportMode', value)}
                       >
-                        <SelectTrigger className="mt-1" data-testid={`select-transport-${index}`}>
+                        <SelectTrigger className="h-8 text-sm" data-testid={`select-transport-${index}`}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -273,13 +270,13 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                       </Select>
                     </div>
 
-                    <div>
-                      <Label className="text-xs text-gray-500">Holes</Label>
+                    {/* Holes */}
+                    <div className="col-span-2">
                       <Select
                         value={player.holesPlaying}
                         onValueChange={(value) => updatePlayer(index, 'holesPlaying', value)}
                       >
-                        <SelectTrigger className="mt-1" data-testid={`select-holes-${index}`}>
+                        <SelectTrigger className="h-8 text-sm" data-testid={`select-holes-${index}`}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -288,49 +285,68 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Action */}
+                    <div className="col-span-2">
+                      {index > 0 ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removePlayer(index)}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          data-testid={`button-remove-player-${index}`}
+                        >
+                          <Minus className="w-3 h-3" />
+                        </Button>
+                      ) : (
+                        <div className="text-xs text-gray-400">Primary</div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Booking Summary */}
-          <div className="bg-golf-green/5 rounded-lg p-4 space-y-2">
-            <h4 className="font-medium text-sm text-golf-green">Booking Summary</h4>
-            <div className="text-xs space-y-1 text-gray-600">
-              <div className="flex justify-between">
-                <span>Total Players:</span>
-                <span>{players.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Available Spots:</span>
-                <span>{maxPlayers - currentPlayers - players.length} remaining</span>
-              </div>
-              <div className="flex justify-between font-medium pt-2 border-t">
-                <span>Green Fee:</span>
-                <span>${teeTime.price}</span>
-              </div>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="flex gap-3 pt-4">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="flex-1"
-            data-testid="button-cancel-booking"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleBooking}
-            disabled={bookingMutation.isPending}
-            className="flex-1 bg-golf-green hover:bg-golf-green/90 text-white"
-            data-testid="button-confirm-booking"
-          >
-            {bookingMutation.isPending ? "Booking..." : "Confirm Booking"}
-          </Button>
+        {/* Fixed footer */}
+        <div className="flex-shrink-0 space-y-4 pt-4 border-t">
+          {/* Booking Summary */}
+          <div className="bg-golf-green/5 rounded-lg p-3">
+            <div className="flex justify-between items-center text-sm">
+              <div className="space-y-1">
+                <div className="flex items-center gap-4">
+                  <span className="text-gray-600">Total Players: <span className="font-medium">{players.length}</span></span>
+                  <span className="text-gray-600">Available: <span className="font-medium">{maxPlayers - currentPlayers - players.length}</span></span>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-lg font-semibold text-golf-green">${teeTime.price}</div>
+                <div className="text-xs text-gray-500">Green Fee</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="flex-1"
+              data-testid="button-cancel-booking"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleBooking}
+              disabled={bookingMutation.isPending}
+              className="flex-1 bg-golf-green hover:bg-golf-green/90 text-white"
+              data-testid="button-confirm-booking"
+            >
+              {bookingMutation.isPending ? "Booking..." : "Confirm Booking"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
