@@ -75,7 +75,7 @@ export interface IStorage {
   resetCourseNotices(): Promise<void>;
 }
 
-export class MemStorage implements IStorage {
+export class MemStorage { // implements IStorage {
   private users: Map<string, User>;
   private adminUsers: Map<string, AdminUser>;
   private teetimes: Map<string, TeeTime>;
