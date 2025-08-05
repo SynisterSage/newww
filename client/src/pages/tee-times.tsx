@@ -482,39 +482,41 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
                       </div>
                       
                       {/* Middle - Player Info */}
-                      <div className="flex-1 mx-6">
+                      <div className="flex-1 mx-4">
                         {(teetime.playerNames && teetime.playerNames.filter(name => name && name.trim()).length > 0) ? (
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-2">
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 mb-3">
                               <Users className="w-4 h-4 text-muted-foreground" />
                               <span className="text-sm font-medium text-muted-foreground">
                                 Booked Players ({teetime.playerNames.filter(name => name && name.trim()).length})
                               </span>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="space-y-2">
                               {teetime.playerNames.filter(name => name && name.trim()).map((name, index) => {
                                 const playerType = teetime.playerTypes?.[index] || 'member';
                                 const transportMode = teetime.transportModes?.[index] || 'walking';
                                 const holesPlaying = teetime.holesPlaying?.[index] || '18';
                                 
                                 return (
-                                  <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                  <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
                                     <UserCheck className="w-4 h-4 text-[#08452e] flex-shrink-0" />
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-medium text-foreground truncate">{name}</p>
-                                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                                        <span className={`capitalize px-2 py-0.5 rounded text-xs font-medium ${
-                                          playerType === 'guest' ? 'bg-orange-100 text-orange-700' : 'bg-gray-200 text-gray-700'
-                                        }`}>
-                                          {playerType}
-                                        </span>
-                                        <div className="flex items-center gap-1">
-                                          <Car className="w-3 h-3" />
-                                          <span className="capitalize">{transportMode}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                          <MapPin className="w-3 h-3" />
-                                          <span>{holesPlaying} holes</span>
+                                    <div className="flex-1">
+                                      <div className="flex items-center justify-between">
+                                        <p className="text-sm font-medium text-foreground">{name}</p>
+                                        <div className="flex items-center gap-2 text-xs">
+                                          <span className={`capitalize px-2 py-0.5 rounded font-medium ${
+                                            playerType === 'guest' ? 'bg-orange-100 text-orange-700' : 'bg-gray-200 text-gray-700'
+                                          }`}>
+                                            {playerType}
+                                          </span>
+                                          <div className="flex items-center gap-1 text-muted-foreground">
+                                            <Car className="w-3 h-3" />
+                                            <span className="capitalize">{transportMode}</span>
+                                          </div>
+                                          <div className="flex items-center gap-1 text-muted-foreground">
+                                            <MapPin className="w-3 h-3" />
+                                            <span>{holesPlaying}h</span>
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
