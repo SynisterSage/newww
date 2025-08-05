@@ -75,54 +75,8 @@ export interface IStorage {
   resetCourseNotices(): Promise<void>;
 }
 
-export class MemStorage { // implements IStorage {
-  private users: Map<string, User>;
-  private adminUsers: Map<string, AdminUser>;
-  private teetimes: Map<string, TeeTime>;
-  private menuItems: Map<string, MenuItem>;
-  private orders: Map<string, Order>;
-  private courseHoles: Map<string, CourseHole>;
-  private rounds: Map<string, Round>;
-  private sessions: Map<string, Session>;
-  private events: Map<string, Event>;
-  private eventRegistrations: Map<string, EventRegistration>;
-  private currentConditions: CourseConditions;
-
-  constructor() {
-    this.users = new Map();
-    this.adminUsers = new Map();
-    this.teetimes = new Map();
-    this.menuItems = new Map();
-    this.events = new Map();
-    this.eventRegistrations = new Map();
-    this.orders = new Map();
-    this.courseHoles = new Map();
-    this.rounds = new Map();
-    this.sessions = new Map();
-    
-    // Initialize default course conditions
-    this.currentConditions = {
-      id: "conditions-1",
-      weather: "sunny",
-      temperature: 72,
-      windSpeed: 5,
-      humidity: 45,
-      courseStatus: "open",
-      cartPathOnly: false,
-      greensCondition: "excellent",
-      fairwaysCondition: "good",
-      hazardNotes: "",
-      maintenanceNotes: [],
-      lastUpdated: new Date(),
-      updatedBy: "System"
-    };
-    
-    this.initializeData();
-  }
-
-  private initializeData() {
-    // Initialize Packanack Golf Club member database with ALL 259 members from 2025 membership data
-    // Complete real member roster from Packanack Golf Club CSV export
+// DatabaseStorage implementation
+export class DatabaseStorage implements IStorage {
     const members: User[] = [
       { id: "user-1", username: "keith.allerton", password: "password123", email: "keith.allerton@email.com", firstName: "Keith", lastName: "Allerton", phone: "(973) 335-4567", memberNumber: "AG001", memberStatus: "Paid", membershipType: "AG", address: "15 Golf Course Drive", city: "Wayne", state: "NJ", zipCode: "07470", emergencyContact: "Jeanne", emergencyPhone: "(973) 335-4568", handicap: 12, roundsPlayed: 47, accountBalance: "0.00", joinDate: new Date("2024-01-01"), isActive: true },
       { id: "user-2", username: "robert.amoruso", password: "password123", email: "robert.amoruso@email.com", firstName: "Robert", lastName: "Amoruso", phone: "(973) 694-2134", memberNumber: "AGH002", memberStatus: "Paid", membershipType: "AGH", address: "42 Golf Course Drive", city: "Wayne", state: "NJ", zipCode: "07470", emergencyContact: "Emergency Contact", emergencyPhone: "(973) 694-2135", handicap: 18, roundsPlayed: 63, accountBalance: "0.00", joinDate: new Date("2015-01-01"), isActive: true },
