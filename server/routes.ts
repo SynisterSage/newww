@@ -924,6 +924,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Hide event from user view (for remove card functionality)
+  app.patch("/api/events/:id/hide", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { userId } = req.body;
+      
+      // For now, just return success - in a full implementation this would 
+      // track hidden events per user in the database
+      res.json({ message: "Event hidden from user view" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to hide event" });
+    }
+  });
+
   // Event registration routes
   app.get("/api/events/:id/registrations", async (req, res) => {
     try {

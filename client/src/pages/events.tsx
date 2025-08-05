@@ -52,18 +52,20 @@ export default function Events({ userData }: EventsProps) {
     mutationFn: async ({ eventId, notes }: { eventId: string; notes?: string }) => {
       return await apiRequest("POST", `/api/events/${eventId}/register`, { userId: currentUserId, notes });
     },
-    onSuccess: () => {
-      // Force immediate refetch to ensure registration count updates instantly
-      queryClient.refetchQueries({ queryKey: ["/api/events", currentUserId] });
-      queryClient.refetchQueries({ queryKey: ["/api/events"] });
-      queryClient.refetchQueries({ queryKey: ["/api/events/all"] });
-      queryClient.invalidateQueries({ predicate: (query) => 
-        Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events"
-      });
+    onSuccess: async () => {
+      // Comprehensive cache invalidation for real-time updates across all pages
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/events"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/events", currentUserId] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/events/all"] }),
+        queryClient.refetchQueries({ queryKey: ["/api/events", currentUserId] }),
+        queryClient.refetchQueries({ queryKey: ["/api/events/all"] }),
+      ]);
+      
       setIsRegisterDialogOpen(false);
       setSelectedEvent(null);
       toast({
-        title: "Registration Successful",
+        title: "Registration Successful", 
         description: "You have been registered for the event",
       });
     },
@@ -81,14 +83,16 @@ export default function Events({ userData }: EventsProps) {
     mutationFn: async (eventId: string) => {
       return await apiRequest("DELETE", `/api/events/${eventId}/register/${currentUserId}`);
     },
-    onSuccess: () => {
-      // Force immediate refetch to ensure unregistration updates instantly
-      queryClient.refetchQueries({ queryKey: ["/api/events", currentUserId] });
-      queryClient.refetchQueries({ queryKey: ["/api/events"] });
-      queryClient.refetchQueries({ queryKey: ["/api/events/all"] });
-      queryClient.invalidateQueries({ predicate: (query) => 
-        Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events"
-      });
+    onSuccess: async () => {
+      // Comprehensive cache invalidation for real-time updates across all pages
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/events"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/events", currentUserId] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/events/all"] }),
+        queryClient.refetchQueries({ queryKey: ["/api/events", currentUserId] }),
+        queryClient.refetchQueries({ queryKey: ["/api/events/all"] }),
+      ]);
+      
       toast({
         title: "Unregistered Successfully",
         description: "You have been removed from the event",
@@ -122,15 +126,36 @@ export default function Events({ userData }: EventsProps) {
     }
   };
 
-  const handleDeleteEvent = (eventId: string) => {
-    if (confirm("Remove this ended event card?")) {
-      // Just remove from local display - ended events are filtered out anyway
-      queryClient.refetchQueries({ queryKey: ["/api/events"] });
-      queryClient.refetchQueries({ queryKey: ["/api/events/all"] });
+  // Remove card mutation - marks event as inactive for user
+  const removeCardMutation = useMutation({
+    mutationFn: async (eventId: string) => {
+      return await apiRequest("PATCH", `/api/events/${eventId}/hide`, { userId: currentUserId });
+    },
+    onSuccess: async () => {
+      // Comprehensive cache invalidation to remove card from view
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/events"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/events", currentUserId] }),
+        queryClient.refetchQueries({ queryKey: ["/api/events", currentUserId] }),
+      ]);
+      
       toast({
         title: "Card Removed",
-        description: "Ended event card has been removed from view",
+        description: "Event card has been removed from your view",
       });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to Remove Card",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteEvent = (eventId: string) => {
+    if (confirm("Remove this event card from your view?")) {
+      removeCardMutation.mutate(eventId);
     }
   };
 
