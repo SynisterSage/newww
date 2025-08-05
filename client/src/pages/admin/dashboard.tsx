@@ -59,14 +59,14 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
     staleTime: 0, // Always fetch fresh data
   });
 
-  // Fetch recent events for activity feed - keep auto-refresh for dashboard since no forms here
+  // Fetch recent events for activity feed - real-time updates like orders
   const { data: recentEvents = [] } = useQuery<Event[]>({
     queryKey: ['/api/events/all'],
-    refetchInterval: 10000, // Slower refresh for dashboard - no forms to interrupt
+    refetchInterval: 3000, // Auto-refresh every 3 seconds like orders
     refetchIntervalInBackground: true,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    staleTime: 5000, // Cache for 5 seconds to reduce requests
+    staleTime: 0, // Always fetch fresh data like orders
   });
 
   // Reset test data mutation

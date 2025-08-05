@@ -44,7 +44,7 @@ export default function AdminEvents() {
 
   // No automatic refresh - only refresh on mutations
 
-  // Fetch events - NO auto-refresh to avoid closing dialog popups
+  // Fetch events - real-time updates like orders system
   const { data: allEvents = [], isLoading } = useQuery({
     queryKey: ["/api/events/all"],
     queryFn: async () => {
@@ -52,10 +52,12 @@ export default function AdminEvents() {
       if (!response.ok) throw new Error("Failed to fetch events");
       return response.json();
     },
-    // Only refresh on mount and focus - no intervals to avoid closing dialogs
+    // Real-time updates like orders - immediate refresh for instant updates
+    refetchInterval: 3000, // Auto-refresh every 3 seconds like orders
+    refetchIntervalInBackground: true, // Continue polling when tab inactive
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    staleTime: 30000, // Cache for 30 seconds
+    staleTime: 0, // Always fetch fresh data like orders
   }) as { data: EventWithRegistrations[], isLoading: boolean };
 
   // Filter to show only active events (database handles inactive filtering)
