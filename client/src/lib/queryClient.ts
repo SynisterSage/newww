@@ -9,7 +9,7 @@ async function throwIfResNotOk(res: Response) {
 
 // API base URL - detect environment for deployment
 const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://divot-digita.vercel.app' // Your Vercel backend URL
+  ? import.meta.env.VITE_API_URL || 'https://your-vercel-app.vercel.app' // Will be set in Vercel
   : '';
 
 export async function apiRequest(
