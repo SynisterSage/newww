@@ -44,6 +44,16 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
     staleTime: 0, // Always fetch fresh data
   });
 
+  // Fetch recent events for activity feed - explicitly type as Event array
+  const { data: recentEvents = [] } = useQuery<Event[]>({
+    queryKey: ['/api/events/all'],
+    refetchInterval: 3000, // Same as orders for consistency
+    refetchIntervalInBackground: true,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+  });
+
   // Reset test data mutation
   const resetTestDataMutation = useMutation({
     mutationFn: () => apiRequest("/api/admin/reset-test-data", "POST"),
@@ -108,6 +118,11 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
       return timeB - timeA;
     })
     .slice(0, 3);
+  // Sort recent events (event registrations and event creation)
+  const recentEventActivity = [...recentEvents]
+    .filter(e => e.createdAt) // Only events with timestamp
+    .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
+    .slice(0, 2); // Limit to 2 most recent events
   
   const recentActivity = [
     ...recentTeetimes.map(t => {
@@ -136,6 +151,15 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
         subtitle: `${o.items.length} items • $${o.total}`,
         time: format(new Date(o.createdAt || Date.now()), 'MMM dd, h:mm a'),
         status: o.status
+      };
+    }),
+    ...recentEventActivity.map(e => {
+      return {
+        type: 'event',
+        title: `Event Created - ${e.title}`,
+        subtitle: `${e.category} • ${e.date} at ${e.time}`,
+        time: format(new Date(e.createdAt || Date.now()), 'MMM dd, h:mm a'),
+        status: 'created'
       };
     })
   ].slice(0, 5);

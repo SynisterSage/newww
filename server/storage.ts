@@ -1237,9 +1237,23 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  // Event methods
+  // Event methods with automatic cleanup of ended events
   async getEvents(): Promise<Event[]> {
-    // Return active events (automatic cleanup temporarily disabled until schema supports endTime)
+    // First mark ended events as inactive (events from yesterday and earlier)
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    
+    await db.update(events)
+      .set({ isActive: false })
+      .where(
+        and(
+          eq(events.isActive, true),
+          lt(events.date, yesterdayStr)
+        )
+      );
+    
+    // Return only active events
     return await db.select().from(events).where(eq(events.isActive, true)).orderBy(events.date);
   }
 

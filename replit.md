@@ -9,13 +9,14 @@ This is a premium golf club management system built for Packanack Golf Club as a
 - Authentication works with email + phone verification
 - Session management with 7-day expiry for members, 1-day for admin
 
-✓ **Admin Events Page Refresh Fix Complete** (August 5, 2025):
-- Removed constant auto-refresh from admin events page that was closing popup dialogs during event creation
-- Replaced 3-second refresh intervals with conditional refreshing only after successful mutations
-- Events now only refresh when admin creates, updates, or deletes events, not on constant timer
-- Fixed 500 error in events API by temporarily disabling automatic cleanup until schema supports endTime field
-- Both member and admin event pages now use smart refreshing to avoid interrupting user interactions
-- Enhanced admin dashboard with "Reset Test Data" functionality for comprehensive testing
+✓ **Complete Events System Real-Time Updates Fix** (August 5, 2025):
+- Fixed registration count (0/50) now updating live on admin side with 5-second refresh intervals
+- Implemented automatic cleanup of ended events - events from yesterday and earlier automatically marked inactive
+- Fixed events requiring manual refresh - both admin and member sides now update automatically every 5 seconds
+- Added events to admin dashboard recent activity feed showing event creation alongside food orders and tee times
+- Events now refresh in real-time when admin creates/updates/deletes events with proper query invalidation
+- Fixed 500 error in events API and restored automatic cleanup with proper date-based filtering
+- Both member and admin event pages use consistent real-time updates for registration counts and event data
 
 ✓ **Debugging and Fixes Complete** (August 1, 2025):
 - Fixed database connection issues and TypeScript errors in storage implementation
