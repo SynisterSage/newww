@@ -9,6 +9,13 @@ This is a premium golf club management system built for Packanack Golf Club as a
 - Authentication works with email + phone verification
 - Session management with 7-day expiry for members, 1-day for admin
 
+✓ **Event Auto-Cleanup Complete** (August 5, 2025):
+- Implemented automatic deletion of ended events on both member and admin sides
+- Events are automatically marked as inactive when their end time passes
+- Both /api/events and /api/events/all routes trigger automatic cleanup
+- System checks date and time to remove past events from active display
+- Enhanced admin dashboard with "Reset Test Data" functionality for testing
+
 ✓ **Debugging and Fixes Complete** (August 1, 2025):
 - Fixed database connection issues and TypeScript errors in storage implementation
 - Switched from memory storage to PostgreSQL database for persistent data
