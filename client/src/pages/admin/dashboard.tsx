@@ -104,8 +104,17 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
     },
   });
 
-  // Calculate stats with proper filtering
-  const todaysTeetimes = teetimes.filter(t => t.date === today).length;
+  // Calculate stats with proper filtering - count AVAILABLE tee times, not total slots
+  const todaysTeetimes = teetimes.filter(t => {
+    // Only count tee times for today that are still available (not fully booked)
+    if (t.date !== today) return false;
+    
+    // Check if tee time has available spots
+    const currentPlayers = t.bookedBy?.length || 0;
+    const maxPlayers = t.maxPlayers || 4;
+    
+    return currentPlayers < maxPlayers; // Only count if there are available spots
+  }).length;
   const todaysActiveOrders = orders.filter(o => {
     const orderDate = new Date(o.createdAt || Date.now());
     const today = new Date();
