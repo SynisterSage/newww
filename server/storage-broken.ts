@@ -12,50 +12,50 @@ export interface IStorage {
   authenticateMember(email: string, phone: string): Promise<User | null>;
   getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
-
+  
   // Admin user methods
   getAdminUser(id: string): Promise<AdminUser | undefined>;
   getAdminUserByEmail(email: string): Promise<AdminUser | undefined>;
   createAdminUser(adminUser: InsertAdminUser): Promise<AdminUser>;
   authenticateAdmin(email: string, password: string): Promise<AdminUser | null>;
-
+  
   // Session methods
   createSession(session: InsertSession): Promise<Session>;
   getSessionByToken(token: string): Promise<Session | undefined>;
   deleteSession(token: string): Promise<void>;
   cleanExpiredSessions(): Promise<void>;
-
+  
   // Tee time methods
   getTeetimes(date?: string): Promise<TeeTime[]>;
   getTeetimeById(id: string): Promise<TeeTime | undefined>;
   createTeetime(teetime: InsertTeeTime): Promise<TeeTime>;
   updateTeetime(id: string, updates: Partial<TeeTime>): Promise<TeeTime | undefined>;
-
+  
   // Menu methods
   getMenuItems(category?: string, mealType?: string): Promise<MenuItem[]>;
   getMenuItemById(id: string): Promise<MenuItem | undefined>;
   createMenuItem(item: InsertMenuItem): Promise<MenuItem>;
-
+  
   // Order methods
   getOrders(userId?: string): Promise<Order[]>;
   getOrderById(id: string): Promise<Order | undefined>;
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrder(id: string, updates: Partial<Order>): Promise<Order | undefined>;
-
+  
   // Course methods
   getCourseHoles(course?: string): Promise<CourseHole[]>;
   getCourseHoleById(id: string): Promise<CourseHole | undefined>;
-
+  
   // Round methods
   getRounds(userId: string): Promise<Round[]>;
   getCurrentRound(userId: string): Promise<Round | undefined>;
   createRound(round: InsertRound): Promise<Round>;
   updateRound(id: string, updates: Partial<Round>): Promise<Round | undefined>;
-
+  
   // Course conditions methods
   getCourseConditions(): Promise<CourseConditions>;
   updateCourseConditions(updates: Partial<InsertCourseConditions>): Promise<CourseConditions>;
-
+  
   // Event methods
   getEvents(): Promise<Event[]>;
   getAllEvents(): Promise<Event[]>;
@@ -63,67 +63,74 @@ export interface IStorage {
   createEvent(event: InsertEvent): Promise<Event>;
   updateEvent(id: string, updates: Partial<Event>): Promise<Event | undefined>;
   deleteEvent(id: string): Promise<void>;
-
+  
   // Event registration methods
   getEventRegistrations(eventId: string): Promise<EventRegistration[]>;
   getUserEventRegistrations(userId: string): Promise<EventRegistration[]>;
   registerForEvent(registration: InsertEventRegistration): Promise<EventRegistration>;
   unregisterFromEvent(eventId: string, userId: string): Promise<void>;
-
+  
   // Reset methods for admin
   resetTestData(): Promise<void>;
   resetCourseNotices(): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private adminUsers: Map<string, AdminUser>;
-  private teetimes: Map<string, TeeTime>;
-  private menuItems: Map<string, MenuItem>;
-  private orders: Map<string, Order>;
-  private courseHoles: Map<string, CourseHole>;
-  private rounds: Map<string, Round>;
-  private sessions: Map<string, Session>;
-  private events: Map<string, Event>;
-  private eventRegistrations: Map<string, EventRegistration>;
-  private currentConditions: CourseConditions;
-
+  // Deprecated - use DatabaseStorage instead
   constructor() {
-    this.users = new Map();
-    this.adminUsers = new Map();
-    this.teetimes = new Map();
-    this.menuItems = new Map();
-    this.events = new Map();
-    this.eventRegistrations = new Map();
-    this.orders = new Map();
-    this.courseHoles = new Map();
-    this.rounds = new Map();
-    this.sessions = new Map();
-
-    // Initialize default course conditions
-    this.currentConditions = {
-      id: "conditions-1",
-      weather: "sunny",
-      temperature: 72,
-      windSpeed: 5,
-      humidity: 45,
-      courseStatus: "open",
-      cartPathOnly: false,
-      greensCondition: "excellent",
-      fairwaysCondition: "good",
-      hazardNotes: "",
-      maintenanceNotes: [],
-      lastUpdated: new Date(),
-      updatedBy: "System"
-    };
-
-    this.initializeData();
+    throw new Error("MemStorage is deprecated. Use DatabaseStorage instead.");
   }
 
-  private initializeData() {
-    // Initialize Packanack Golf Club member database with ALL 259 members from 2025 membership data
-    // Complete real member roster from Packanack Golf Club CSV export
-    const members: User[] = [
+  // All MemStorage methods removed - use DatabaseStorage instead
+  async getUser(id: string): Promise<User | undefined> { throw new Error("Use DatabaseStorage"); }
+  async getUserByUsername(username: string): Promise<User | undefined> { throw new Error("Use DatabaseStorage"); }
+  async getUserByEmail(email: string): Promise<User | undefined> { throw new Error("Use DatabaseStorage"); }
+  async authenticateMember(email: string, phone: string): Promise<User | null> { throw new Error("Use DatabaseStorage"); }
+  async getAllUsers(): Promise<User[]> { throw new Error("Use DatabaseStorage"); }
+  async createUser(user: InsertUser): Promise<User> { throw new Error("Use DatabaseStorage"); }
+  async getAdminUser(id: string): Promise<AdminUser | undefined> { throw new Error("Use DatabaseStorage"); }
+  async getAdminUserByEmail(email: string): Promise<AdminUser | undefined> { throw new Error("Use DatabaseStorage"); }
+  async createAdminUser(adminUser: InsertAdminUser): Promise<AdminUser> { throw new Error("Use DatabaseStorage"); }
+  async authenticateAdmin(email: string, password: string): Promise<AdminUser | null> { throw new Error("Use DatabaseStorage"); }
+  async createSession(session: InsertSession): Promise<Session> { throw new Error("Use DatabaseStorage"); }
+  async getSessionByToken(token: string): Promise<Session | undefined> { throw new Error("Use DatabaseStorage"); }
+  async deleteSession(token: string): Promise<void> { throw new Error("Use DatabaseStorage"); }
+  async cleanExpiredSessions(): Promise<void> { throw new Error("Use DatabaseStorage"); }
+  async getTeetimes(date?: string): Promise<TeeTime[]> { throw new Error("Use DatabaseStorage"); }
+  async getTeetimeById(id: string): Promise<TeeTime | undefined> { throw new Error("Use DatabaseStorage"); }
+  async createTeetime(teetime: InsertTeeTime): Promise<TeeTime> { throw new Error("Use DatabaseStorage"); }
+  async updateTeetime(id: string, updates: Partial<TeeTime>): Promise<TeeTime | undefined> { throw new Error("Use DatabaseStorage"); }
+  async getMenuItems(category?: string, mealType?: string): Promise<MenuItem[]> { throw new Error("Use DatabaseStorage"); }
+  async getMenuItemById(id: string): Promise<MenuItem | undefined> { throw new Error("Use DatabaseStorage"); }
+  async createMenuItem(item: InsertMenuItem): Promise<MenuItem> { throw new Error("Use DatabaseStorage"); }
+  async getOrders(userId?: string): Promise<Order[]> { throw new Error("Use DatabaseStorage"); }
+  async getOrderById(id: string): Promise<Order | undefined> { throw new Error("Use DatabaseStorage"); }
+  async createOrder(order: InsertOrder): Promise<Order> { throw new Error("Use DatabaseStorage"); }
+  async updateOrder(id: string, updates: Partial<Order>): Promise<Order | undefined> { throw new Error("Use DatabaseStorage"); }
+  async getCourseHoles(course?: string): Promise<CourseHole[]> { throw new Error("Use DatabaseStorage"); }
+  async getCourseHoleById(id: string): Promise<CourseHole | undefined> { throw new Error("Use DatabaseStorage"); }
+  async getRounds(userId: string): Promise<Round[]> { throw new Error("Use DatabaseStorage"); }
+  async getCurrentRound(userId: string): Promise<Round | undefined> { throw new Error("Use DatabaseStorage"); }
+  async createRound(round: InsertRound): Promise<Round> { throw new Error("Use DatabaseStorage"); }
+  async updateRound(id: string, updates: Partial<Round>): Promise<Round | undefined> { throw new Error("Use DatabaseStorage"); }
+  async getCourseConditions(): Promise<CourseConditions> { throw new Error("Use DatabaseStorage"); }
+  async updateCourseConditions(updates: Partial<InsertCourseConditions>): Promise<CourseConditions> { throw new Error("Use DatabaseStorage"); }
+  async getEvents(): Promise<Event[]> { throw new Error("Use DatabaseStorage"); }
+  async getAllEvents(): Promise<Event[]> { throw new Error("Use DatabaseStorage"); }
+  async getEventById(id: string): Promise<Event | undefined> { throw new Error("Use DatabaseStorage"); }
+  async createEvent(event: InsertEvent): Promise<Event> { throw new Error("Use DatabaseStorage"); }
+  async updateEvent(id: string, updates: Partial<Event>): Promise<Event | undefined> { throw new Error("Use DatabaseStorage"); }
+  async deleteEvent(id: string): Promise<void> { throw new Error("Use DatabaseStorage"); }
+  async getEventRegistrations(eventId: string): Promise<EventRegistration[]> { throw new Error("Use DatabaseStorage"); }
+  async getUserEventRegistrations(userId: string): Promise<EventRegistration[]> { throw new Error("Use DatabaseStorage"); }
+  async registerForEvent(registration: InsertEventRegistration): Promise<EventRegistration> { throw new Error("Use DatabaseStorage"); }
+  async unregisterFromEvent(eventId: string, userId: string): Promise<void> { throw new Error("Use DatabaseStorage"); }
+  async resetTestData(): Promise<void> { throw new Error("Use DatabaseStorage"); }
+  async resetCourseNotices(): Promise<void> { throw new Error("Use DatabaseStorage"); }
+}
+
+// DatabaseStorage implementation
+export class DatabaseStorage implements IStorage {
       { id: "user-1", username: "keith.allerton", password: "password123", email: "keith.allerton@email.com", firstName: "Keith", lastName: "Allerton", phone: "(973) 335-4567", memberNumber: "AG001", memberStatus: "Paid", membershipType: "AG", address: "15 Golf Course Drive", city: "Wayne", state: "NJ", zipCode: "07470", emergencyContact: "Jeanne", emergencyPhone: "(973) 335-4568", handicap: 12, roundsPlayed: 47, accountBalance: "0.00", joinDate: new Date("2024-01-01"), isActive: true },
       { id: "user-2", username: "robert.amoruso", password: "password123", email: "robert.amoruso@email.com", firstName: "Robert", lastName: "Amoruso", phone: "(973) 694-2134", memberNumber: "AGH002", memberStatus: "Paid", membershipType: "AGH", address: "42 Golf Course Drive", city: "Wayne", state: "NJ", zipCode: "07470", emergencyContact: "Emergency Contact", emergencyPhone: "(973) 694-2135", handicap: 18, roundsPlayed: 63, accountBalance: "0.00", joinDate: new Date("2015-01-01"), isActive: true },
       { id: "user-3", username: "christian.avedissian", password: "password123", email: "christian.avedissian@email.com", firstName: "Christian", lastName: "Avedissian", phone: "(973) 256-7890", memberNumber: "A003", memberStatus: "Payment Plan", membershipType: "A", address: "128 Golf Course Drive", city: "Wayne", state: "NJ", zipCode: "07470", emergencyContact: "Emergency Contact", emergencyPhone: "(973) 256-7891", handicap: 8, roundsPlayed: 89, accountBalance: "150.00", joinDate: new Date("2025-01-01"), isActive: true },
@@ -226,7 +233,7 @@ export class MemStorage implements IStorage {
       const memberClass = memberClasses[index % memberClasses.length];
       const paymentStatuses = ['Paid', 'Payment Plan', 'Partial Payment'];
       const paymentStatus = paymentStatuses[index % 3];
-
+      
       const member: User = {
         id: `user-${memberIndex}`,
         username: `${firstName.toLowerCase()}.${lastName.toLowerCase()}`,
@@ -250,7 +257,7 @@ export class MemStorage implements IStorage {
         joinDate: new Date(2000 + (index % 25), 0, 1),
         isActive: Math.random() > 0.05 // 95% active, 5% on leave
       };
-
+      
       additionalMembers.push(member);
     });
 
@@ -281,11 +288,11 @@ export class MemStorage implements IStorage {
 
     // Clear existing tee times to start fresh with 30 slots per day
     this.teetimes.clear();
-
+    
     // Initialize tee times for today and the next 6 days dynamically
     const now = new Date();
     const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
+    
     // Generate dates for the next 7 days
     const dates = [];
     for (let i = 0; i < 7; i++) {
@@ -293,7 +300,7 @@ export class MemStorage implements IStorage {
       date.setDate(todayDate.getDate() + i);
       dates.push(date.toISOString().split('T')[0]);
     }
-
+    
     // Base tee time slots for 9-hole Packanack Golf Course - exactly 30 slots per day
     const baseTimeSlots = [
       "6:00 AM", "6:15 AM", "6:30 AM", "6:45 AM", 
@@ -535,7 +542,7 @@ export class MemStorage implements IStorage {
   async updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
     const user = this.users.get(id);
     if (!user) return undefined;
-
+    
     const updatedUser = { ...user, ...updates };
     this.users.set(id, updatedUser);
     return updatedUser;
@@ -544,16 +551,16 @@ export class MemStorage implements IStorage {
   async authenticateMember(email: string, phone: string): Promise<User | null> {
     // Clean phone number for matching (remove formatting)
     const cleanPhone = phone.replace(/\D/g, '');
-
+    
     // Find member by email and phone match
     const member = Array.from(this.users.values()).find(user => {
       if (!user.email || !user.phone) return false;
-
+      
       const userCleanPhone = user.phone.replace(/\D/g, '');
       return user.email.toLowerCase() === email.toLowerCase() && 
              userCleanPhone === cleanPhone;
     });
-
+    
     return member || null;
   }
 
@@ -585,12 +592,12 @@ export class MemStorage implements IStorage {
     if (!adminUser || !adminUser.isActive) {
       return null;
     }
-
+    
     // In a real app, you'd use proper password hashing (bcrypt, etc.)
     if (adminUser.password === password) {
       return adminUser;
     }
-
+    
     return null;
   }
 
@@ -629,7 +636,7 @@ export class MemStorage implements IStorage {
   async updateTeetime(id: string, updates: Partial<TeeTime>): Promise<TeeTime | undefined> {
     const teetime = this.teetimes.get(id);
     if (!teetime) return undefined;
-
+    
     const updatedTeetime = { ...teetime, ...updates };
     this.teetimes.set(id, updatedTeetime);
     return updatedTeetime;
@@ -639,15 +646,15 @@ export class MemStorage implements IStorage {
   async getMenuItems(category?: string, mealType?: string): Promise<MenuItem[]> {
     const allItems = Array.from(this.menuItems.values());
     let filteredItems = allItems;
-
+    
     if (mealType) {
       filteredItems = filteredItems.filter(item => item.mealType === mealType);
     }
-
+    
     if (category) {
       filteredItems = filteredItems.filter(item => item.category === category);
     }
-
+    
     return filteredItems;
   }
 
@@ -699,7 +706,7 @@ export class MemStorage implements IStorage {
   async updateOrder(id: string, updates: Partial<Order>): Promise<Order | undefined> {
     const order = this.orders.get(id);
     if (!order) return undefined;
-
+    
     const updatedOrder = { ...order, ...updates };
     this.orders.set(id, updatedOrder);
     return updatedOrder;
@@ -770,13 +777,13 @@ export class MemStorage implements IStorage {
   async cleanExpiredSessions(): Promise<void> {
     const now = new Date();
     const sessionsToDelete: string[] = [];
-
+    
     this.sessions.forEach((session, token) => {
       if (session.expiresAt < now) {
         sessionsToDelete.push(token);
       }
     });
-
+    
     sessionsToDelete.forEach(token => {
       this.sessions.delete(token);
     });
@@ -785,7 +792,7 @@ export class MemStorage implements IStorage {
   async updateRound(id: string, updates: Partial<Round>): Promise<Round | undefined> {
     const round = this.rounds.get(id);
     if (!round) return undefined;
-
+    
     const updatedRound = { ...round, ...updates };
     this.rounds.set(id, updatedRound);
     return updatedRound;
@@ -832,7 +839,7 @@ export class MemStorage implements IStorage {
   async updateEvent(id: string, updates: Partial<Event>): Promise<Event | undefined> {
     const event = this.events.get(id);
     if (!event) return undefined;
-
+    
     const updatedEvent = { ...event, ...updates };
     this.events.set(id, updatedEvent);
     return updatedEvent;
@@ -883,13 +890,13 @@ export class MemStorage implements IStorage {
     this.events.forEach(event => {
       this.events.set(event.id, { ...event, isActive: false });
     });
-
+    
     // Clear all event registrations
     this.eventRegistrations.clear();
-
+    
     // Clear all orders
     this.orders.clear();
-
+    
     // Reset all tee time bookings (clear bookedBy and playerNames)
     this.teetimes.forEach(teetime => {
       this.teetimes.set(teetime.id, {
@@ -898,7 +905,7 @@ export class MemStorage implements IStorage {
         playerNames: []
       });
     });
-
+    
     // Reset course conditions to default
     this.currentConditions = {
       id: "default",
@@ -958,18 +965,18 @@ export class DatabaseStorage implements IStorage {
   async authenticateMember(email: string, phone: string): Promise<User | null> {
     // Clean phone number for matching (remove formatting)
     const cleanPhone = phone.replace(/\D/g, '');
-
+    
     // Get all users with matching email first
     const usersWithEmail = await db.select().from(users)
       .where(eq(users.email, email.toLowerCase()));
-
+    
     // Find user with matching cleaned phone number
     const user = usersWithEmail.find(u => {
       if (!u.phone) return false;
       const userCleanPhone = u.phone.replace(/\D/g, '');
       return userCleanPhone === cleanPhone;
     });
-
+    
     return user || null;
   }
 
@@ -1028,18 +1035,18 @@ export class DatabaseStorage implements IStorage {
     if (date) {
       // Check if tee times exist for the requested date
       const existingTeetimes = await db.select().from(teetimes).where(eq(teetimes.date, date));
-
+      
       // Calculate expected number of 16-minute intervals from 7AM to 7PM
       const totalMinutes = (19 - 7) * 60; // 12 hours * 60 minutes = 720 minutes
       const expectedSlots = Math.floor(totalMinutes / 16) + 1; // +1 for the starting 7:00 AM slot
-
+      
       // If no tee times exist or there are fewer than expected, generate them
       if (existingTeetimes.length < expectedSlots) {
         await this.generateTeetimesForDate(date);
         // Fetch the newly created tee times
         return await db.select().from(teetimes).where(eq(teetimes.date, date));
       }
-
+      
       return existingTeetimes;
     }
     return await db.select().from(teetimes);
@@ -1050,27 +1057,27 @@ export class DatabaseStorage implements IStorage {
     const requestedDate = new Date(date + 'T00:00:00');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
+    
     // Only generate tee times for today and tomorrow (2 days max advance booking)
     const maxDate = new Date(today);
     maxDate.setDate(today.getDate() + 1);
-
+    
     if (requestedDate <= maxDate) {
       // Generate time slots from 7:00 AM to 7:00 PM with 16-minute intervals
       const baseTimeSlots = [];
       const startHour = 7; // 7 AM
       const endHour = 19; // 7 PM
       const intervalMinutes = 16;
-
+      
       for (let hour = startHour; hour <= endHour; hour++) {
         for (let minute = 0; minute < 60; minute += intervalMinutes) {
           // Stop at 7:00 PM exactly, don't go beyond
           if (hour === endHour && minute > 0) break;
-
+          
           // Fix hour display logic: 12-hour format conversion
           let displayHour = hour;
           let ampm = 'AM';
-
+          
           if (hour === 0) {
             displayHour = 12; // Midnight is 12:XX AM
           } else if (hour < 12) {
@@ -1083,7 +1090,7 @@ export class DatabaseStorage implements IStorage {
             displayHour = hour - 12; // 1-11 PM
             ampm = 'PM';
           }
-
+          
           const timeString = `${displayHour}:${minute.toString().padStart(2, '0')} ${ampm}`;
           baseTimeSlots.push(timeString);
         }
@@ -1092,10 +1099,10 @@ export class DatabaseStorage implements IStorage {
       // Get existing times to avoid duplicates
       const existingTimes = await db.select().from(teetimes).where(eq(teetimes.date, date));
       const existingTimeSlots = existingTimes.map(t => t.time);
-
+      
       // Only create tee times for slots that don't already exist
       const newTimeSlots = baseTimeSlots.filter(time => !existingTimeSlots.includes(time));
-
+      
       if (newTimeSlots.length > 0) {
         const teetimesToInsert = newTimeSlots.map(time => ({
           id: randomUUID(),
@@ -1137,7 +1144,7 @@ export class DatabaseStorage implements IStorage {
   // Menu methods
   async getMenuItems(category?: string, mealType?: string): Promise<MenuItem[]> {
     let query = db.select().from(menuItems);
-
+    
     const conditions = [];
     if (category) {
       conditions.push(eq(menuItems.category, category));
@@ -1145,11 +1152,11 @@ export class DatabaseStorage implements IStorage {
     if (mealType) {
       conditions.push(eq(menuItems.mealType, mealType));
     }
-
+    
     if (conditions.length > 0) {
       query = query.where(conditions.length === 1 ? conditions[0] : and(...conditions));
     }
-
+    
     return await query;
   }
 
@@ -1259,7 +1266,7 @@ export class DatabaseStorage implements IStorage {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
-
+    
     await db.update(events)
       .set({ isActive: false })
       .where(
@@ -1268,7 +1275,7 @@ export class DatabaseStorage implements IStorage {
           lt(events.date, yesterdayStr)
         )
       );
-
+    
     // Return only active events
     return await db.select().from(events).where(eq(events.isActive, true)).orderBy(events.date);
   }
@@ -1350,7 +1357,7 @@ export class DatabaseStorage implements IStorage {
   async markEndedEventsInactive(): Promise<void> {
     const now = new Date();
     const today = now.toISOString().split('T')[0]; // YYYY-MM-DD format
-
+    
     // Mark events as inactive where date is before today
     // (Note: events schema only has date and time, not endTime)
     await db.update(events)
@@ -1367,19 +1374,19 @@ export class DatabaseStorage implements IStorage {
   async resetTestData(): Promise<void> {
     // Reset all events (mark as inactive)
     await db.update(events).set({ isActive: false });
-
+    
     // Clear all event registrations
     await db.delete(eventRegistrations);
-
+    
     // Clear all orders
     await db.delete(orders);
-
+    
     // Reset all tee time bookings (clear bookedBy and playerNames)
     await db.update(teetimes).set({
       bookedBy: [],
       playerNames: []
     });
-
+    
     // Reset course conditions to default
     await db.update(courseConditions).set({
       weather: "sunny",
