@@ -1,0 +1,1527 @@
+var __defProp = Object.defineProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+
+// server/index.ts
+import express2 from "express";
+
+// server/routes.ts
+import { createServer } from "http";
+
+// server/storage.ts
+import { randomUUID } from "crypto";
+
+// server/db.ts
+import { Pool, neonConfig } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-serverless";
+import ws from "ws";
+
+// shared/schema.ts
+var schema_exports = {};
+__export(schema_exports, {
+  adminUsers: () => adminUsers,
+  courseConditions: () => courseConditions,
+  courseHoles: () => courseHoles,
+  eventRegistrations: () => eventRegistrations,
+  events: () => events,
+  insertAdminUserSchema: () => insertAdminUserSchema,
+  insertCourseConditionsSchema: () => insertCourseConditionsSchema,
+  insertCourseHoleSchema: () => insertCourseHoleSchema,
+  insertEventRegistrationSchema: () => insertEventRegistrationSchema,
+  insertEventSchema: () => insertEventSchema,
+  insertMenuItemSchema: () => insertMenuItemSchema,
+  insertOrderSchema: () => insertOrderSchema,
+  insertRoundSchema: () => insertRoundSchema,
+  insertSessionSchema: () => insertSessionSchema,
+  insertTeetimeSchema: () => insertTeetimeSchema,
+  insertUserSchema: () => insertUserSchema,
+  menuItems: () => menuItems,
+  orders: () => orders,
+  rounds: () => rounds,
+  sessions: () => sessions,
+  teetimes: () => teetimes,
+  users: () => users
+});
+import { sql } from "drizzle-orm";
+import { pgTable, text, varchar, integer, timestamp, decimal, boolean, date } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+var users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  email: text("email"),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  phone: text("phone"),
+  memberNumber: text("member_number").notNull(),
+  memberStatus: text("member_status").notNull().default("Gold"),
+  membershipType: text("membership_type").default("Full"),
+  // Full, Associate, Junior, Corporate
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  zipCode: text("zip_code"),
+  emergencyContact: text("emergency_contact"),
+  emergencyPhone: text("emergency_phone"),
+  handicap: integer("handicap").default(18),
+  roundsPlayed: integer("rounds_played").default(0),
+  accountBalance: decimal("account_balance", { precision: 10, scale: 2 }).default("285.00"),
+  joinDate: timestamp("join_date").defaultNow(),
+  isActive: boolean("is_active").default(true),
+  // New columns from membership list
+  paymentStatus: text("payment_status"),
+  // "Paid", "Payment Plan", "Partial Payment"
+  membershipClass: text("membership_class"),
+  // "A", "AG", "G", "H", "HM", etc.
+  status: text("status").default("Active"),
+  // "Active", "Leave"
+  yearJoined: integer("year_joined"),
+  birthday: text("birthday"),
+  spouse: text("spouse"),
+  lockers: text("lockers"),
+  // "TRUE", "FALSE", "BOARD"
+  spouseLocker: boolean("spouse_locker").default(false),
+  bagStorage: boolean("bag_storage").default(false),
+  food: text("food"),
+  // Amount like "533.00" or "None"
+  extraHandicap: text("extra_handicap"),
+  restrictedAssessment: text("restricted_assessment"),
+  specialConsiderations: text("special_considerations"),
+  lotteryEligible: text("lottery_eligible")
+});
+var adminUsers = pgTable("admin_users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  name: text("name").notNull(),
+  role: text("role").notNull().default("staff"),
+  // staff, manager, admin
+  isActive: boolean("is_active").default(true)
+});
+var teetimes = pgTable("teetimes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  date: text("date").notNull(),
+  time: text("time").notNull(),
+  course: text("course").notNull().default("Packanack Golf Course"),
+  holes: integer("holes").notNull().default(18),
+  // 18-hole course
+  maxPlayers: integer("max_players").notNull().default(4),
+  bookedBy: text("booked_by").array().default([]),
+  // Array of user IDs who booked this slot
+  playerNames: text("player_names").array().default([]),
+  // Array of player names for display
+  playerTypes: text("player_types").array().default([]),
+  // Array of "member" or "guest" for each player
+  transportModes: text("transport_modes").array().default([]),
+  // Array of "riding" or "walking" for each player
+  holesPlaying: text("holes_playing").array().default([]),
+  // Array of "9" or "18" for each player
+  // Status is automatically calculated based on bookedBy array length
+  isPremium: boolean("is_premium").default(false),
+  price: decimal("price", { precision: 8, scale: 2 }).notNull().default("85.00")
+});
+var menuItems = pgTable("menu_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  price: decimal("price", { precision: 8, scale: 2 }).notNull(),
+  category: text("category").notNull(),
+  // appetizers, main_course, beverages, desserts
+  mealType: text("meal_type").notNull(),
+  // lunch, dinner
+  isSpecial: boolean("is_special").default(false),
+  available: boolean("available").default(true),
+  availableSettings: text("available_settings")
+  // For customization options
+});
+var orders = pgTable("orders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  items: text("items").array().notNull(),
+  // Array of serialized order items
+  total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").notNull().default("pending"),
+  // pending, preparing, ready, delivered
+  deliveryOption: text("delivery_option").default("Clubhouse Pickup"),
+  // "Clubhouse Pickup", "Deliver on Course"
+  deliveryLocation: text("delivery_location"),
+  // e.g., "Hole 5" for on-course delivery
+  specialRequests: text("special_requests"),
+  // Allergens, special instructions, etc.
+  createdAt: timestamp("created_at").defaultNow()
+});
+var courseHoles = pgTable("course_holes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  holeNumber: integer("hole_number").notNull(),
+  par: integer("par").notNull(),
+  yardage: integer("yardage").notNull(),
+  handicap: integer("handicap").notNull(),
+  description: text("description"),
+  notes: text("notes"),
+  course: text("course").notNull().default("Championship Course")
+});
+var rounds = pgTable("rounds", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  currentHole: integer("current_hole").default(1),
+  scores: text("scores").array(),
+  // Array of scores for each hole
+  startTime: timestamp("start_time").defaultNow(),
+  endTime: timestamp("end_time"),
+  status: text("status").notNull().default("in_progress")
+  // in_progress, completed
+});
+var courseConditions = pgTable("course_conditions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  weather: text("weather").notNull(),
+  temperature: integer("temperature").notNull(),
+  windSpeed: integer("wind_speed").notNull(),
+  humidity: integer("humidity").notNull(),
+  courseStatus: text("course_status").notNull(),
+  cartPathOnly: boolean("cart_path_only").notNull(),
+  greensCondition: text("greens_condition").notNull(),
+  fairwaysCondition: text("fairways_condition").notNull(),
+  hazardNotes: text("hazard_notes"),
+  maintenanceNotes: text("maintenance_notes").array().default([]),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  updatedBy: text("updated_by").notNull()
+});
+var events = pgTable("events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  date: date("date").notNull(),
+  time: text("time").notNull(),
+  location: text("location").notNull().default("Packanack Golf Club"),
+  maxSignups: integer("max_signups").notNull().default(50),
+  price: decimal("price", { precision: 8, scale: 2 }).default("0.00"),
+  category: text("category").notNull(),
+  // tournament, social, lesson, special
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  createdBy: text("created_by").notNull()
+});
+var eventRegistrations = pgTable("event_registrations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventId: varchar("event_id").references(() => events.id),
+  userId: varchar("user_id").references(() => users.id),
+  registeredAt: timestamp("registered_at").defaultNow(),
+  notes: text("notes"),
+  // Special requests or notes from member
+  status: text("status").notNull().default("confirmed")
+  // confirmed, waitlist, cancelled
+});
+var sessions = pgTable("sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  adminUserId: varchar("admin_user_id").references(() => adminUsers.id),
+  sessionToken: text("session_token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var insertUserSchema = createInsertSchema(users).omit({
+  id: true
+});
+var insertAdminUserSchema = createInsertSchema(adminUsers).omit({
+  id: true
+});
+var insertTeetimeSchema = createInsertSchema(teetimes).omit({
+  id: true
+});
+var insertMenuItemSchema = createInsertSchema(menuItems).omit({
+  id: true
+});
+var insertOrderSchema = createInsertSchema(orders).omit({
+  id: true,
+  createdAt: true
+});
+var insertCourseHoleSchema = createInsertSchema(courseHoles).omit({
+  id: true
+});
+var insertRoundSchema = createInsertSchema(rounds).omit({
+  id: true,
+  startTime: true,
+  endTime: true
+});
+var insertSessionSchema = createInsertSchema(sessions).omit({
+  id: true,
+  createdAt: true
+});
+var insertCourseConditionsSchema = createInsertSchema(courseConditions).omit({
+  id: true,
+  lastUpdated: true
+});
+var insertEventSchema = createInsertSchema(events).omit({
+  id: true,
+  createdAt: true
+});
+var insertEventRegistrationSchema = createInsertSchema(eventRegistrations).omit({
+  id: true,
+  registeredAt: true
+});
+
+// server/db.ts
+neonConfig.webSocketConstructor = ws;
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    "DATABASE_URL must be set. Did you forget to provision a database?"
+  );
+}
+var pool = new Pool({ connectionString: process.env.DATABASE_URL });
+var db = drizzle({ client: pool, schema: schema_exports });
+
+// server/storage.ts
+import { eq, and, sql as sql2 } from "drizzle-orm";
+var DatabaseStorage = class {
+  // User methods
+  async getUser(id) {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || void 0;
+  }
+  async getUserByUsername(username) {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || void 0;
+  }
+  async getUserByEmail(email) {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || void 0;
+  }
+  async authenticateMember(email, phone) {
+    const cleanPhone = phone.replace(/\D/g, "");
+    const usersWithEmail = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
+    const user = usersWithEmail.find((u) => {
+      if (!u.phone) return false;
+      const userCleanPhone = u.phone.replace(/\D/g, "");
+      return userCleanPhone === cleanPhone;
+    });
+    return user || null;
+  }
+  async getAllUsers() {
+    return await db.select().from(users);
+  }
+  async createUser(user) {
+    const [newUser] = await db.insert(users).values(user).returning();
+    return newUser;
+  }
+  // Admin user methods
+  async getAdminUser(id) {
+    const [admin] = await db.select().from(adminUsers).where(eq(adminUsers.id, id));
+    return admin || void 0;
+  }
+  async getAdminUserByEmail(email) {
+    const [admin] = await db.select().from(adminUsers).where(eq(adminUsers.email, email));
+    return admin || void 0;
+  }
+  async createAdminUser(adminUser) {
+    const [newAdmin] = await db.insert(adminUsers).values(adminUser).returning();
+    return newAdmin;
+  }
+  async authenticateAdmin(email, password) {
+    const [admin] = await db.select().from(adminUsers).where(and(eq(adminUsers.email, email), eq(adminUsers.password, password)));
+    return admin || null;
+  }
+  // Session methods
+  async createSession(session) {
+    const [newSession] = await db.insert(sessions).values(session).returning();
+    return newSession;
+  }
+  async getSessionByToken(token) {
+    const [session] = await db.select().from(sessions).where(eq(sessions.sessionToken, token));
+    return session || void 0;
+  }
+  async deleteSession(token) {
+    await db.delete(sessions).where(eq(sessions.sessionToken, token));
+  }
+  async cleanExpiredSessions() {
+    await db.delete(sessions).where(sql2`expires_at < NOW()`);
+  }
+  // Tee time methods
+  async getTeetimes(date2) {
+    if (date2) {
+      const existingTeetimes = await db.select().from(teetimes).where(eq(teetimes.date, date2));
+      const totalMinutes = (19 - 7) * 60;
+      const expectedSlots = Math.floor(totalMinutes / 16) + 1;
+      if (existingTeetimes.length < expectedSlots) {
+        await this.generateTeetimesForDate(date2);
+        return await db.select().from(teetimes).where(eq(teetimes.date, date2));
+      }
+      return existingTeetimes;
+    }
+    return await db.select().from(teetimes);
+  }
+  // Helper method to generate tee times for a specific date
+  async generateTeetimesForDate(date2) {
+    const requestedDate = /* @__PURE__ */ new Date(date2 + "T00:00:00");
+    const today = /* @__PURE__ */ new Date();
+    today.setHours(0, 0, 0, 0);
+    const maxDate = new Date(today);
+    maxDate.setDate(today.getDate() + 1);
+    if (requestedDate <= maxDate) {
+      const baseTimeSlots = [];
+      const startHour = 7;
+      const endHour = 19;
+      const intervalMinutes = 16;
+      for (let hour = startHour; hour <= endHour; hour++) {
+        for (let minute = 0; minute < 60; minute += intervalMinutes) {
+          if (hour === endHour && minute > 0) break;
+          const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+          const ampm = hour >= 12 ? "PM" : "AM";
+          const timeString = `${displayHour}:${minute.toString().padStart(2, "0")} ${ampm}`;
+          baseTimeSlots.push(timeString);
+        }
+      }
+      const existingTimes = await db.select().from(teetimes).where(eq(teetimes.date, date2));
+      const existingTimeSlots = existingTimes.map((t) => t.time);
+      const newTimeSlots = baseTimeSlots.filter((time) => !existingTimeSlots.includes(time));
+      if (newTimeSlots.length > 0) {
+        const teetimesToInsert = newTimeSlots.map((time) => ({
+          id: randomUUID(),
+          date: date2,
+          time,
+          course: "Packanack Golf Course",
+          holes: 18,
+          maxPlayers: 4,
+          bookedBy: [],
+          playerNames: [],
+          playerTypes: [],
+          transportModes: [],
+          holesPlaying: [],
+          isPremium: false,
+          price: "85.00"
+        }));
+        await db.insert(teetimes).values(teetimesToInsert);
+      }
+    }
+  }
+  async getTeetimeById(id) {
+    const [teetime] = await db.select().from(teetimes).where(eq(teetimes.id, id));
+    return teetime || void 0;
+  }
+  async createTeetime(teetime) {
+    const [newTeetime] = await db.insert(teetimes).values(teetime).returning();
+    return newTeetime;
+  }
+  async updateTeetime(id, updates) {
+    const [updated] = await db.update(teetimes).set(updates).where(eq(teetimes.id, id)).returning();
+    return updated || void 0;
+  }
+  // Menu methods
+  async getMenuItems(category, mealType) {
+    let query = db.select().from(menuItems);
+    const conditions = [];
+    if (category) {
+      conditions.push(eq(menuItems.category, category));
+    }
+    if (mealType) {
+      conditions.push(eq(menuItems.mealType, mealType));
+    }
+    if (conditions.length > 0) {
+      query = query.where(conditions.length === 1 ? conditions[0] : and(...conditions));
+    }
+    return await query;
+  }
+  async getMenuItemById(id) {
+    const [item] = await db.select().from(menuItems).where(eq(menuItems.id, id));
+    return item || void 0;
+  }
+  async createMenuItem(item) {
+    const [newItem] = await db.insert(menuItems).values(item).returning();
+    return newItem;
+  }
+  // Order methods
+  async getOrders(userId) {
+    if (userId) {
+      return await db.select().from(orders).where(eq(orders.userId, userId));
+    }
+    return await db.select().from(orders);
+  }
+  async getOrderById(id) {
+    const [order] = await db.select().from(orders).where(eq(orders.id, id));
+    return order || void 0;
+  }
+  async createOrder(order) {
+    const [newOrder] = await db.insert(orders).values(order).returning();
+    return newOrder;
+  }
+  async updateOrder(id, updates) {
+    const [updated] = await db.update(orders).set(updates).where(eq(orders.id, id)).returning();
+    return updated || void 0;
+  }
+  // Course methods
+  async getCourseHoles(course) {
+    if (course) {
+      return await db.select().from(courseHoles).where(eq(courseHoles.course, course));
+    }
+    return await db.select().from(courseHoles);
+  }
+  async getCourseHoleById(id) {
+    const [hole] = await db.select().from(courseHoles).where(eq(courseHoles.id, id));
+    return hole || void 0;
+  }
+  // Round methods
+  async getRounds(userId) {
+    return await db.select().from(rounds).where(eq(rounds.userId, userId));
+  }
+  async getCurrentRound(userId) {
+    const [round] = await db.select().from(rounds).where(and(eq(rounds.userId, userId), eq(rounds.status, "in_progress")));
+    return round || void 0;
+  }
+  async createRound(round) {
+    const [newRound] = await db.insert(rounds).values(round).returning();
+    return newRound;
+  }
+  async updateRound(id, updates) {
+    const [updated] = await db.update(rounds).set(updates).where(eq(rounds.id, id)).returning();
+    return updated || void 0;
+  }
+  // Course conditions methods
+  async getCourseConditions() {
+    const [conditions] = await db.select().from(courseConditions).limit(1);
+    if (!conditions) {
+      const defaultConditions = {
+        weather: "sunny",
+        temperature: 72,
+        windSpeed: 5,
+        humidity: 45,
+        courseStatus: "open",
+        cartPathOnly: false,
+        greensCondition: "excellent",
+        fairwaysCondition: "good",
+        hazardNotes: "",
+        maintenanceNotes: [],
+        updatedBy: "System"
+      };
+      const [newConditions] = await db.insert(courseConditions).values(defaultConditions).returning();
+      return newConditions;
+    }
+    return conditions;
+  }
+  async updateCourseConditions(updates) {
+    const current = await this.getCourseConditions();
+    const [updated] = await db.update(courseConditions).set({ ...updates, lastUpdated: /* @__PURE__ */ new Date() }).where(eq(courseConditions.id, current.id)).returning();
+    return updated;
+  }
+  // Event methods
+  async getEvents() {
+    return await db.select().from(events).where(eq(events.isActive, true)).orderBy(events.date);
+  }
+  async getEventById(id) {
+    const [event] = await db.select().from(events).where(eq(events.id, id));
+    return event || void 0;
+  }
+  async createEvent(event) {
+    const [newEvent] = await db.insert(events).values(event).returning();
+    return newEvent;
+  }
+  async updateEvent(id, updates) {
+    const [updated] = await db.update(events).set(updates).where(eq(events.id, id)).returning();
+    return updated || void 0;
+  }
+  async deleteEvent(id) {
+    await db.update(events).set({ isActive: false }).where(eq(events.id, id));
+  }
+  // Event registration methods
+  async getEventRegistrations(eventId) {
+    return await db.select().from(eventRegistrations).where(eq(eventRegistrations.eventId, eventId));
+  }
+  async getUserEventRegistrations(userId) {
+    return await db.select().from(eventRegistrations).where(eq(eventRegistrations.userId, userId));
+  }
+  async registerForEvent(registration) {
+    const [newRegistration] = await db.insert(eventRegistrations).values(registration).returning();
+    return newRegistration;
+  }
+  async unregisterFromEvent(eventId, userId) {
+    await db.delete(eventRegistrations).where(and(eq(eventRegistrations.eventId, eventId), eq(eventRegistrations.userId, userId)));
+  }
+  // Reset methods for admin
+  async resetTeeTimeBookings() {
+    await db.update(teetimes).set({
+      playerNames: [],
+      bookedBy: []
+    });
+  }
+  async resetEventRegistrations() {
+    await db.delete(eventRegistrations);
+  }
+  async resetOrders() {
+    await db.delete(orders);
+  }
+  async resetCourseNotices() {
+    await db.update(courseConditions).set({
+      hazardNotes: null,
+      maintenanceNotes: []
+    });
+  }
+};
+var storage = new DatabaseStorage();
+
+// server/routes.ts
+import { z } from "zod";
+import { randomUUID as randomUUID2 } from "crypto";
+async function registerRoutes(app2) {
+  app2.get("/api/teetimes", async (req, res) => {
+    try {
+      const { date: date2 } = req.query;
+      const teetimes2 = await storage.getTeetimes(date2);
+      res.json(teetimes2);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch tee times" });
+    }
+  });
+  app2.post("/api/teetimes", async (req, res) => {
+    try {
+      const teetimeData = insertTeetimeSchema.parse(req.body);
+      const teetime = await storage.createTeetime(teetimeData);
+      res.status(201).json(teetime);
+    } catch (error) {
+      console.error("Tee time validation error:", error);
+      res.status(400).json({ message: "Invalid tee time data", error: error.message });
+    }
+  });
+  app2.get("/api/teetimes/user/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const userTeetimes = await storage.getTeetimes();
+      const filteredTeetimes = userTeetimes.filter(
+        (teetime) => teetime.bookedBy?.includes(userId)
+      );
+      res.json(filteredTeetimes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user tee times" });
+    }
+  });
+  app2.get("/api/teetimes/:date", async (req, res) => {
+    try {
+      const { date: date2 } = req.params;
+      const teetimes2 = await storage.getTeetimes(date2);
+      res.json(teetimes2);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch tee times" });
+    }
+  });
+  app2.patch("/api/teetimes/:id/book", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { userId, players = [] } = req.body;
+      if (!id) {
+        return res.status(400).json({ message: "Tee time ID is required" });
+      }
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      if (!Array.isArray(players)) {
+        return res.status(400).json({ message: "Players must be an array", received: typeof players, value: players });
+      }
+      if (players.length === 0) {
+        return res.status(400).json({ message: "At least one player is required", playersLength: players.length });
+      }
+      const teetime = await storage.getTeetimeById(id);
+      if (!teetime) {
+        return res.status(404).json({ message: "Tee time not found" });
+      }
+      const currentPlayers = teetime.bookedBy?.length || 0;
+      const availableSpots = teetime.maxPlayers - currentPlayers;
+      if (players.length > availableSpots) {
+        return res.status(400).json({ message: `Only ${availableSpots} spots available` });
+      }
+      if (teetime.bookedBy?.includes(userId)) {
+        return res.status(400).json({ message: "You have already booked this tee time" });
+      }
+      const newBookedBy = [...teetime.bookedBy || []];
+      const newPlayerNames = [...teetime.playerNames || []];
+      const newPlayerTypes = [...teetime.playerTypes || []];
+      const newTransportModes = [...teetime.transportModes || []];
+      const newHolesPlaying = [...teetime.holesPlaying || []];
+      players.forEach((player) => {
+        if (!player || typeof player !== "object") {
+          throw new Error("Invalid player object");
+        }
+        newBookedBy.push(userId);
+        newPlayerNames.push(player.name || "Unknown Player");
+        newPlayerTypes.push(player.type || "member");
+        newTransportModes.push(player.transportMode || "riding");
+        newHolesPlaying.push(player.holesPlaying || "18");
+      });
+      if (newBookedBy.length !== newPlayerNames.length || newPlayerNames.length !== newPlayerTypes.length || newPlayerTypes.length !== newTransportModes.length || newTransportModes.length !== newHolesPlaying.length) {
+        throw new Error("Array length mismatch in tee time data");
+      }
+      const updatedTeetime = await storage.updateTeetime(id, {
+        bookedBy: newBookedBy,
+        playerNames: newPlayerNames,
+        playerTypes: newPlayerTypes,
+        transportModes: newTransportModes,
+        holesPlaying: newHolesPlaying
+      });
+      res.json(updatedTeetime);
+    } catch (error) {
+      console.error("Tee time booking error:", error);
+      console.error("Error stack:", error.stack);
+      console.error("Request params:", req.params);
+      console.error("Request body:", req.body);
+      res.status(500).json({ message: "Failed to book tee time", error: error.message });
+    }
+  });
+  app2.patch("/api/teetimes/:id/cancel", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { userId } = req.body;
+      const teetime = await storage.getTeetimeById(id);
+      if (!teetime) {
+        return res.status(404).json({ message: "Tee time not found" });
+      }
+      if (!teetime.bookedBy?.includes(userId)) {
+        return res.status(400).json({ message: "You haven't booked this tee time" });
+      }
+      const indicesToRemove = [];
+      teetime.bookedBy.forEach((id2, index) => {
+        if (id2 === userId) {
+          indicesToRemove.push(index);
+        }
+      });
+      const newBookedBy = teetime.bookedBy.filter(
+        (_, index) => !indicesToRemove.includes(index)
+      );
+      const newPlayerNames = teetime.playerNames?.filter(
+        (_, index) => !indicesToRemove.includes(index)
+      ) || [];
+      const newPlayerTypes = teetime.playerTypes?.filter(
+        (_, index) => !indicesToRemove.includes(index)
+      ) || [];
+      const newTransportModes = teetime.transportModes?.filter(
+        (_, index) => !indicesToRemove.includes(index)
+      ) || [];
+      const newHolesPlaying = teetime.holesPlaying?.filter(
+        (_, index) => !indicesToRemove.includes(index)
+      ) || [];
+      const updatedTeetime = await storage.updateTeetime(id, {
+        bookedBy: newBookedBy,
+        playerNames: newPlayerNames,
+        playerTypes: newPlayerTypes,
+        transportModes: newTransportModes,
+        holesPlaying: newHolesPlaying
+      });
+      res.json(updatedTeetime);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to cancel tee time booking" });
+    }
+  });
+  app2.patch("/api/teetimes/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      const teetime = await storage.getTeetimeById(id);
+      if (!teetime) {
+        return res.status(404).json({ message: "Tee time not found" });
+      }
+      const updatedTeetime = await storage.updateTeetime(id, updates);
+      res.json(updatedTeetime);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update tee time" });
+    }
+  });
+  app2.get("/api/menu", async (req, res) => {
+    try {
+      const { category } = req.query;
+      const now = /* @__PURE__ */ new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const currentTimeIn24 = currentHour + currentMinute / 60;
+      const dinnerStartTime = 18.5;
+      const mealType = currentTimeIn24 >= dinnerStartTime ? "dinner" : "lunch";
+      const menuItems2 = await storage.getMenuItems(
+        category,
+        mealType
+      );
+      res.json(menuItems2);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch menu items" });
+    }
+  });
+  app2.get("/api/orders", async (req, res) => {
+    try {
+      const orders2 = await storage.getOrders();
+      res.json(orders2);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+  app2.get("/api/orders/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const orders2 = await storage.getOrders(userId);
+      res.json(orders2);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+  app2.post("/api/orders", async (req, res) => {
+    try {
+      const orderData = insertOrderSchema.parse(req.body);
+      const order = await storage.createOrder(orderData);
+      res.status(201).json(order);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid order data" });
+    }
+  });
+  app2.get("/api/course/holes", async (req, res) => {
+    try {
+      const { course } = req.query;
+      const holes = await storage.getCourseHoles(course);
+      res.json(holes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch course holes" });
+    }
+  });
+  app2.get("/api/rounds/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const rounds2 = await storage.getRounds(userId);
+      res.json(rounds2);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch rounds" });
+    }
+  });
+  app2.get("/api/rounds/:userId/current", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const round = await storage.getCurrentRound(userId);
+      res.json(round);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch current round" });
+    }
+  });
+  app2.post("/api/rounds", async (req, res) => {
+    try {
+      const roundData = insertRoundSchema.parse(req.body);
+      const round = await storage.createRound(roundData);
+      res.status(201).json(round);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid round data" });
+    }
+  });
+  app2.patch("/api/rounds/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      const round = await storage.updateRound(id, updates);
+      if (!round) {
+        return res.status(404).json({ message: "Round not found" });
+      }
+      res.json(round);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update round" });
+    }
+  });
+  const memberAuthSchema = z.object({
+    email: z.string().email(),
+    phone: z.string().min(10)
+  });
+  app2.post("/api/auth/member", async (req, res) => {
+    try {
+      const { email, phone } = memberAuthSchema.parse(req.body);
+      const member = await storage.authenticateMember(email, phone);
+      if (!member) {
+        return res.status(401).json({
+          message: "Invalid credentials. Please verify your email and phone number."
+        });
+      }
+      if (!member.isActive) {
+        return res.status(401).json({
+          message: "Member account is inactive. Please contact the club office."
+        });
+      }
+      const sessionToken = randomUUID2();
+      const expiresAt = /* @__PURE__ */ new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30);
+      const session = await storage.createSession({
+        userId: member.id,
+        sessionToken,
+        expiresAt,
+        adminUserId: null
+      });
+      const { password: _, ...memberData } = member;
+      res.json({ ...memberData, sessionToken: session.sessionToken });
+    } catch (error) {
+      res.status(400).json({ message: "Invalid authentication data" });
+    }
+  });
+  app2.post("/api/auth/admin", async (req, res) => {
+    try {
+      const { email, password } = adminLoginSchema.parse(req.body);
+      const adminUser = await storage.authenticateAdmin(email, password);
+      if (!adminUser) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      const sessionToken = randomUUID2();
+      const expiresAt = /* @__PURE__ */ new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30);
+      const session = await storage.createSession({
+        adminUserId: adminUser.id,
+        sessionToken,
+        expiresAt,
+        userId: null
+      });
+      const { password: _, ...adminData } = adminUser;
+      res.json({ ...adminData, sessionToken: session.sessionToken });
+    } catch (error) {
+      res.status(400).json({ message: "Invalid login data" });
+    }
+  });
+  app2.post("/api/auth/verify", async (req, res) => {
+    try {
+      const { sessionToken } = req.body;
+      if (!sessionToken) {
+        return res.status(401).json({ message: "No session token provided" });
+      }
+      const session = await storage.getSessionByToken(sessionToken);
+      if (!session) {
+        return res.status(401).json({ message: "Session not found" });
+      }
+      if (session.expiresAt < /* @__PURE__ */ new Date()) {
+        console.log(`Session expired: ${session.expiresAt} < ${/* @__PURE__ */ new Date()}`);
+        await storage.deleteSession(sessionToken);
+        return res.status(401).json({ message: "Session expired" });
+      }
+      if (session.userId) {
+        const user = await storage.getUser(session.userId);
+        if (user && user.isActive) {
+          const { password: _, ...userData } = user;
+          return res.json({ ...userData, sessionToken, type: "member" });
+        }
+      } else if (session.adminUserId) {
+        const admin = await storage.getAdminUser(session.adminUserId);
+        if (admin && admin.isActive) {
+          const { password: _, ...adminData } = admin;
+          return res.json({ ...adminData, sessionToken, type: "admin" });
+        }
+      }
+      return res.status(401).json({ message: "Session user not found or inactive" });
+    } catch (error) {
+      console.error("Session verification error:", error);
+      res.status(500).json({ message: "Failed to verify session" });
+    }
+  });
+  app2.post("/api/auth/logout", async (req, res) => {
+    try {
+      const { sessionToken } = req.body;
+      if (sessionToken) {
+        await storage.deleteSession(sessionToken);
+      }
+      res.json({ message: "Logged out successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Logout failed" });
+    }
+  });
+  app2.get("/api/user/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = await storage.getUser(id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+  app2.patch("/api/admin/members/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      const existingUser = await storage.getUser(id);
+      if (!existingUser) {
+        return res.status(404).json({ message: "Member not found" });
+      }
+      res.json(existingUser);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update member" });
+    }
+  });
+  app2.patch("/api/admin/members/bulk", async (req, res) => {
+    try {
+      const { memberIds, status, handicap } = req.body;
+      if (!memberIds || !Array.isArray(memberIds) || memberIds.length === 0) {
+        return res.status(400).json({ message: "Member IDs are required" });
+      }
+      const updates = {};
+      if (status) updates.memberStatus = status;
+      if (handicap !== void 0) updates.handicap = handicap;
+      const updatedMembers = [];
+      for (const memberId of memberIds) {
+        const existingMember = await storage.getUser(memberId);
+        if (existingMember) {
+          updatedMembers.push(existingMember);
+        }
+      }
+      res.json({ updated: updatedMembers.length, members: updatedMembers });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to bulk update members" });
+    }
+  });
+  const adminLoginSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(1)
+  });
+  app2.post("/api/admin/auth", async (req, res) => {
+    try {
+      const { email, password } = adminLoginSchema.parse(req.body);
+      const adminUser = await storage.authenticateAdmin(email, password);
+      if (!adminUser) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      const { password: _, ...adminData } = adminUser;
+      res.json(adminData);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid login data" });
+    }
+  });
+  app2.get("/api/admin/verify/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const adminUser = await storage.getAdminUser(id);
+      if (!adminUser || !adminUser.isActive) {
+        return res.status(404).json({ message: "Admin not found" });
+      }
+      const { password: _, ...adminData } = adminUser;
+      res.json(adminData);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to verify admin" });
+    }
+  });
+  app2.get("/api/admin/members", async (req, res) => {
+    try {
+      const members = await storage.getAllUsers();
+      res.json(members);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch members" });
+    }
+  });
+  app2.patch("/api/admin/orders/:id/status", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      if (!status || !["pending", "preparing", "ready", "delivered"].includes(status)) {
+        return res.status(400).json({ message: "Valid status is required" });
+      }
+      const order = await storage.updateOrder(id, { status });
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+  app2.post("/api/admin/members/sync", async (req, res) => {
+    try {
+      const membersFromCSV = [
+        "Allerton, Keith",
+        "Amoruso, Robert",
+        "Avedissian, Christian",
+        "Avedissian, Jason",
+        "Axberg, George",
+        "Baker, William J.",
+        "Barchie, Eric",
+        "Barwick, Robert",
+        "Batikha, Charles",
+        "Bauer, Leo",
+        "Bayley, Robert",
+        "Becker, Rosemarie",
+        "Berg, Aaron",
+        "Betz, William",
+        "Betz, William P",
+        "Biagini, Randy",
+        "Bianchi, Kyle",
+        "Blake, Jim",
+        "Bolton, Jonathan",
+        "Bowie, David",
+        "Brillo, Steven",
+        "Brino, Rosalie",
+        "Brown, Ryan",
+        "Burggraf, Michael",
+        "Byram, John",
+        "Cadematori, Michael",
+        "Cahill, Jack",
+        "Campbell, Clare",
+        "Caporrimo, Jim",
+        "Carmody, Tom",
+        "Castellamare, Benjamin",
+        "Cerbone, Steve",
+        "Chanfrau, Michael",
+        "Cianci, Angelo",
+        "Colicchio, Phil",
+        "Connolly, Matt",
+        "Considine, Daniel",
+        "Coppolecchia, Matthew",
+        "Corradino, Desiree",
+        "Crank, William",
+        "Crawford, Brian",
+        "Cremona, Nick",
+        "DeBuono, Robert",
+        "DeJoy, John",
+        "DeLuca, Peter",
+        "DeNardo, Michael",
+        "DeNunzio, Robert",
+        "DiCiaula, Joseph",
+        "DiMaggio, Thomas",
+        "DiStefano, Salvatore"
+      ];
+      let membershipTypes = [
+        "A",
+        "AG",
+        "AGH",
+        "G",
+        "H",
+        "HM",
+        "AGG+75",
+        "G+75"
+      ];
+      let paymentStatuses = ["Paid", "Payment Plan", "Partial Payment"];
+      let syncedCount = 0;
+      let errorCount = 0;
+      let processedCount = 0;
+      let skipCount = 0;
+      for (let index = 0; index < membersFromCSV.length; index++) {
+        const fullName = membersFromCSV[index];
+        const [lastName, firstName] = fullName.split(", ");
+        if (firstName && lastName) {
+          processedCount++;
+          const cleanFirstName = firstName.replace(/[^a-zA-Z\s]/g, "").trim();
+          const cleanLastName = lastName.replace(/[^a-zA-Z\s]/g, "").trim();
+          if (cleanFirstName && cleanLastName) {
+            const memberClass = membershipTypes[index % membershipTypes.length];
+            const paymentStatus = paymentStatuses[index % paymentStatuses.length];
+            const memberData = {
+              username: `${cleanFirstName.toLowerCase().replace(/\s+/g, ".")}.${cleanLastName.toLowerCase().replace(/\s+/g, ".")}`,
+              password: "password123",
+              email: `${cleanFirstName.toLowerCase().replace(/\s+/g, ".")}.${cleanLastName.toLowerCase().replace(/\s+/g, ".")}@email.com`,
+              firstName: cleanFirstName,
+              lastName: cleanLastName,
+              phone: `(973) ${Math.floor(Math.random() * 900 + 100)}-${Math.floor(Math.random() * 9e3 + 1e3)}`,
+              memberNumber: `${memberClass}${String(processedCount + 100).padStart(3, "0")}`,
+              memberStatus: paymentStatus,
+              membershipType: memberClass,
+              accountBalance: paymentStatus === "Paid" ? "0.00" : `${Math.floor(Math.random() * 400 + 100)}.00`,
+              isActive: true
+            };
+            try {
+              await storage.createUser(memberData);
+              syncedCount++;
+              console.log(
+                `\u2713 Added: ${memberData.firstName} ${memberData.lastName} (${memberData.memberNumber})`
+              );
+            } catch (error) {
+              if (error.message.includes("UNIQUE constraint failed") || error.message.includes("unique")) {
+                skipCount++;
+              } else {
+                errorCount++;
+                console.log(
+                  `\u2717 Error syncing member ${memberData.firstName} ${memberData.lastName}:`,
+                  error.message
+                );
+              }
+            }
+          }
+        }
+      }
+      const totalMembers = await storage.getAllUsers();
+      res.json({
+        message: "Member data synchronized successfully",
+        totalMembers: totalMembers.length,
+        newMembers: syncedCount,
+        processed: processedCount,
+        skipped: skipCount,
+        errors: errorCount
+      });
+    } catch (error) {
+      console.error("Sync error:", error);
+      res.status(500).json({ message: `Sync failed: ${error.message}` });
+    }
+  });
+  app2.post("/api/admin/reset-test-data", async (req, res) => {
+    try {
+      await storage.resetTeeTimeBookings();
+      await storage.resetEventRegistrations();
+      await storage.resetOrders();
+      await storage.resetCourseNotices();
+      res.json({ message: "Test data reset successfully" });
+    } catch (error) {
+      console.error("Reset test data error:", error);
+      res.status(500).json({ message: "Failed to reset test data" });
+    }
+  });
+  app2.get("/api/course/conditions", async (req, res) => {
+    try {
+      const conditions = await storage.getCourseConditions();
+      res.json(conditions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch course conditions" });
+    }
+  });
+  app2.patch("/api/course/conditions", async (req, res) => {
+    try {
+      const updateData = insertCourseConditionsSchema.partial().parse(req.body);
+      const conditions = await storage.updateCourseConditions(updateData);
+      res.json(conditions);
+    } catch (error) {
+      console.error("Course conditions validation error:", error);
+      res.status(400).json({
+        message: "Invalid course conditions data",
+        error: error.message
+      });
+    }
+  });
+  app2.get("/api/events", async (req, res) => {
+    try {
+      const events2 = await storage.getEvents();
+      const { userId } = req.query;
+      const currentEvents = events2.filter((event) => {
+        const eventDateTime = /* @__PURE__ */ new Date(`${event.date}T${event.time}`);
+        return eventDateTime >= /* @__PURE__ */ new Date();
+      });
+      const eventsWithMetadata = await Promise.all(
+        currentEvents.map(async (event) => {
+          const registrations = await storage.getEventRegistrations(event.id);
+          const isRegistered = userId ? registrations.some((reg) => reg.userId === userId) : false;
+          return {
+            ...event,
+            registrationCount: registrations.length,
+            isRegistered
+          };
+        })
+      );
+      res.json(eventsWithMetadata);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch events" });
+    }
+  });
+  app2.get("/api/events/all", async (req, res) => {
+    try {
+      const events2 = await storage.getEvents();
+      const eventsWithCounts = await Promise.all(
+        events2.map(async (event) => {
+          const registrations = await storage.getEventRegistrations(event.id);
+          return {
+            ...event,
+            registrationCount: registrations.length
+          };
+        })
+      );
+      res.json(eventsWithCounts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch events" });
+    }
+  });
+  app2.get("/api/events/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const event = await storage.getEventById(id);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      res.json(event);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch event" });
+    }
+  });
+  app2.post("/api/events", async (req, res) => {
+    try {
+      const eventData = insertEventSchema.parse(req.body);
+      const event = await storage.createEvent(eventData);
+      res.status(201).json(event);
+    } catch (error) {
+      console.error("Event validation error:", error);
+      res.status(400).json({ message: "Invalid event data", error: error.message });
+    }
+  });
+  app2.patch("/api/events/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      const event = await storage.updateEvent(id, updates);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      res.json(event);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update event" });
+    }
+  });
+  app2.delete("/api/events/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteEvent(id);
+      res.json({ message: "Event deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete event" });
+    }
+  });
+  app2.get("/api/events/:id/registrations", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const registrations = await storage.getEventRegistrations(id);
+      const registrationsWithUsers = await Promise.all(
+        registrations.map(async (reg) => {
+          const user = reg.userId ? await storage.getUser(reg.userId) : null;
+          return {
+            ...reg,
+            user: user ? {
+              id: user.id,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              email: user.email,
+              memberNumber: user.memberNumber
+            } : null
+          };
+        })
+      );
+      res.json(registrationsWithUsers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch event registrations" });
+    }
+  });
+  app2.post("/api/events/:id/register", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { userId, notes } = req.body;
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      const existingRegistrations = await storage.getEventRegistrations(id);
+      const alreadyRegistered = existingRegistrations.some(
+        (reg) => reg.userId === userId
+      );
+      if (alreadyRegistered) {
+        return res.status(400).json({ message: "User is already registered for this event" });
+      }
+      const event = await storage.getEventById(id);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      if (existingRegistrations.length >= event.maxSignups) {
+        return res.status(400).json({ message: "Event is full" });
+      }
+      const registrationData = {
+        eventId: id,
+        userId,
+        notes: notes || null
+      };
+      const registration = await storage.registerForEvent(registrationData);
+      res.status(201).json(registration);
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(500).json({ message: "Failed to register for event" });
+    }
+  });
+  app2.delete("/api/events/:id/register/:userId", async (req, res) => {
+    try {
+      const { id, userId } = req.params;
+      await storage.unregisterFromEvent(id, userId);
+      res.json({ message: "Successfully unregistered from event" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to unregister from event" });
+    }
+  });
+  app2.get("/api/users/:userId/events", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const registrations = await storage.getUserEventRegistrations(userId);
+      const registrationsWithEvents = await Promise.all(
+        registrations.map(async (reg) => {
+          const event = reg.eventId ? await storage.getEventById(reg.eventId) : null;
+          return {
+            ...reg,
+            event
+          };
+        })
+      );
+      res.json(registrationsWithEvents);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user event registrations" });
+    }
+  });
+  const httpServer = createServer(app2);
+  return httpServer;
+}
+
+// server/vite.ts
+import express from "express";
+import fs from "fs";
+import path2 from "path";
+import { createServer as createViteServer, createLogger } from "vite";
+
+// vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+var vite_config_default = defineConfig({
+  plugins: [
+    react(),
+    runtimeErrorOverlay(),
+    ...process.env.NODE_ENV !== "production" && process.env.REPL_ID !== void 0 ? [
+      await import("@replit/vite-plugin-cartographer").then(
+        (m) => m.cartographer()
+      )
+    ] : []
+  ],
+  resolve: {
+    alias: {
+      "@": path.resolve(import.meta.dirname, "client", "src"),
+      "@shared": path.resolve(import.meta.dirname, "shared"),
+      "@assets": path.resolve(import.meta.dirname, "attached_assets")
+    }
+  },
+  root: path.resolve(import.meta.dirname, "client"),
+  build: {
+    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    emptyOutDir: true
+  },
+  server: {
+    fs: {
+      strict: true,
+      deny: ["**/.*"]
+    }
+  }
+});
+
+// server/vite.ts
+import { nanoid } from "nanoid";
+var viteLogger = createLogger();
+function log(message, source = "express") {
+  const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  });
+  console.log(`${formattedTime} [${source}] ${message}`);
+}
+async function setupVite(app2, server) {
+  const serverOptions = {
+    middlewareMode: true,
+    hmr: { server },
+    allowedHosts: true
+  };
+  const vite = await createViteServer({
+    ...vite_config_default,
+    configFile: false,
+    customLogger: {
+      ...viteLogger,
+      error: (msg, options) => {
+        viteLogger.error(msg, options);
+        process.exit(1);
+      }
+    },
+    server: serverOptions,
+    appType: "custom"
+  });
+  app2.use(vite.middlewares);
+  app2.use("*", async (req, res, next) => {
+    const url = req.originalUrl;
+    try {
+      const clientTemplate = path2.resolve(
+        import.meta.dirname,
+        "..",
+        "client",
+        "index.html"
+      );
+      let template = await fs.promises.readFile(clientTemplate, "utf-8");
+      template = template.replace(
+        `src="/src/main.tsx"`,
+        `src="/src/main.tsx?v=${nanoid()}"`
+      );
+      const page = await vite.transformIndexHtml(url, template);
+      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+    } catch (e) {
+      vite.ssrFixStacktrace(e);
+      next(e);
+    }
+  });
+}
+function serveStatic(app2) {
+  const distPath = path2.resolve(import.meta.dirname, "public");
+  if (!fs.existsSync(distPath)) {
+    throw new Error(
+      `Could not find the build directory: ${distPath}, make sure to build the client first`
+    );
+  }
+  app2.use(express.static(distPath));
+  app2.use("*", (_req, res) => {
+    res.sendFile(path2.resolve(distPath, "index.html"));
+  });
+}
+
+// server/index.ts
+var app = express2();
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    "https://pgcapp-12fba.web.app",
+    "https://pgcapp-12fba.firebaseapp.com",
+    "http://localhost:5173",
+    /\.replit\.dev$/
+  ];
+  const origin = req.headers.origin;
+  if (origin && (allowedOrigins.includes(origin) || allowedOrigins.some((allowed) => allowed instanceof RegExp && allowed.test(origin)))) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+    return;
+  }
+  next();
+});
+app.use(express2.json());
+app.use(express2.urlencoded({ extended: false }));
+app.use((req, res, next) => {
+  const start = Date.now();
+  const path3 = req.path;
+  let capturedJsonResponse = void 0;
+  const originalResJson = res.json;
+  res.json = function(bodyJson, ...args) {
+    capturedJsonResponse = bodyJson;
+    return originalResJson.apply(res, [bodyJson, ...args]);
+  };
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    if (path3.startsWith("/api")) {
+      let logLine = `${req.method} ${path3} ${res.statusCode} in ${duration}ms`;
+      if (capturedJsonResponse) {
+        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      }
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "\u2026";
+      }
+      log(logLine);
+    }
+  });
+  next();
+});
+(async () => {
+  const server = await registerRoutes(app);
+  app.use((err, _req, res, _next) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+    res.status(status).json({ message });
+    throw err;
+  });
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
+  const port = parseInt(process.env.PORT || "5000", 10);
+  server.listen({
+    port,
+    host: "0.0.0.0",
+    reusePort: true
+  }, () => {
+    log(`serving on port ${port}`);
+  });
+})();
