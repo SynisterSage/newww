@@ -626,7 +626,7 @@ export default function Dining({ userData }: DiningProps) {
                             <SelectValue placeholder="Select hole" />
                           </SelectTrigger>
                           <SelectContent>
-                            {Array.from({ length: 9 }, (_, i) => i + 1).map((hole) => (
+                            {Array.from({ length: 18 }, (_, i) => i + 1).map((hole) => (
                               <SelectItem key={hole} value={hole.toString()}>
                                 Hole {hole}
                               </SelectItem>
