@@ -297,11 +297,13 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                             value={player.name}
                             onChange={(e) => {
                               updatePlayer(index, 'name', e.target.value);
-                              const shouldShow = e.target.value.length >= 2 && getMemberSuggestions(e.target.value).length > 0;
+                              // Only show autocomplete for members, not guests
+                              const shouldShow = player.type === 'member' && e.target.value.length >= 2 && getMemberSuggestions(e.target.value).length > 0;
                               setOpenAutocomplete(prev => ({ ...prev, [index]: shouldShow }));
                             }}
                             onFocus={() => {
-                              const shouldShow = player.name.length >= 2 && getMemberSuggestions(player.name).length > 0;
+                              // Only show autocomplete for members, not guests
+                              const shouldShow = player.type === 'member' && player.name.length >= 2 && getMemberSuggestions(player.name).length > 0;
                               setOpenAutocomplete(prev => ({ ...prev, [index]: shouldShow }));
                             }}
                             onBlur={(e) => {
@@ -312,16 +314,16 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                                 }, 150);
                               }
                             }}
-                            placeholder="Search member name or type guest name"
+                            placeholder={player.type === 'member' ? "Search member name" : "Enter guest name"}
                             className="h-8 text-sm pr-8"
                             data-testid={`input-player-name-${index}`}
                           />
-                          {player.name.length >= 2 && getMemberSuggestions(player.name).length > 0 && (
+                          {player.type === 'member' && player.name.length >= 2 && getMemberSuggestions(player.name).length > 0 && (
                             <ChevronDown className="absolute right-2 top-2 h-4 w-4 text-gray-400" />
                           )}
                           
-                          {/* Dropdown suggestions - use portal-like positioning */}
-                          {openAutocomplete[index] && getMemberSuggestions(player.name).length > 0 && (
+                          {/* Dropdown suggestions - only show for members, not guests */}
+                          {player.type === 'member' && openAutocomplete[index] && getMemberSuggestions(player.name).length > 0 && (
                             <div className="fixed z-[60] bg-white border border-gray-200 rounded-md shadow-lg w-72"
                                  style={{
                                    top: `${Math.max(10, window.innerHeight * 0.3)}px`,
