@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { TeeTime, User } from "@shared/schema";
 import { Users, Car, MapPin, Clock, Plus, Minus, UserPlus } from "lucide-react";
+import { MemberAutocomplete } from "@/components/member-autocomplete";
 
 interface TeeTimeBookingDialogProps {
   open: boolean;
@@ -224,14 +225,23 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                   <div className="grid grid-cols-12 gap-2 items-center">
                     {/* Name */}
                     <div className="col-span-4">
-                      <Input
-                        value={player.name}
-                        onChange={(e) => updatePlayer(index, 'name', e.target.value)}
-                        placeholder={index === 0 ? "Your name" : "Player name"}
-                        disabled={index === 0}
-                        className="h-8 text-sm"
-                        data-testid={`input-player-name-${index}`}
-                      />
+                      {index === 0 ? (
+                        <Input
+                          value={player.name}
+                          onChange={(e) => updatePlayer(index, 'name', e.target.value)}
+                          placeholder="Your name"
+                          disabled={true}
+                          className="h-8 text-sm"
+                          data-testid={`input-player-name-${index}`}
+                        />
+                      ) : (
+                        <MemberAutocomplete
+                          value={player.name}
+                          onValueChange={(value) => updatePlayer(index, 'name', value)}
+                          placeholder="Search member name..."
+                          className="h-8 text-sm"
+                        />
+                      )}
                       {index === 0 && (
                         <div className="text-xs text-golf-green mt-1">Booking Member</div>
                       )}
