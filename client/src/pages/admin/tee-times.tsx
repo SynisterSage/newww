@@ -2,13 +2,15 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, User as UserIcon, Users, MapPin, Car, Grid3X3, List, UserCheck, Download } from "lucide-react";
+import { Calendar, Clock, User as UserIcon, Users, MapPin, Car, Grid3X3, List, UserCheck, Download, Send } from "lucide-react";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import type { TeeTime, User } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminTeeTimesPage() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -165,6 +167,18 @@ export default function AdminTeeTimesPage() {
     });
   };
 
+  // Fake QuickBooks export function
+  const sendToQuickBooks = () => {
+    // Simulate a brief delay like a real API call
+    setTimeout(() => {
+      toast({
+        title: "✅ Successfully sent to QuickBooks",
+        description: `Tee time data for ${formatDate(selectedDate)} has been exported to QuickBooks Online.`,
+        duration: 4000,
+      });
+    }, 500);
+  };
+
   // Export tee sheet as CSV
   const exportTeeSheet = () => {
     // Filter only booked tee times and sort them by time
@@ -243,37 +257,50 @@ export default function AdminTeeTimesPage() {
             <p className="text-muted-foreground">View and manage member tee time bookings • 16-minute intervals from 7 AM to 7 PM</p>
           </div>
           
-          {/* View Toggle and Export */}
-          <div className="flex items-center gap-2">
+          {/* QuickBooks, View Toggle and Export */}
+          <div className="flex flex-col lg:flex-row items-end lg:items-center gap-2">
             <Button
               variant="outline"
               size="sm"
-              onClick={exportTeeSheet}
-              className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
-              data-testid="button-export-tee-sheet"
+              onClick={sendToQuickBooks}
+              className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+              data-testid="button-send-to-quickbooks"
             >
-              <Download className="w-4 h-4 mr-2" />
-              Export Tee Sheet
+              <Send className="w-4 h-4 mr-2" />
+              Send to QuickBooks
             </Button>
-            <div className="h-4 w-px bg-gray-300 mx-1"></div>
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className={viewMode === 'grid' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-            >
-              <Grid3X3 className="w-4 h-4 mr-2" />
-              Grid
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className={viewMode === 'list' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-            >
-              <List className="w-4 h-4 mr-2" />
-              List
-            </Button>
+            
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={exportTeeSheet}
+                className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+                data-testid="button-export-tee-sheet"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export Tee Sheet
+              </Button>
+              <div className="h-4 w-px bg-gray-300 mx-1"></div>
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className={viewMode === 'grid' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+              >
+                <Grid3X3 className="w-4 h-4 mr-2" />
+                Grid
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className={viewMode === 'list' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+              >
+                <List className="w-4 h-4 mr-2" />
+                List
+              </Button>
+            </div>
           </div>
         </div>
 
