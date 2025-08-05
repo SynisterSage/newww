@@ -140,6 +140,22 @@ export default function AdminTeeTimesPage() {
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
+  // Helper function to sort times properly (7 AM to 7 PM)
+  const sortTimesProperly = (teetimes: TeeTime[]) => {
+    return teetimes.sort((a, b) => {
+      // Convert time strings to 24-hour format for proper sorting
+      const timeToMinutes = (timeStr: string) => {
+        const [time, period] = timeStr.split(' ');
+        const [hours, minutes] = time.split(':').map(Number);
+        let totalMinutes = hours * 60 + minutes;
+        if (period === 'PM' && hours !== 12) totalMinutes += 12 * 60;
+        if (period === 'AM' && hours === 12) totalMinutes = minutes;
+        return totalMinutes;
+      };
+      return timeToMinutes(a.time) - timeToMinutes(b.time);
+    });
+  };
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr + 'T12:00:00'); // Add time to avoid timezone issues
     return date.toLocaleDateString('en-US', { 
@@ -300,8 +316,7 @@ export default function AdminTeeTimesPage() {
         {/* Tee Time Display */}
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {availableTeetimes
-              .sort((a, b) => a.time.localeCompare(b.time))
+            {sortTimesProperly(availableTeetimes)
               .map((teetime) => {
               const statusInfo = getStatusInfo(teetime);
               const bookedMembers = teetime.bookedBy?.map(userId => getMemberDetails(userId)).filter(Boolean) || [];
@@ -378,8 +393,7 @@ export default function AdminTeeTimesPage() {
         ) : (
           /* List View */
           <div className="space-y-3">
-            {availableTeetimes
-              .sort((a, b) => a.time.localeCompare(b.time))
+            {sortTimesProperly(availableTeetimes)
               .map((teetime) => {
               const statusInfo = getStatusInfo(teetime);
               const bookedMembers = teetime.bookedBy?.map(userId => getMemberDetails(userId)).filter(Boolean) || [];

@@ -187,6 +187,22 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
     return time;
   };
 
+  // Helper function to sort times properly (7 AM to 7 PM)
+  const sortTimesProperly = (teetimes: TeeTime[]) => {
+    return teetimes.sort((a, b) => {
+      // Convert time strings to 24-hour format for proper sorting
+      const timeToMinutes = (timeStr: string) => {
+        const [time, period] = timeStr.split(' ');
+        const [hours, minutes] = time.split(':').map(Number);
+        let totalMinutes = hours * 60 + minutes;
+        if (period === 'PM' && hours !== 12) totalMinutes += 12 * 60;
+        if (period === 'AM' && hours === 12) totalMinutes = minutes;
+        return totalMinutes;
+      };
+      return timeToMinutes(a.time) - timeToMinutes(b.time);
+    });
+  };
+
   const formatDate = (dateStr: string) => {
     // Parse the date string as local date to avoid timezone issues
     const [year, month, day] = dateStr.split('-').map(Number);
@@ -321,8 +337,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
         {/* Tee Time Display */}
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {availableTeetimes
-              .sort((a, b) => a.time.localeCompare(b.time))
+            {sortTimesProperly(availableTeetimes)
               .map((teetime) => {
               const statusInfo = getStatusInfo(teetime);
               const isUserBooked = teetime.bookedBy?.includes(userData?.id || "");
@@ -435,8 +450,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
         ) : (
           /* List View */
           <div className="space-y-3">
-            {availableTeetimes
-              .sort((a, b) => a.time.localeCompare(b.time))
+            {sortTimesProperly(availableTeetimes)
               .map((teetime) => {
               const statusInfo = getStatusInfo(teetime);
               const isUserBooked = teetime.bookedBy?.includes(userData?.id || "");
