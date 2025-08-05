@@ -109,6 +109,7 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
 
   // Handle member selection from autocomplete
   const selectMember = (index: number, memberName: string) => {
+    console.log('Selecting member:', memberName, 'for index:', index);
     updatePlayer(index, 'name', memberName);
     updatePlayer(index, 'type', 'member'); // Auto-set to member when selecting from database
     setOpenAutocomplete(prev => ({ ...prev, [index]: false }));
@@ -291,11 +292,13 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                               const shouldShow = player.name.length >= 2 && getMemberSuggestions(player.name).length > 0;
                               setOpenAutocomplete(prev => ({ ...prev, [index]: shouldShow }));
                             }}
-                            onBlur={() => {
-                              // Delay closing to allow for clicks on dropdown items
-                              setTimeout(() => {
-                                setOpenAutocomplete(prev => ({ ...prev, [index]: false }));
-                              }, 200);
+                            onBlur={(e) => {
+                              // Don't close if clicking on dropdown item
+                              if (!e.relatedTarget || !e.relatedTarget.closest('[data-autocomplete-item]')) {
+                                setTimeout(() => {
+                                  setOpenAutocomplete(prev => ({ ...prev, [index]: false }));
+                                }, 150);
+                              }
                             }}
                             placeholder="Search member name or type guest name"
                             className="h-8 text-sm pr-8"
@@ -305,20 +308,29 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                             <ChevronDown className="absolute right-2 top-2 h-4 w-4 text-gray-400" />
                           )}
                           
-                          {/* Dropdown suggestions - positioned above input to avoid cutoff */}
+                          {/* Dropdown suggestions - use portal-like positioning */}
                           {openAutocomplete[index] && getMemberSuggestions(player.name).length > 0 && (
-                            <div className="absolute z-50 w-full max-w-xs bottom-full mb-1 bg-white border border-gray-200 rounded-md shadow-lg">
-                              <div className="px-3 py-2 text-xs font-medium text-gray-600 border-b">
+                            <div className="fixed z-[60] bg-white border border-gray-200 rounded-md shadow-lg w-72"
+                                 style={{
+                                   top: `${Math.max(10, window.innerHeight * 0.3)}px`,
+                                   left: '50%',
+                                   transform: 'translateX(-50%)'
+                                 }}>
+                              <div className="px-3 py-2 text-xs font-medium text-gray-600 border-b bg-gray-50">
                                 Members ({getMemberSuggestions(player.name).length})
                               </div>
-                              <div className="max-h-32 overflow-y-auto">
+                              <div className="max-h-48 overflow-y-auto">
                                 {getMemberSuggestions(player.name).map((member) => (
                                   <div
                                     key={member.id}
-                                    onClick={() => selectMember(index, member.name)}
-                                    className="flex items-center gap-2 px-3 py-1.5 cursor-pointer hover:bg-gray-50"
+                                    data-autocomplete-item
+                                    onMouseDown={(e) => {
+                                      e.preventDefault(); // Prevent input blur
+                                      selectMember(index, member.name);
+                                    }}
+                                    className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors"
                                   >
-                                    <Users className="w-3 h-3 text-golf-green" />
+                                    <Users className="w-4 h-4 text-golf-green flex-shrink-0" />
                                     <div className="flex-1 min-w-0">
                                       <div className="text-sm font-medium truncate">{member.name}</div>
                                       <div className="text-xs text-gray-500 truncate">
