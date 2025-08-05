@@ -352,11 +352,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/member", async (req, res) => {
     try {
-      console.log("Member auth request body:", req.body);
       const { email, phone } = memberAuthSchema.parse(req.body);
-      console.log("Parsed email:", email, "phone:", phone);
       const member = await storage.authenticateMember(email, phone);
-      console.log("Authentication result:", member ? "Found member" : "No member found");
 
       if (!member) {
         return res
@@ -392,7 +389,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { password: _, ...memberData } = member;
       res.json({ ...memberData, sessionToken: session.sessionToken });
     } catch (error) {
-      console.log("Member auth error:", error);
       res.status(400).json({ message: "Invalid authentication data" });
     }
   });
