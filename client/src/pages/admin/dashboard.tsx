@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, UtensilsCrossed, Users, Clock, CheckCircle, AlertCircle, TrendingUp, Trophy, RotateCcw } from "lucide-react";
+import { Calendar, UtensilsCrossed, Users, Clock, CheckCircle, AlertCircle, TrendingUp, Trophy, RotateCcw, CloudSun } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 import type { TeeTime, Order, User } from "@shared/schema";
@@ -77,9 +77,9 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
     },
   });
 
-  // Calculate stats
-  const todaysTeetimes = teetimes.length;
-  const pendingOrders = orders.filter(o => {
+  // Calculate stats with proper filtering
+  const todaysTeetimes = teetimes.filter(t => t.date === today).length;
+  const todaysActiveOrders = orders.filter(o => {
     const orderDate = new Date(o.createdAt || Date.now());
     const today = new Date();
     return orderDate.toDateString() === today.toDateString();
@@ -136,9 +136,9 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
       
       return {
         type: 'tee-time',
-        title: `Tee Time - ${t.time}`,
+        title: `Tee Time Booked - ${t.time}`,
         subtitle: `${displayNames.join(', ') || 'Players'} • ${t.holes || '18'} holes`,
-        time: format(new Date(t.date), 'MMM dd'),
+        time: format(new Date(), 'MMM dd, h:mm a'), // Use current time since we don't store booking timestamp
         status: 'booked'
       };
     }),
@@ -221,7 +221,7 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Active Orders</p>
-                  <p className="text-2xl font-bold text-slate-800">{pendingOrders}</p>
+                  <p className="text-2xl font-bold text-slate-800">{todaysActiveOrders}</p>
                 </div>
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                   <UtensilsCrossed className="w-6 h-6 text-orange-600" />
@@ -246,7 +246,7 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 shadow-sm">
             <CardContent className="p-6 text-center">
               <Link href="/admin/tee-times">
@@ -294,6 +294,18 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
               </Link>
             </CardContent>
           </Card>
+
+          <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 shadow-sm">
+            <CardContent className="p-6 text-center">
+              <Link href="/admin/conditions">
+                <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <CloudSun className="w-7 h-7 text-green-600" />
+                </div>
+                <h3 className="font-semibold text-foreground mb-1">Course Conditions</h3>
+                <p className="text-sm text-muted-foreground">Adjust course rules</p>
+              </Link>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Recent Activity */}
@@ -307,10 +319,13 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
                 <div key={index} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
                   <div className="flex items-center space-x-4">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      activity.type === 'tee-time' ? 'bg-blue-100' : 'bg-orange-100'
+                      activity.type === 'tee-time' ? 'bg-blue-100' : 
+                      activity.type === 'event' ? 'bg-purple-100' : 'bg-orange-100'
                     }`}>
                       {activity.type === 'tee-time' ? (
                         <Calendar className="w-5 h-5 text-blue-600" />
+                      ) : activity.type === 'event' ? (
+                        <Trophy className="w-5 h-5 text-purple-600" />
                       ) : (
                         <UtensilsCrossed className="w-5 h-5 text-orange-600" />
                       )}
@@ -324,11 +339,13 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
                     <span className="text-sm text-muted-foreground">{activity.time}</span>
                     <span className={`px-2 py-1 text-xs rounded-md ${
                       activity.type === 'tee-time' ? 'bg-green-100 text-green-700' :
+                      activity.type === 'event' ? 'bg-purple-100 text-purple-700' :
                       activity.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
                       activity.status === 'confirmed' ? 'bg-green-100 text-green-700' :
                       'bg-green-100 text-green-700'
                     }`}>
-                      {activity.type === 'tee-time' ? 'booked' : activity.status}
+                      {activity.type === 'tee-time' ? 'booked' : 
+                       activity.type === 'event' ? 'created' : activity.status}
                     </span>
                   </div>
                 </div>

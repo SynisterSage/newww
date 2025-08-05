@@ -70,12 +70,11 @@ export default function AdminEvents() {
       return await apiRequest("POST", "/api/events", eventData);
     },
     onSuccess: () => {
-      // Invalidate all event-related queries for real-time updates
-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events/all"] });
+      // Force immediate refetch to ensure new events appear instantly
+      queryClient.refetchQueries({ queryKey: ["/api/events"] });
+      queryClient.refetchQueries({ queryKey: ["/api/events/all"] });
       queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] === "/api/events" || 
-        (Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events")
+        Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events"
       });
       setIsCreateDialogOpen(false);
       toast({

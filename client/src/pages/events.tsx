@@ -53,13 +53,12 @@ export default function Events({ userData }: EventsProps) {
       return await apiRequest("POST", `/api/events/${eventId}/register`, { userId: currentUserId, notes });
     },
     onSuccess: () => {
-      // Invalidate all event-related queries for real-time updates
-      queryClient.invalidateQueries({ queryKey: ["/api/events", currentUserId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events/all"] });
+      // Force immediate refetch to ensure registration count updates instantly
+      queryClient.refetchQueries({ queryKey: ["/api/events", currentUserId] });
+      queryClient.refetchQueries({ queryKey: ["/api/events"] });
+      queryClient.refetchQueries({ queryKey: ["/api/events/all"] });
       queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] === "/api/events" || 
-        (Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events")
+        Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events"
       });
       setIsRegisterDialogOpen(false);
       setSelectedEvent(null);
@@ -83,13 +82,12 @@ export default function Events({ userData }: EventsProps) {
       return await apiRequest("DELETE", `/api/events/${eventId}/register/${currentUserId}`);
     },
     onSuccess: () => {
-      // Invalidate all event-related queries for real-time updates
-      queryClient.invalidateQueries({ queryKey: ["/api/events", currentUserId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events/all"] });
+      // Force immediate refetch to ensure unregistration updates instantly
+      queryClient.refetchQueries({ queryKey: ["/api/events", currentUserId] });
+      queryClient.refetchQueries({ queryKey: ["/api/events"] });
+      queryClient.refetchQueries({ queryKey: ["/api/events/all"] });
       queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] === "/api/events" || 
-        (Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events")
+        Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events"
       });
       toast({
         title: "Unregistered Successfully",
