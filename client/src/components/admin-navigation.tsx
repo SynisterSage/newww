@@ -116,6 +116,36 @@ export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminN
                 <button
                   onClick={async () => {
                     setShowSwitchMenu(false);
+                    if (confirm('This will repair all corrupted tee time slots by fixing mismatched arrays. Continue?')) {
+                      try {
+                        // Call API to repair corrupted tee times
+                        const response = await fetch('/api/admin/repair-teetimes', { 
+                          method: 'POST',
+                          credentials: 'include'
+                        });
+                        
+                        const result = await response.json();
+                        if (response.ok) {
+                          alert(`Successfully repaired ${result.repairedCount} corrupted tee time slots`);
+                          // Refresh page to show updated data
+                          window.location.reload();
+                        } else {
+                          alert(`Failed to repair tee times: ${result.message}`);
+                        }
+                      } catch (error) {
+                        alert('Failed to repair tee times');
+                      }
+                    }
+                  }}
+                  className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-md bg-green-600/15 border border-green-500/30 text-green-200 hover:bg-green-600/25 hover:border-green-500/40 transition-all duration-200 text-sm font-medium"
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>Repair Tee Times</span>
+                </button>
+
+                <button
+                  onClick={async () => {
+                    setShowSwitchMenu(false);
                     if (confirm('This will clear all test bookings and registrations. Continue?')) {
                       try {
                         // Call API to reset test data

@@ -835,6 +835,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin repair corrupted tee times route
+  app.post("/api/admin/repair-teetimes", async (req, res) => {
+    try {
+      // Get tee times for today and tomorrow to check for corruption
+      const today = new Date().toISOString().split('T')[0];
+      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      
+      const todayTeetimes = await storage.getTeetimes(today);
+      const tomorrowTeetimes = await storage.getTeetimes(tomorrow);
+      const allTeetimes = [...todayTeetimes, ...tomorrowTeetimes];
+      
+      let repairedCount = 0;
+
+      for (const teetime of allTeetimes) {
+        // Check for array length mismatches
+        const arrays = [
+          teetime.bookedBy || [],
+          teetime.playerNames || [],
+          teetime.playerTypes || [],
+          teetime.transportModes || [],
+          teetime.holesPlaying || []
+        ];
+        
+        const hasArrayMismatch = arrays.some(arr => arr.length !== arrays[0].length);
+        
+        if (hasArrayMismatch) {
+          console.log(`Repairing corrupted tee time ${teetime.id} at ${teetime.time} - clearing mismatched arrays`);
+          console.log(`Array lengths: bookedBy=${arrays[0].length}, playerNames=${arrays[1].length}, playerTypes=${arrays[2].length}, transportModes=${arrays[3].length}, holesPlaying=${arrays[4].length}`);
+          
+          // Clear all arrays to fix corruption
+          await storage.updateTeetime(teetime.id, {
+            bookedBy: [],
+            playerNames: [],
+            playerTypes: [],
+            transportModes: [],
+            holesPlaying: [],
+          });
+          
+          repairedCount++;
+        }
+      }
+
+      res.json({ 
+        message: `Repair completed successfully`, 
+        repairedCount,
+        totalChecked: allTeetimes.length
+      });
+    } catch (error) {
+      console.error("Repair tee times error:", error);
+      res.status(500).json({ message: "Failed to repair tee times" });
+    }
+  });
+
   // Course conditions routes
   app.get("/api/course/conditions", async (req, res) => {
     try {
