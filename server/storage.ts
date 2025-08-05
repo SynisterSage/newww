@@ -2,7 +2,7 @@ import { type User, type InsertUser, type AdminUser, type InsertAdminUser, type 
 import { randomUUID } from "crypto";
 import { db } from "./db";
 import { users, adminUsers, teetimes, menuItems, orders, courseHoles, rounds, sessions, courseConditions, events, eventRegistrations } from "@shared/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, lt } from "drizzle-orm";
 
 export interface IStorage {
   // User methods

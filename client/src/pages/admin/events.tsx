@@ -44,7 +44,7 @@ export default function AdminEvents() {
 
   // No automatic refresh - only refresh on mutations
 
-  // Fetch events with real-time updates for registration counts
+  // Fetch events - NO auto-refresh to avoid closing dialog popups
   const { data: allEvents = [], isLoading } = useQuery({
     queryKey: ["/api/events/all"],
     queryFn: async () => {
@@ -52,11 +52,10 @@ export default function AdminEvents() {
       if (!response.ok) throw new Error("Failed to fetch events");
       return response.json();
     },
-    refetchInterval: 5000, // Auto-refresh every 5 seconds for registration count updates
-    refetchIntervalInBackground: true,
+    // Only refresh on mount and focus - no intervals to avoid closing dialogs
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    staleTime: 0, // Always fetch fresh data for real-time registration counts
+    staleTime: 30000, // Cache for 30 seconds
   }) as { data: EventWithRegistrations[], isLoading: boolean };
 
   // Filter out ended events from display
