@@ -20,10 +20,9 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
     const today = new Date();
     return today.toISOString().split('T')[0];
   });
-  const [bookingDialog, setBookingDialog] = useState<{ open: boolean; teeTime: TeeTime | null; mode: "book" | "edit" }>({
+  const [bookingDialog, setBookingDialog] = useState<{ open: boolean; teeTime: TeeTime | null }>({
     open: false,
-    teeTime: null,
-    mode: "book"
+    teeTime: null
   });
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
@@ -93,12 +92,12 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
     enabled: !!userData?.id,
   });
 
-  const openBookingDialog = (teeTime: TeeTime, mode: "book" | "edit" = "book") => {
-    setBookingDialog({ open: true, teeTime, mode });
+  const openBookingDialog = (teeTime: TeeTime) => {
+    setBookingDialog({ open: true, teeTime });
   };
 
   const closeBookingDialog = () => {
-    setBookingDialog({ open: false, teeTime: null, mode: "book" });
+    setBookingDialog({ open: false, teeTime: null });
   };
 
   const cancelMutation = useMutation({
@@ -409,29 +408,19 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
                     <div>Packanack Golf Course</div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="pt-2 mt-auto space-y-2">
+                  {/* Action Button */}
+                  <div className="pt-2 mt-auto">
                     {isUserBooked ? (
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                          onClick={() => openBookingDialog(teetime, "edit")}
-                          data-testid={`button-edit-tee-time-${teetime.id}`}
-                        >
-                          Edit Booking
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
-                          onClick={() => handleCancelBooking(teetime.id)}
-                          disabled={cancelMutation.isPending}
-                        >
-                          <X className="w-4 h-4 mr-2" />
-                          {cancelMutation.isPending ? "Leaving..." : "Leave"}
-                        </Button>
-                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-red-600 border-red-200 hover:bg-red-50"
+                        onClick={() => handleCancelBooking(teetime.id)}
+                        disabled={cancelMutation.isPending}
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        {cancelMutation.isPending ? "Leaving..." : "Leave Tee Time"}
+                      </Button>
                     ) : statusInfo.canJoin ? (
                       <Button
                         size="sm"
@@ -550,29 +539,19 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
                           <div>Packanack Golf Course</div>
                         </div>
                         
-                        {/* Action Buttons */}
-                        <div className="w-48 space-y-2">
+                        {/* Action Button */}
+                        <div className="w-32">
                           {isUserBooked ? (
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                                onClick={() => openBookingDialog(teetime, "edit")}
-                                data-testid={`button-edit-tee-time-list-${teetime.id}`}
-                              >
-                                Edit
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
-                                onClick={() => handleCancelBooking(teetime.id)}
-                                disabled={cancelMutation.isPending}
-                              >
-                                <X className="w-4 h-4 mr-1" />
-                                {cancelMutation.isPending ? "Leaving..." : "Leave"}
-                              </Button>
-                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full text-red-600 border-red-200 hover:bg-red-50"
+                              onClick={() => handleCancelBooking(teetime.id)}
+                              disabled={cancelMutation.isPending}
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              {cancelMutation.isPending ? "Leaving..." : "Leave"}
+                            </Button>
                           ) : statusInfo.canJoin ? (
                             <Button
                               size="sm"
@@ -621,7 +600,6 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
             onOpenChange={closeBookingDialog}
             teeTime={bookingDialog.teeTime}
             userData={userData}
-            mode={bookingDialog.mode}
           />
         )}
       </div>

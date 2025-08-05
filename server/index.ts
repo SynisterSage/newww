@@ -67,60 +67,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Daily reset function to clear all tee time bookings at end of day
-const resetDailyTeeTimesAtMidnight = async () => {
-  try {
-    const { DatabaseStorage } = await import('./storage');
-    const storage = new DatabaseStorage();
-    
-    console.log('Starting daily tee time reset...');
-    
-    // Get all tee times and clear their bookings
-    const today = new Date().toISOString().split('T')[0];
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    
-    // Clear bookings for yesterday's tee times
-    const yesterdayTeetimes = await storage.getTeetimes(yesterday);
-    for (const teetime of yesterdayTeetimes) {
-      if (teetime.bookedBy && teetime.bookedBy.length > 0) {
-        await storage.updateTeetime(teetime.id, {
-          bookedBy: [],
-          playerNames: [],
-          playerTypes: [],
-          transportModes: [],
-          holesPlaying: [],
-        });
-      }
-    }
-    
-    console.log(`Daily reset complete - cleared ${yesterdayTeetimes.length} tee times from ${yesterday}`);
-  } catch (error) {
-    console.error('Error during daily tee time reset:', error);
-  }
-};
-
-// Schedule daily reset at midnight (00:00)
-const scheduleNightlyReset = () => {
-  const now = new Date();
-  const midnight = new Date();
-  midnight.setHours(24, 0, 0, 0); // Next midnight
-  
-  const timeUntilMidnight = midnight.getTime() - now.getTime();
-  
-  setTimeout(() => {
-    resetDailyTeeTimesAtMidnight();
-    // Schedule next reset (every 24 hours)
-    setInterval(resetDailyTeeTimesAtMidnight, 24 * 60 * 60 * 1000);
-  }, timeUntilMidnight);
-  
-  console.log(`Scheduled daily tee time reset in ${Math.round(timeUntilMidnight / 1000 / 60)} minutes`);
-};
-
 (async () => {
   const server = await registerRoutes(app);
-  
-  // Start the daily reset scheduler
-  scheduleNightlyReset();
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
