@@ -22,13 +22,21 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: "Email and phone are required" });
     }
 
-    // Test member credentials (simplified for Vercel testing)
+    // Test member credentials matching actual database
     const testMembers = [
-      { id: '1', email: 'admin@golf.com', phone: '123-456-7890', firstName: 'Admin', lastName: 'User', memberNumber: 'A001' },
-      { id: '2', email: 'afergyy@gmail.com', phone: '987-654-3210', firstName: 'Andrew', lastName: 'Ferguson', memberNumber: 'M002' }
+      { id: '1', email: 'admin@golf.com', phone: '(973) 123-4567', firstName: 'Admin', lastName: 'User', memberNumber: 'A001' },
+      { id: '2', email: 'afergyy@gmail.com', phone: '(908) 555-0123', firstName: 'Andrew', lastName: 'Ferguson', memberNumber: 'M002' },
+      { id: '3', email: 'john.smith@email.com', phone: '(973) 555-1234', firstName: 'John', lastName: 'Smith', memberNumber: 'M101' },
+      { id: '4', email: 'mary.jones@email.com', phone: '(908) 555-5678', firstName: 'Mary', lastName: 'Jones', memberNumber: 'M102' }
     ];
 
-    const member = testMembers.find(m => m.email === email && m.phone === phone);
+    // Normalize phone numbers by removing all non-digits
+    const normalizePhone = (phone: string) => phone.replace(/\D/g, '');
+    const normalizedInputPhone = normalizePhone(phone);
+    
+    const member = testMembers.find(m => 
+      m.email === email && normalizePhone(m.phone) === normalizedInputPhone
+    );
     
     if (!member) {
       return res.status(401).json({ error: "Invalid credentials" });
