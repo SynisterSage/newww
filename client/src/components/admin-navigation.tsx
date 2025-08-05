@@ -38,7 +38,7 @@ export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminN
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <img src="/attached_assets/logo_1754366264944.png" alt="Packanack GC" className="w-6 h-6 invert" />
+              <img src="attached_assets/logo_1754366395167.png" alt="Packanack GC" className="w-6 h-6 invert" />
               <span className="font-semibold text-lg">PGC Admin</span>
             </div>
           </div>
@@ -48,9 +48,7 @@ export default function AdminNavigation({ adminEmail, onSwitchToMember }: AdminN
       <aside className="hidden lg:block w-64 text-white min-h-screen fixed left-0 top-0 z-40 bg-slate-800">
         <div className="p-6">
           <div className="flex items-center space-x-3 mb-8 pb-6 border-b border-white/10">
-            <div className="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center p-1">
-              <img src="/attached_assets/logo_1754366264944.png" alt="Packanack GC" className="w-full h-full object-contain invert" />
-            </div>
+            <img src="attached_assets/logo_1754366395167.png" alt="Packanack GC" className="w-8 h-8 object-contain invert" />
             <div>
               <h1 className="font-semibold text-lg">PGC</h1>
               <p className="text-xs text-white/60">Admin Portal</p>

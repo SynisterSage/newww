@@ -42,7 +42,7 @@ export default function Navigation({ userEmail, userData, isAdminView, onSwitchT
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <img src="/attached_assets/logo_1754366264944.png" alt="Packanack GC" className="w-6 h-6" />
+              <img src="attached_assets/logo_1754366395167.png" alt="Packanack GC" className="w-6 h-6" />
               <span className="font-semibold text-lg">Packanack GC</span>
             </div>
             <button
@@ -72,9 +72,7 @@ export default function Navigation({ userEmail, userData, isAdminView, onSwitchT
           {/* Mobile Sidebar Header */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-golf-gold rounded-md flex items-center justify-center p-1">
-                <img src="/attached_assets/logo_1754366264944.png" alt="Packanack GC" className="w-full h-full object-contain" />
-              </div>
+              <img src="attached_assets/logo_1754366395167.png" alt="Packanack GC" className="w-8 h-8 object-contain" />
               <div>
                 <h1 className="font-semibold text-lg">PGC</h1>
                 <p className="text-xs text-white/60">Member Portal</p>
@@ -189,9 +187,7 @@ export default function Navigation({ userEmail, userData, isAdminView, onSwitchT
       <aside className="hidden lg:block w-64 text-white min-h-screen fixed left-0 top-0 z-40 bg-[#032617]">
         <div className="p-6">
           <div className="flex items-center space-x-3 mb-8 pb-6 border-b border-white/10">
-            <div className="w-8 h-8 bg-golf-gold rounded-md flex items-center justify-center p-1">
-              <img src="/attached_assets/logo_1754366264944.png" alt="Packanack GC" className="w-full h-full object-contain" />
-            </div>
+            <img src="attached_assets/logo_1754366395167.png" alt="Packanack GC" className="w-8 h-8 object-contain" />
             <div>
               <h1 className="font-semibold text-lg">PGC</h1>
               <p className="text-xs text-white/60">Member Portal</p>
