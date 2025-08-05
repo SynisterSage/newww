@@ -300,7 +300,7 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                               )}
                             </div>
                           </PopoverTrigger>
-                          <PopoverContent className="w-80 p-0" align="start">
+                          <PopoverContent className="w-80 p-0" align="start" side="bottom" sideOffset={4}>
                             <Command>
                               <div className="px-3 py-2 text-xs font-medium text-gray-600 border-b">
                                 Search Members ({allMembers.length} total)
@@ -314,7 +314,10 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                                 {getMemberSuggestions(player.name).map((member) => (
                                   <CommandItem
                                     key={member.id}
-                                    onSelect={() => selectMember(index, member.name)}
+                                    value={member.name}
+                                    onSelect={(selectedValue) => {
+                                      selectMember(index, selectedValue);
+                                    }}
                                     className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-50"
                                   >
                                     <Users className="w-4 h-4 text-golf-green" />
