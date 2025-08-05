@@ -238,7 +238,7 @@ export default function AdminTeeTimesPage() {
                   variant={isToday ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedDate(getTodayDate())}
-                  className={isToday ? "bg-golf-green hover:bg-golf-green-light text-white" : ""}
+                  className={isToday ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}
                 >
                   Today
                   <span className="ml-2 text-xs opacity-75">
@@ -250,7 +250,7 @@ export default function AdminTeeTimesPage() {
                   variant={isTomorrow ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedDate(getTomorrowDate())}
-                  className={isTomorrow ? "bg-golf-green hover:bg-golf-green-light text-white" : ""}
+                  className={isTomorrow ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}
                 >
                   Tomorrow
                   <span className="ml-2 text-xs opacity-75">
@@ -274,8 +274,8 @@ export default function AdminTeeTimesPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="border-0 shadow-sm bg-white">
             <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Clock className="h-6 w-6 text-green-600" />
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Clock className="h-6 w-6 text-blue-600" />
               </div>
               <p className="text-2xl font-bold text-gray-900">{openSlots.length}</p>
               <p className="text-sm text-muted-foreground">Available Slots</p>
@@ -325,7 +325,7 @@ export default function AdminTeeTimesPage() {
                 <Card key={teetime.id} className="border-0 shadow-sm bg-white">
                   <CardContent className="p-4">
                     <div className="text-center mb-3">
-                      <div className="w-10 h-10 bg-golf-green rounded-full flex items-center justify-center mx-auto mb-2">
+                      <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
                         <Clock className="h-5 w-5 text-white" />
                       </div>
                       <p className="font-bold text-lg text-foreground mb-2">{formatTime(teetime.time)}</p>
@@ -355,7 +355,7 @@ export default function AdminTeeTimesPage() {
                             return (
                               <div key={index} className="space-y-1 text-center">
                                 <div className="flex items-center justify-center space-x-1 text-xs">
-                                  <UserIcon className="w-3 h-3 text-golf-green" />
+                                  <UserIcon className="w-3 h-3 text-blue-600" />
                                   <span className="text-foreground font-medium">
                                     {member?.firstName} {member?.lastName}
                                   </span>
@@ -405,7 +405,7 @@ export default function AdminTeeTimesPage() {
                       {/* Left side - Time and Status */}
                       <div className="flex items-center gap-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-golf-green rounded-full flex items-center justify-center">
+                          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
                             <Clock className="h-6 w-6 text-white" />
                           </div>
                           <div>
@@ -432,7 +432,7 @@ export default function AdminTeeTimesPage() {
                                 
                                 return (
                                   <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                                    <UserCheck className="w-4 h-4 text-golf-green" />
+                                    <UserCheck className="w-4 h-4 text-blue-600" />
                                     <div className="flex-1">
                                       <p className="text-sm font-medium text-foreground">
                                         {member?.firstName} {member?.lastName}
