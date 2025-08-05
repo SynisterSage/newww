@@ -8,6 +8,7 @@ export interface IStorage {
   // User methods
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByName(fullName: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   authenticateMember(email: string, phone: string): Promise<User | null>;
   getAllUsers(): Promise<User[]>;
@@ -495,6 +496,18 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).find(user => user.username === username);
   }
 
+  async getUserByName(fullName: string): Promise<User | undefined> {
+    const [firstName, ...lastNameParts] = fullName.trim().split(' ');
+    const lastName = lastNameParts.join(' ');
+    
+    if (firstName && lastName) {
+      return Array.from(this.users.values()).find(user => 
+        user.firstName === firstName && user.lastName === lastName
+      );
+    }
+    return undefined;
+  }
+
   async getUserByEmail(email: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(user => user.email === email);
   }
@@ -948,6 +961,22 @@ export class DatabaseStorage implements IStorage {
   async getUserByUsername(username: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.username, username));
     return user || undefined;
+  }
+
+  async getUserByName(fullName: string): Promise<User | undefined> {
+    const [firstName, ...lastNameParts] = fullName.trim().split(' ');
+    const lastName = lastNameParts.join(' ');
+    
+    if (firstName && lastName) {
+      const [user] = await db.select().from(users).where(
+        and(
+          eq(users.firstName, firstName),
+          eq(users.lastName, lastName)
+        )
+      );
+      return user || undefined;
+    }
+    return undefined;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {

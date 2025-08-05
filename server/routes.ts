@@ -111,18 +111,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newHolesPlaying = [...(teetime.holesPlaying || [])];
 
       // Add each player to the arrays with validation
-      players.forEach((player: any) => {
+      for (const player of players) {
         // Ensure player object has required properties
         if (!player || typeof player !== 'object') {
           throw new Error('Invalid player object');
         }
         
-        newBookedBy.push(userId); // All players are associated with the booking user
+        // For member players, look up their actual user ID
+        let playerUserId = userId; // Default to booking user
+        if (player.type === 'member' && player.name) {
+          const memberUser = await storage.getUserByName(player.name);
+          if (memberUser) {
+            playerUserId = memberUser.id;
+          }
+        }
+        
+        newBookedBy.push(playerUserId);
         newPlayerNames.push(player.name || "Unknown Player");
         newPlayerTypes.push(player.type || "member");
         newTransportModes.push(player.transportMode || "riding");
         newHolesPlaying.push(player.holesPlaying || "18");
-      });
+      }
 
       // Ensure all arrays have the same length after updates
       if (newBookedBy.length !== newPlayerNames.length || 
