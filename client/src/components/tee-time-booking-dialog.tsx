@@ -307,11 +307,11 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                           
                           {/* Dropdown suggestions */}
                           {openAutocomplete[index] && getMemberSuggestions(player.name).length > 0 && (
-                            <div className="absolute z-50 w-80 mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+                            <div className="absolute z-50 w-full max-w-xs mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
                               <div className="px-3 py-2 text-xs font-medium text-gray-600 border-b">
-                                Search Members ({allMembers.length} total)
+                                Members ({getMemberSuggestions(player.name).length})
                               </div>
-                              <div className="max-h-60 overflow-y-auto">
+                              <div className="max-h-40 overflow-y-auto">
                                 {getMemberSuggestions(player.name).map((member) => (
                                   <div
                                     key={member.id}
@@ -319,9 +319,9 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                                     className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-50"
                                   >
                                     <Users className="w-4 h-4 text-golf-green" />
-                                    <div className="flex-1">
-                                      <div className="text-sm font-medium">{member.name}</div>
-                                      <div className="text-xs text-gray-500">
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-sm font-medium truncate">{member.name}</div>
+                                      <div className="text-xs text-gray-500 truncate">
                                         {member.membershipClass ? `${member.membershipClass} Member` : 'Member'}
                                       </div>
                                     </div>
