@@ -319,7 +319,39 @@ export default function AdminTeeTimesPage() {
             {sortTimesProperly(availableTeetimes)
               .map((teetime) => {
               const statusInfo = getStatusInfo(teetime);
-              const bookedMembers = teetime.bookedBy?.map(userId => getMemberDetails(userId)).filter(Boolean) || [];
+              
+              // Get player details - combine member data with player names for accurate display
+              const getPlayerDetails = () => {
+                if (!teetime.playerNames || teetime.playerNames.length === 0) return [];
+                
+                return teetime.playerNames.map((playerName, index) => {
+                  const playerType = teetime.playerTypes?.[index] || 'member';
+                  const userId = teetime.bookedBy?.[index];
+                  
+                  if (playerType === 'member' && userId) {
+                    // For members, get full details from database
+                    const memberDetails = getMemberDetails(userId);
+                    return {
+                      name: playerName,
+                      firstName: memberDetails?.firstName || playerName.split(' ')[0],
+                      lastName: memberDetails?.lastName || playerName.split(' ').slice(1).join(' '),
+                      type: playerType,
+                      isGuest: false
+                    };
+                  } else {
+                    // For guests, use the provided name
+                    return {
+                      name: playerName,
+                      firstName: playerName.split(' ')[0],
+                      lastName: playerName.split(' ').slice(1).join(' ') || '',
+                      type: playerType,
+                      isGuest: true
+                    };
+                  }
+                });
+              };
+              
+              const bookedPlayers = getPlayerDetails();
 
               return (
                 <Card key={teetime.id} className="border-0 shadow-sm bg-white">
@@ -342,13 +374,12 @@ export default function AdminTeeTimesPage() {
                         </p>
                       </div>
 
-                      {bookedMembers.length > 0 && (
+                      {bookedPlayers.length > 0 && (
                         <div className="space-y-1">
                           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide text-center">
                             Booked Players:
                           </p>
-                          {bookedMembers.map((member, index) => {
-                            const playerType = teetime.playerTypes?.[index] || 'member';
+                          {bookedPlayers.map((player, index) => {
                             const transportMode = teetime.transportModes?.[index] || 'riding';
                             const holesPlaying = teetime.holesPlaying?.[index] || '18';
                             
@@ -357,10 +388,12 @@ export default function AdminTeeTimesPage() {
                                 <div className="flex items-center justify-center space-x-1 text-xs">
                                   <UserIcon className="w-3 h-3 text-blue-600" />
                                   <span className="text-foreground font-medium">
-                                    {member?.firstName} {member?.lastName}
+                                    {player.firstName} {player.lastName}
                                   </span>
-                                  <span className="text-xs text-muted-foreground capitalize px-1 py-0.5 bg-gray-100 rounded">
-                                    {playerType}
+                                  <span className={`text-xs capitalize px-1 py-0.5 rounded ${
+                                    player.isGuest ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-muted-foreground'
+                                  }`}>
+                                    {player.type}
                                   </span>
                                 </div>
                                 <div className="flex items-center justify-center space-x-2 text-xs text-muted-foreground">
@@ -396,7 +429,39 @@ export default function AdminTeeTimesPage() {
             {sortTimesProperly(availableTeetimes)
               .map((teetime) => {
               const statusInfo = getStatusInfo(teetime);
-              const bookedMembers = teetime.bookedBy?.map(userId => getMemberDetails(userId)).filter(Boolean) || [];
+              
+              // Get player details - combine member data with player names for accurate display
+              const getPlayerDetails = () => {
+                if (!teetime.playerNames || teetime.playerNames.length === 0) return [];
+                
+                return teetime.playerNames.map((playerName, index) => {
+                  const playerType = teetime.playerTypes?.[index] || 'member';
+                  const userId = teetime.bookedBy?.[index];
+                  
+                  if (playerType === 'member' && userId) {
+                    // For members, get full details from database
+                    const memberDetails = getMemberDetails(userId);
+                    return {
+                      name: playerName,
+                      firstName: memberDetails?.firstName || playerName.split(' ')[0],
+                      lastName: memberDetails?.lastName || playerName.split(' ').slice(1).join(' '),
+                      type: playerType,
+                      isGuest: false
+                    };
+                  } else {
+                    // For guests, use the provided name
+                    return {
+                      name: playerName,
+                      firstName: playerName.split(' ')[0],
+                      lastName: playerName.split(' ').slice(1).join(' ') || '',
+                      type: playerType,
+                      isGuest: true
+                    };
+                  }
+                });
+              };
+              
+              const bookedPlayers = getPlayerDetails();
 
               return (
                 <Card key={teetime.id} className="border-0 shadow-sm bg-white">
@@ -421,12 +486,11 @@ export default function AdminTeeTimesPage() {
                       
                       {/* Middle - Player Details */}
                       <div className="flex-1 mx-8">
-                        {bookedMembers.length > 0 ? (
+                        {bookedPlayers.length > 0 ? (
                           <div className="space-y-2">
                             <p className="text-sm font-medium text-muted-foreground">Booked Players:</p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                              {bookedMembers.map((member, index) => {
-                                const playerType = teetime.playerTypes?.[index] || 'member';
+                              {bookedPlayers.map((player, index) => {
                                 const transportMode = teetime.transportModes?.[index] || 'riding';
                                 const holesPlaying = teetime.holesPlaying?.[index] || '18';
                                 
@@ -435,11 +499,13 @@ export default function AdminTeeTimesPage() {
                                     <UserCheck className="w-4 h-4 text-blue-600" />
                                     <div className="flex-1">
                                       <p className="text-sm font-medium text-foreground">
-                                        {member?.firstName} {member?.lastName}
+                                        {player.firstName} {player.lastName}
                                       </p>
                                       <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                        <span className="capitalize bg-gray-200 px-2 py-0.5 rounded">
-                                          {playerType}
+                                        <span className={`capitalize px-2 py-0.5 rounded ${
+                                          player.isGuest ? 'bg-orange-200 text-orange-800' : 'bg-gray-200 text-gray-700'
+                                        }`}>
+                                          {player.type}
                                         </span>
                                         <div className="flex items-center gap-1">
                                           <Car className="w-3 h-3" />
