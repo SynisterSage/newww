@@ -279,45 +279,43 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                         />
                       ) : (
                         // Additional players - with member autocomplete
-                        <Popover 
-                          open={openAutocomplete[index] || false} 
-                          onOpenChange={(open) => setOpenAutocomplete(prev => ({ ...prev, [index]: open }))}
-                        >
-                          <PopoverTrigger asChild>
-                            <div className="relative">
-                              <Input
-                                value={player.name}
-                                onChange={(e) => {
-                                  updatePlayer(index, 'name', e.target.value);
-                                  setOpenAutocomplete(prev => ({ ...prev, [index]: e.target.value.length >= 2 }));
-                                }}
-                                placeholder="Search member name or type guest name"
-                                className="h-8 text-sm pr-8"
-                                data-testid={`input-player-name-${index}`}
-                              />
-                              {player.name.length >= 2 && (
-                                <ChevronDown className="absolute right-2 top-2 h-4 w-4 text-gray-400" />
-                              )}
-                            </div>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-80 p-0" align="start" side="bottom" sideOffset={4}>
-                            <Command>
+                        <div className="relative">
+                          <Input
+                            value={player.name}
+                            onChange={(e) => {
+                              updatePlayer(index, 'name', e.target.value);
+                              const shouldShow = e.target.value.length >= 2 && getMemberSuggestions(e.target.value).length > 0;
+                              setOpenAutocomplete(prev => ({ ...prev, [index]: shouldShow }));
+                            }}
+                            onFocus={() => {
+                              const shouldShow = player.name.length >= 2 && getMemberSuggestions(player.name).length > 0;
+                              setOpenAutocomplete(prev => ({ ...prev, [index]: shouldShow }));
+                            }}
+                            onBlur={() => {
+                              // Delay closing to allow for clicks on dropdown items
+                              setTimeout(() => {
+                                setOpenAutocomplete(prev => ({ ...prev, [index]: false }));
+                              }, 200);
+                            }}
+                            placeholder="Search member name or type guest name"
+                            className="h-8 text-sm pr-8"
+                            data-testid={`input-player-name-${index}`}
+                          />
+                          {player.name.length >= 2 && getMemberSuggestions(player.name).length > 0 && (
+                            <ChevronDown className="absolute right-2 top-2 h-4 w-4 text-gray-400" />
+                          )}
+                          
+                          {/* Dropdown suggestions */}
+                          {openAutocomplete[index] && getMemberSuggestions(player.name).length > 0 && (
+                            <div className="absolute z-50 w-80 mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
                               <div className="px-3 py-2 text-xs font-medium text-gray-600 border-b">
                                 Search Members ({allMembers.length} total)
                               </div>
-                              <CommandEmpty className="px-3 py-2 text-xs text-gray-500">
-                                {player.name.length < 2 
-                                  ? "Type at least 2 characters to search members" 
-                                  : "No members found. Continue typing for guest name."}
-                              </CommandEmpty>
-                              <CommandGroup>
+                              <div className="max-h-60 overflow-y-auto">
                                 {getMemberSuggestions(player.name).map((member) => (
-                                  <CommandItem
+                                  <div
                                     key={member.id}
-                                    value={member.name}
-                                    onSelect={(selectedValue) => {
-                                      selectMember(index, selectedValue);
-                                    }}
+                                    onClick={() => selectMember(index, member.name)}
                                     className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-50"
                                   >
                                     <Users className="w-4 h-4 text-golf-green" />
@@ -327,13 +325,12 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                                         {member.membershipClass ? `${member.membershipClass} Member` : 'Member'}
                                       </div>
                                     </div>
-                                    <Check className="w-4 h-4 text-golf-green opacity-0 group-data-[selected]:opacity-100" />
-                                  </CommandItem>
+                                  </div>
                                 ))}
-                              </CommandGroup>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       )}
                       {index === 0 && (
                         <div className="text-xs text-golf-green">Booking Member</div>
