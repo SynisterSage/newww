@@ -78,10 +78,15 @@ export default function Dashboard({ userEmail, user }: DashboardProps) {
     fetchWeather();
   }, []);
 
-  // Get user's tee time bookings
+  // Get user's tee time bookings - AUTO-REFRESH for real-time updates
   const { data: userTeetimes = [] } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes/user', currentUser?.id],
     enabled: !!currentUser?.id,
+    refetchInterval: 5000, // Auto-refresh every 5 seconds
+    refetchIntervalInBackground: true, // Continue polling when tab inactive
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always fetch fresh data
   });
 
   const { data: allOrders = [] } = useQuery<Order[]>({

@@ -52,7 +52,7 @@ export default function AdminEvents() {
     return () => clearInterval(interval);
   }, [queryClient]);
 
-  // Fetch events (admin side gets all events including past ones for record keeping)
+  // Fetch events (admin side gets all events including past ones for record keeping) - AUTO-REFRESH
   const { data: allEvents = [], isLoading } = useQuery({
     queryKey: ["/api/events/all"],
     queryFn: async () => {
@@ -60,6 +60,8 @@ export default function AdminEvents() {
       if (!response.ok) throw new Error("Failed to fetch events");
       return response.json();
     },
+    refetchInterval: 3000, // Auto-refresh every 3 seconds like orders
+    refetchIntervalInBackground: true, // Continue polling when tab inactive
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     staleTime: 0, // Always consider data stale for real-time updates

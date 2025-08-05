@@ -15,14 +15,29 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
   
   const { data: teetimes = [] } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', today],
+    refetchInterval: 3000, // Auto-refresh every 3 seconds like orders
+    refetchIntervalInBackground: true, // Continue polling when tab inactive
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always fetch fresh data
   });
 
   const { data: orders = [] } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
+    refetchInterval: 3000, // Auto-refresh every 3 seconds like orders
+    refetchIntervalInBackground: true, // Continue polling when tab inactive
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always fetch fresh data
   });
 
   const { data: members = [] } = useQuery<User[]>({
     queryKey: ['/api/admin/members'],
+    refetchInterval: 10000, // Auto-refresh every 10 seconds (less frequent)
+    refetchIntervalInBackground: true, // Continue polling when tab inactive
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always fetch fresh data
   });
 
   // Calculate stats

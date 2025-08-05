@@ -7,7 +7,12 @@ import type { CourseConditions } from "@shared/schema";
 export default function ConditionsPage() {
   const { data: conditions, isLoading } = useQuery({
     queryKey: ["/api/course/conditions"],
-    queryFn: () => fetch("/api/course/conditions").then(res => res.json()) as Promise<CourseConditions>
+    queryFn: () => fetch("/api/course/conditions").then(res => res.json()) as Promise<CourseConditions>,
+    refetchInterval: 5000, // Auto-refresh every 5 seconds like admin conditions
+    refetchIntervalInBackground: true, // Continue polling when tab inactive
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always fetch fresh data
   });
 
   if (isLoading) {

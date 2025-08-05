@@ -33,6 +33,11 @@ export default function Dining({ userData }: DiningProps) {
 
   const { data: menuItems = [], isLoading } = useQuery<MenuItem[]>({
     queryKey: ['/api/menu'],
+    refetchInterval: 10000, // Auto-refresh every 10 seconds (less frequent than tee times/events)
+    refetchIntervalInBackground: true, // Continue polling when tab inactive
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always fetch fresh data
   });
 
   const orderMutation = useMutation({

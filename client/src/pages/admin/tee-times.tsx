@@ -73,9 +73,14 @@ export default function AdminTeeTimesPage() {
     return false;
   };
 
-  // Fetch all tee times for the selected date
+  // Fetch all tee times for the selected date - AUTO-REFRESH
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', selectedDate],
+    refetchInterval: 3000, // Auto-refresh every 3 seconds like orders
+    refetchIntervalInBackground: true, // Continue polling when tab inactive
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always fetch fresh data
   });
 
   // Filter out past times

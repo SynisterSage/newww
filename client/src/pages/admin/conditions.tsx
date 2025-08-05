@@ -27,7 +27,12 @@ export default function CourseConditionsPage() {
   
   const { data: conditions, isLoading } = useQuery({
     queryKey: ["/api/course/conditions"],
-    queryFn: () => fetch("/api/course/conditions").then(res => res.json()) as Promise<CourseConditions>
+    queryFn: () => fetch("/api/course/conditions").then(res => res.json()) as Promise<CourseConditions>,
+    refetchInterval: 5000, // Auto-refresh every 5 seconds
+    refetchIntervalInBackground: true, // Continue polling when tab inactive
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always fetch fresh data
   });
 
   const [formData, setFormData] = useState<Partial<InsertCourseConditions>>({});

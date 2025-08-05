@@ -74,6 +74,8 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
 
   const { data: teetimes = [], isLoading } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', selectedDate],
+    refetchInterval: 3000, // Auto-refresh every 3 seconds like orders
+    refetchIntervalInBackground: true, // Continue polling when tab inactive
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     staleTime: 0, // Always fetch fresh data
