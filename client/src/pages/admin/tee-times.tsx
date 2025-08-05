@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, User as UserIcon, Users, MapPin, Car, Grid3X3, List, UserCheck } from "lucide-react";
+import { Calendar, Clock, User as UserIcon, Users, MapPin, Car, Grid3X3, List, UserCheck, Download } from "lucide-react";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import type { TeeTime, User } from "@shared/schema";
@@ -165,6 +165,48 @@ export default function AdminTeeTimesPage() {
     });
   };
 
+  // Export tee sheet as CSV
+  const exportTeeSheet = () => {
+    // Filter only booked tee times and sort them by time
+    const bookedTeetimes = sortTimesProperly(teetimes.filter(tt => (tt.bookedBy?.length || 0) > 0));
+    
+    // Create CSV data
+    const csvData = [];
+    
+    // CSV Header
+    csvData.push('Tee Time,Player Name,Member Type,Phone,Transport,Holes Playing');
+    
+    // Add data rows
+    bookedTeetimes.forEach(teetime => {
+      if (teetime.playerNames && teetime.playerNames.length > 0) {
+        teetime.playerNames.forEach((playerName, index) => {
+          const userId = teetime.bookedBy?.[index];
+          const member = userId ? getMemberDetails(userId) : null;
+          const playerType = teetime.playerTypes?.[index] || 'guest';
+          const transport = teetime.transportModes?.[index] || 'walking';
+          const holes = teetime.holesPlaying?.[index] || '18';
+          
+          csvData.push(
+            `${formatTime(teetime.time)},${playerName},${playerType},${member?.phone || 'N/A'},${transport},${holes}`
+          );
+        });
+      }
+    });
+    
+    // Create and download CSV file
+    const csvContent = csvData.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `tee-sheet-${selectedDate}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Calculate statistics
   const openSlots = teetimes.filter(tt => (tt.bookedBy?.length || 0) === 0);
   const partialSlots = teetimes.filter(tt => {
@@ -201,8 +243,19 @@ export default function AdminTeeTimesPage() {
             <p className="text-muted-foreground">View and manage member tee time bookings • 16-minute intervals from 7 AM to 7 PM</p>
           </div>
           
-          {/* View Toggle */}
+          {/* View Toggle and Export */}
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportTeeSheet}
+              className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+              data-testid="button-export-tee-sheet"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export Tee Sheet
+            </Button>
+            <div className="h-4 w-px bg-gray-300 mx-1"></div>
             <Button
               variant={viewMode === 'grid' ? 'default' : 'outline'}
               size="sm"
