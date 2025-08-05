@@ -1067,8 +1067,23 @@ export class DatabaseStorage implements IStorage {
           // Stop at 7:00 PM exactly, don't go beyond
           if (hour === endHour && minute > 0) break;
           
-          const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-          const ampm = hour >= 12 ? 'PM' : 'AM';
+          // Fix hour display logic: 12-hour format conversion
+          let displayHour = hour;
+          let ampm = 'AM';
+          
+          if (hour === 0) {
+            displayHour = 12; // Midnight is 12:XX AM
+          } else if (hour < 12) {
+            displayHour = hour; // 1-11 AM
+            ampm = 'AM';
+          } else if (hour === 12) {
+            displayHour = 12; // Noon is 12:XX PM
+            ampm = 'PM';
+          } else {
+            displayHour = hour - 12; // 1-11 PM
+            ampm = 'PM';
+          }
+          
           const timeString = `${displayHour}:${minute.toString().padStart(2, '0')} ${ampm}`;
           baseTimeSlots.push(timeString);
         }
