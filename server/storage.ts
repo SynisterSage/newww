@@ -234,12 +234,8 @@ export class DatabaseStorage implements IStorage {
   async getMenuItems(category?: string, mealType?: string): Promise<MenuItem[]> {
     let query = db.select().from(menuItems);
     
-    if (category && mealType) {
-      query = query.where(and(eq(menuItems.category, category), eq(menuItems.mealType, mealType)));
-    } else if (category) {
+    if (category) {
       query = query.where(eq(menuItems.category, category));
-    } else if (mealType) {
-      query = query.where(eq(menuItems.mealType, mealType));
     }
     
     return await query;
@@ -279,7 +275,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Course methods
-  async getCourseHoles(): Promise<CourseHole[]> {
+  async getCourseHoles(course?: string): Promise<CourseHole[]> {
     return await db.select().from(courseHoles);
   }
 
@@ -309,6 +305,14 @@ export class DatabaseStorage implements IStorage {
   async createRound(round: InsertRound): Promise<Round> {
     const [newRound] = await db.insert(rounds).values(round).returning();
     return newRound;
+  }
+
+  async getCurrentRound(userId: string): Promise<Round | undefined> {
+    const [round] = await db.select().from(rounds)
+      .where(eq(rounds.userId, userId))
+      .orderBy(sql`created_at DESC`)
+      .limit(1);
+    return round || undefined;
   }
 
   async updateRound(id: string, updates: Partial<Round>): Promise<Round | undefined> {
@@ -353,6 +357,10 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(events).where(eq(events.isActive, true));
   }
 
+  async getAllEvents(): Promise<Event[]> {
+    return await db.select().from(events).where(eq(events.isActive, true));
+  }
+
   async getEventById(id: string): Promise<Event | undefined> {
     const [event] = await db.select().from(events).where(eq(events.id, id));
     return event || undefined;
@@ -373,6 +381,26 @@ export class DatabaseStorage implements IStorage {
     await db.delete(eventRegistrations).where(eq(eventRegistrations.eventId, id));
     // Then delete the event itself
     await db.delete(events).where(eq(events.id, id));
+  }
+
+  async registerForEvent(eventId: string, userId: string): Promise<void> {
+    await db.insert(eventRegistrations).values({
+      id: randomUUID(),
+      eventId,
+      userId,
+      registeredAt: new Date()
+    });
+  }
+
+  async unregisterFromEvent(eventId: string, userId: string): Promise<void> {
+    await db.delete(eventRegistrations)
+      .where(and(eq(eventRegistrations.eventId, eventId), eq(eventRegistrations.userId, userId)));
+  }
+
+  async getUserEventRegistrations(userId: string): Promise<any[]> {
+    return await db.select()
+      .from(eventRegistrations)
+      .where(eq(eventRegistrations.userId, userId));
   }
 
   // Event registration methods

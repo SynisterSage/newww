@@ -74,10 +74,8 @@ export const menuItems = pgTable("menu_items", {
   description: text("description").notNull(),
   price: decimal("price", { precision: 8, scale: 2 }).notNull(),
   category: text("category").notNull(), // appetizers, main_course, beverages, desserts
-  mealType: text("meal_type").notNull(), // lunch, dinner
   isSpecial: boolean("is_special").default(false),
   available: boolean("available").default(true),
-  availableSettings: text("available_settings"), // For customization options
 });
 
 export const orders = pgTable("orders", {
