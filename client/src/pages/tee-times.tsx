@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useState } from "react";
-import { Calendar, Clock, Users, Plus, X, UserCheck, Car, MapPin } from "lucide-react";
+import { Calendar, Clock, Users, Plus, X, UserCheck, Car, MapPin, Grid3X3, List, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import type { TeeTime, User } from "@shared/schema";
 import { TeeTimeBookingDialog } from "@/components/tee-time-booking-dialog";
@@ -24,6 +24,7 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
     open: false,
     teeTime: null
   });
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const getTodayDate = () => {
     const today = new Date();
@@ -223,6 +224,28 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
             <h1 className="text-2xl sm:text-3xl font-bold text-[#08452e] mb-2">Tee Time Schedule</h1>
             <p className="text-sm sm:text-base text-muted-foreground">View and join available tee times • 16-minute intervals from 7 AM to 7 PM</p>
           </div>
+          
+          {/* View Toggle */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+              className={viewMode === 'grid' ? 'bg-[#08452e] hover:bg-[#08452e]/90' : ''}
+            >
+              <Grid3X3 className="w-4 h-4 mr-2" />
+              Grid
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className={viewMode === 'list' ? 'bg-[#08452e] hover:bg-[#08452e]/90' : ''}
+            >
+              <List className="w-4 h-4 mr-2" />
+              List
+            </Button>
+          </div>
         </div>
 
         {/* Date Selector */}
@@ -295,32 +318,33 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
           </CardContent>
         </Card>
 
-        {/* Tee Time Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {availableTeetimes
-            .sort((a, b) => a.time.localeCompare(b.time))
-            .map((teetime) => {
-            const statusInfo = getStatusInfo(teetime);
-            const isUserBooked = teetime.bookedBy?.includes(userData?.id || "");
-            
-            return (
-              <Card 
-                key={teetime.id} 
-                className="border border-gray-200 transition-all duration-200 hover:shadow-md hover:border-golf-green/30"
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-golf-green" />
-                      <CardTitle className="text-lg font-semibold text-golf-green">
-                        {formatTime(teetime.time)}
-                      </CardTitle>
+        {/* Tee Time Display */}
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {availableTeetimes
+              .sort((a, b) => a.time.localeCompare(b.time))
+              .map((teetime) => {
+              const statusInfo = getStatusInfo(teetime);
+              const isUserBooked = teetime.bookedBy?.includes(userData?.id || "");
+              
+              return (
+                <Card 
+                  key={teetime.id} 
+                  className="border border-gray-200 transition-all duration-200 hover:shadow-md hover:border-golf-green/30"
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-golf-green" />
+                        <CardTitle className="text-lg font-semibold text-golf-green">
+                          {formatTime(teetime.time)}
+                        </CardTitle>
+                      </div>
+                      {isUserBooked && (
+                        <UserCheck className="w-4 h-4 text-golf-green" />
+                      )}
                     </div>
-                    {isUserBooked && (
-                      <UserCheck className="w-4 h-4 text-golf-green" />
-                    )}
-                  </div>
-                </CardHeader>
+                  </CardHeader>
                 
                 <CardContent className="space-y-4">
                   {/* Status Badge */}
@@ -407,7 +431,116 @@ export default function TeeTimes({ userData }: TeeTimesProps) {
               </Card>
             );
             })}
-        </div>
+          </div>
+        ) : (
+          /* List View */
+          <div className="space-y-3">
+            {availableTeetimes
+              .sort((a, b) => a.time.localeCompare(b.time))
+              .map((teetime) => {
+              const statusInfo = getStatusInfo(teetime);
+              const isUserBooked = teetime.bookedBy?.includes(userData?.id || "");
+              
+              return (
+                <Card 
+                  key={teetime.id} 
+                  className={`border transition-all duration-200 hover:shadow-md ${
+                    isUserBooked ? 'border-golf-green bg-green-50/50' : 'border-gray-200 hover:border-golf-green/30'
+                  }`}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      {/* Left side - Time and Status */}
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-5 h-5 text-golf-green" />
+                          <span className="text-xl font-semibold text-golf-green">
+                            {formatTime(teetime.time)}
+                          </span>
+                          {isUserBooked && (
+                            <UserCheck className="w-5 h-5 text-golf-green ml-2" />
+                          )}
+                        </div>
+                        
+                        <div className={`px-3 py-1 rounded-full text-sm font-medium border ${statusInfo.color}`}>
+                          {statusInfo.text}
+                        </div>
+                      </div>
+                      
+                      {/* Middle - Player Info */}
+                      <div className="flex-1 mx-6">
+                        {(teetime.playerNames && teetime.playerNames.filter(name => name && name.trim()).length > 0) && (
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4 text-muted-foreground" />
+                            <div className="space-y-1">
+                              {teetime.playerNames.filter(name => name && name.trim()).map((name, index) => {
+                                const player = teetime.playerDetails?.[index];
+                                const transportMode = player?.transportMode || 'walking';
+                                const holesPlaying = player?.holesPlaying || '18';
+                                
+                                return (
+                                  <div key={index} className="text-sm">
+                                    <span className="font-medium">{name}</span>
+                                    <span className="text-muted-foreground ml-2">
+                                      • {transportMode} • {holesPlaying} holes
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Right side - Course Info and Action */}
+                      <div className="flex items-center gap-4">
+                        <div className="text-right text-sm text-muted-foreground">
+                          <div>{teetime.holes} Holes • ${teetime.price}</div>
+                          <div>Packanack Golf Course</div>
+                        </div>
+                        
+                        {/* Action Button */}
+                        <div className="w-32">
+                          {isUserBooked ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full text-red-600 border-red-200 hover:bg-red-50"
+                              onClick={() => handleCancelBooking(teetime.id)}
+                              disabled={cancelMutation.isPending}
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              {cancelMutation.isPending ? "Leaving..." : "Leave"}
+                            </Button>
+                          ) : statusInfo.canJoin ? (
+                            <Button
+                              size="sm"
+                              className="w-full bg-golf-green hover:bg-golf-green-light text-white"
+                              onClick={() => openBookingDialog(teetime)}
+                              data-testid={`button-join-tee-time-${teetime.id}`}
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              Join
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="w-full"
+                              disabled
+                            >
+                              {statusInfo.status === "full" ? "Full" : "Cannot Join"}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
         {/* Empty State */}
         {teetimes.length === 0 && (
