@@ -42,15 +42,7 @@ export default function AdminEvents() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedEventRegistrations, setSelectedEventRegistrations] = useState<EventRegistration[]>([]);
 
-  // Auto-refresh every 30 seconds for real-time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events/all"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [queryClient]);
+  // No automatic refresh - only refresh on mutations
 
   // Fetch events (admin side gets all events including past ones for record keeping) - AUTO-REFRESH
   const { data: allEvents = [], isLoading } = useQuery({
@@ -60,11 +52,10 @@ export default function AdminEvents() {
       if (!response.ok) throw new Error("Failed to fetch events");
       return response.json();
     },
-    refetchInterval: 3000, // Auto-refresh every 3 seconds like orders
-    refetchIntervalInBackground: true, // Continue polling when tab inactive
+    // Remove constant refresh - only refresh on mount, focus, and after mutations
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    staleTime: 0, // Always consider data stale for real-time updates
+    staleTime: 30000, // Cache for 30 seconds to avoid excessive requests
   }) as { data: EventWithRegistrations[], isLoading: boolean };
 
   // Filter out ended events from display

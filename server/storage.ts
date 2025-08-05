@@ -1239,9 +1239,7 @@ export class DatabaseStorage implements IStorage {
 
   // Event methods
   async getEvents(): Promise<Event[]> {
-    // First, automatically mark ended events as inactive
-    await this.markEndedEventsInactive();
-    
+    // Return active events (automatic cleanup temporarily disabled until schema supports endTime)
     return await db.select().from(events).where(eq(events.isActive, true)).orderBy(events.date);
   }
 
@@ -1314,23 +1312,15 @@ export class DatabaseStorage implements IStorage {
   async markEndedEventsInactive(): Promise<void> {
     const now = new Date();
     const today = now.toISOString().split('T')[0]; // YYYY-MM-DD format
-    const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
     
-    // Mark events as inactive where:
-    // 1. Date is before today, OR
-    // 2. Date is today but end time has passed
+    // Mark events as inactive where date is before today
+    // (Note: events schema only has date and time, not endTime)
     await db.update(events)
       .set({ isActive: false })
       .where(
         and(
           eq(events.isActive, true),
-          or(
-            lt(events.date, today),
-            and(
-              eq(events.date, today),
-              lt(events.endTime, currentTime)
-            )
-          )
+          lt(events.date, today)
         )
       );
   }

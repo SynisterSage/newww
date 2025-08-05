@@ -32,7 +32,7 @@ export default function Events({ userData }: EventsProps) {
   const currentUserId = userData?.id;
   const isAuthenticated = !!userData;
 
-  // Fetch events with user registration status - AUTO-REFRESH like orders
+  // Fetch events with user registration status - No constant refresh to avoid interruptions
   const { data: events = [], isLoading } = useQuery({
     queryKey: ["/api/events", currentUserId],
     queryFn: async () => {
@@ -41,11 +41,10 @@ export default function Events({ userData }: EventsProps) {
       if (!response.ok) throw new Error("Failed to fetch events");
       return response.json();
     },
-    refetchInterval: 3000, // Auto-refresh every 3 seconds like orders
-    refetchIntervalInBackground: true, // Continue polling when tab inactive
+    // Remove constant refresh to avoid interrupting user interactions
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    staleTime: 0, // Always consider data stale for real-time updates
+    staleTime: 30000, // Cache for 30 seconds
   }) as { data: EventWithRegistration[], isLoading: boolean };
 
   // Register for event mutation
