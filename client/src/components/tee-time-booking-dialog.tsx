@@ -208,22 +208,22 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
 
           {/* Players Table */}
           <div className="border rounded-lg overflow-hidden">
-            <div className="bg-gray-50 px-4 py-2 border-b">
-              <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-600">
+            <div className="bg-gray-50 px-3 py-2 border-b">
+              <div className="grid grid-cols-12 gap-3 text-xs font-medium text-gray-600">
                 <div className="col-span-4">Name</div>
                 <div className="col-span-2">Type</div>
                 <div className="col-span-2">Transport</div>
                 <div className="col-span-2">Holes</div>
-                <div className="col-span-2">Action</div>
+                <div className="col-span-2 text-center">Action</div>
               </div>
             </div>
             
             <div className="divide-y">
               {players.map((player, index) => (
-                <div key={index} className="px-4 py-3 hover:bg-gray-50/50">
-                  <div className="grid grid-cols-12 gap-2 items-center">
+                <div key={index} className="px-3 py-3 hover:bg-gray-50/50">
+                  <div className="grid grid-cols-12 gap-3 items-start">
                     {/* Name */}
-                    <div className="col-span-4">
+                    <div className="col-span-4 space-y-1">
                       <Input
                         value={player.name}
                         onChange={(e) => updatePlayer(index, 'name', e.target.value)}
@@ -233,7 +233,7 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                         data-testid={`input-player-name-${index}`}
                       />
                       {index === 0 && (
-                        <div className="text-xs text-golf-green mt-1">Booking Member</div>
+                        <div className="text-xs text-golf-green">Booking Member</div>
                       )}
                     </div>
 
@@ -287,7 +287,7 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                     </div>
 
                     {/* Action */}
-                    <div className="col-span-2">
+                    <div className="col-span-2 flex justify-center">
                       {index > 0 ? (
                         <Button
                           type="button"
@@ -300,7 +300,7 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                           <Minus className="w-3 h-3" />
                         </Button>
                       ) : (
-                        <div className="text-xs text-gray-400">Primary</div>
+                        <div className="text-xs text-gray-400 mt-2">Primary</div>
                       )}
                     </div>
                   </div>
