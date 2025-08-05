@@ -70,7 +70,7 @@ export default function AdminEvents() {
       return await apiRequest("POST", "/api/events", eventData);
     },
     onSuccess: () => {
-      // Force immediate refetch to ensure new events appear instantly
+      // Force immediate refetch to ensure new events appear instantly across all pages
       queryClient.refetchQueries({ queryKey: ["/api/events"] });
       queryClient.refetchQueries({ queryKey: ["/api/events/all"] });
       queryClient.invalidateQueries({ predicate: (query) => 
@@ -97,12 +97,11 @@ export default function AdminEvents() {
       return await apiRequest("PATCH", `/api/events/${id}`, updates);
     },
     onSuccess: () => {
-      // Invalidate all event-related queries for real-time updates
-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events/all"] });
+      // Force immediate refetch to ensure updates appear instantly across all pages
+      queryClient.refetchQueries({ queryKey: ["/api/events"] });
+      queryClient.refetchQueries({ queryKey: ["/api/events/all"] });
       queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] === "/api/events" || 
-        (Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events")
+        Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events"
       });
       setIsEditDialogOpen(false);
       setSelectedEvent(null);
@@ -126,12 +125,11 @@ export default function AdminEvents() {
       return await apiRequest("DELETE", `/api/events/${id}`);
     },
     onSuccess: () => {
-      // Invalidate all event-related queries for real-time updates
-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/events/all"] });
+      // Force immediate refetch to ensure deletions appear instantly across all pages
+      queryClient.refetchQueries({ queryKey: ["/api/events"] });
+      queryClient.refetchQueries({ queryKey: ["/api/events/all"] });
       queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] === "/api/events" || 
-        (Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events")
+        Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events"
       });
       toast({
         title: "Success",

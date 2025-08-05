@@ -17,6 +17,7 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
+  // Fetch tee times for today
   const { data: teetimes = [] } = useQuery<TeeTime[]>({
     queryKey: ['/api/teetimes', today],
     refetchInterval: 3000, // Auto-refresh every 3 seconds like orders
@@ -25,6 +26,20 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
     refetchOnWindowFocus: true,
     staleTime: 0, // Always fetch fresh data
   });
+
+  // Fetch tee times for tomorrow to catch recent bookings
+  const tomorrow = format(new Date(Date.now() + 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
+  const { data: tomorrowTeetimes = [] } = useQuery<TeeTime[]>({
+    queryKey: ['/api/teetimes', tomorrow],
+    refetchInterval: 3000,
+    refetchIntervalInBackground: true,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+  });
+
+  // Combine today and tomorrow tee times for recent activity
+  const allTeetimes = [...teetimes, ...tomorrowTeetimes];
 
   const { data: orders = [] } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
@@ -85,43 +100,45 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
     return orderDate.toDateString() === today.toDateString();
   }).length;
 
-  // Filter tee times with actual bookings (bookedBy array has entries or playerNames has entries)
-  const bookedTeetimes = teetimes.filter(t => {
-    const hasBookingsById = t.bookedBy && t.bookedBy.length > 0;
-    const hasBookingsByName = t.playerNames && t.playerNames.length > 0 && t.playerNames.some(name => name && name.trim());
-    const isToday = t.date === today;
-    
-    console.log(`Tee time ${t.time} on ${t.date}:`, {
-      hasBookingsById,
-      hasBookingsByName, 
-      bookedBy: t.bookedBy,
-      playerNames: t.playerNames,
-      isToday,
-      today
-    });
-    
-    return (hasBookingsById || hasBookingsByName) && isToday;
-  });
-
   // Sort recent orders by creation date (most recent first)
   const recentOrders = [...orders]
     .filter(o => o.createdAt) // Only orders with timestamp
     .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
     .slice(0, 3);
 
-  // Sort recent tee times by booking time (most recent first)  
-  const recentTeetimes = [...bookedTeetimes]
+  // Filter and sort recent tee times from today and tomorrow
+  const recentTeetimes = [...allTeetimes]
+    .filter(t => {
+      const hasBookingsById = t.bookedBy && t.bookedBy.length > 0;
+      const hasBookingsByName = t.playerNames && t.playerNames.length > 0 && t.playerNames.some(name => name && name.trim());
+      const hasBooking = hasBookingsById || hasBookingsByName;
+      
+      console.log(`Admin Dashboard Tee time ${t.time} on ${t.date}:`, {
+        hasBookingsById,
+        hasBookingsByName, 
+        hasBooking,
+        bookedBy: t.bookedBy,
+        playerNames: t.playerNames
+      });
+      
+      return hasBooking;
+    })
     .sort((a, b) => {
-      // Sort by time slot (later times first for today)
+      // Sort by date first (more recent first), then by time
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      if (dateA !== dateB) return dateB - dateA;
+      
+      // Sort by time slot (later times first within same day)
       const timeA = a.time.includes('PM') ? parseInt(a.time) + 12 : parseInt(a.time);
       const timeB = b.time.includes('PM') ? parseInt(b.time) + 12 : parseInt(b.time);
       return timeB - timeA;
     })
-    .slice(0, 3);
+    .slice(0, 5); // Show more recent bookings
   // Sort recent events (event registrations and event creation)
   const recentEventActivity = [...recentEvents]
-    .filter(e => e.createdAt) // Only events with timestamp
-    .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
+    .filter(e => (e as any).createdAt) // Only events with timestamp
+    .sort((a, b) => new Date((b as any).createdAt).getTime() - new Date((a as any).createdAt).getTime())
     .slice(0, 2); // Limit to 2 most recent events
   
   const recentActivity = [
@@ -136,7 +153,7 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
       
       return {
         type: 'tee-time',
-        title: `Tee Time Booked - ${t.time}`,
+        title: `Tee Time Booked - ${t.time} (${t.date})`,
         subtitle: `${displayNames.join(', ') || 'Players'} • ${t.holes || '18'} holes`,
         time: format(new Date(), 'MMM dd, h:mm a'), // Use current time since we don't store booking timestamp
         status: 'booked'
@@ -156,9 +173,9 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
     ...recentEventActivity.map(e => {
       return {
         type: 'event',
-        title: `Event Created - ${e.title}`,
-        subtitle: `${e.category} • ${e.date} at ${e.time}`,
-        time: format(new Date(e.createdAt || Date.now()), 'MMM dd, h:mm a'),
+        title: `Event Created - ${(e as any).title}`,
+        subtitle: `${(e as any).category} • ${(e as any).date} at ${(e as any).time}`,
+        time: format(new Date((e as any).createdAt || Date.now()), 'MMM dd, h:mm a'),
         status: 'created'
       };
     })

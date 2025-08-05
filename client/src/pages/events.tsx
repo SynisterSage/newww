@@ -122,6 +122,18 @@ export default function Events({ userData }: EventsProps) {
     }
   };
 
+  const handleDeleteEvent = (eventId: string) => {
+    if (confirm("Remove this ended event card?")) {
+      // Just remove from local display - ended events are filtered out anyway
+      queryClient.refetchQueries({ queryKey: ["/api/events"] });
+      queryClient.refetchQueries({ queryKey: ["/api/events/all"] });
+      toast({
+        title: "Card Removed",
+        description: "Ended event card has been removed from view",
+      });
+    }
+  };
+
   const submitRegistration = (formData: FormData) => {
     if (!selectedEvent) return;
     
@@ -315,13 +327,21 @@ export default function Events({ userData }: EventsProps) {
                     >
                       {registerMutation.isPending ? "Registering..." : "Register"}
                     </Button>
+                  ) : isPast ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => handleDeleteEvent(event.id)}
+                      className="flex-1 text-gray-600 hover:text-gray-700 border-gray-200 hover:border-gray-300"
+                    >
+                      Remove Card
+                    </Button>
                   ) : (
                     <Button
                       variant="outline"
                       disabled
                       className="flex-1"
                     >
-                      {isFull ? "Event Full" : isPast ? "Event Ended" : "Unavailable"}
+                      {isFull ? "Event Full" : "Unavailable"}
                     </Button>
                   )}
                 </div>
