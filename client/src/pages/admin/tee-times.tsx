@@ -319,7 +319,21 @@ export default function AdminTeeTimesPage() {
             {sortTimesProperly(availableTeetimes)
               .map((teetime) => {
               const statusInfo = getStatusInfo(teetime);
-              const bookedMembers = teetime.bookedBy?.map(userId => getMemberDetails(userId)).filter(Boolean) || [];
+              // Get actual player details (names, types, etc.) instead of just booking member
+              const actualPlayers = teetime.playerNames?.map((name, index) => {
+                const playerType = teetime.playerTypes?.[index] || 'member';
+                const transportMode = teetime.transportModes?.[index] || 'riding';
+                const holesPlaying = teetime.holesPlaying?.[index] || '18';
+                
+                return {
+                  name,
+                  type: playerType,
+                  transportMode,
+                  holesPlaying,
+                  // For members, try to find their details from the members list
+                  memberDetails: playerType === 'member' ? members.find(m => `${m.firstName} ${m.lastName}`.trim() === name.trim()) : null
+                };
+              }).filter(player => player.name && player.name.trim()) || [];
 
               return (
                 <Card key={teetime.id} className="border-0 shadow-sm bg-white">
@@ -342,40 +356,34 @@ export default function AdminTeeTimesPage() {
                         </p>
                       </div>
 
-                      {bookedMembers.length > 0 && (
+                      {actualPlayers.length > 0 && (
                         <div className="space-y-1">
                           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide text-center">
                             Booked Players:
                           </p>
-                          {bookedMembers.map((member, index) => {
-                            const playerType = teetime.playerTypes?.[index] || 'member';
-                            const transportMode = teetime.transportModes?.[index] || 'riding';
-                            const holesPlaying = teetime.holesPlaying?.[index] || '18';
-                            
-                            return (
-                              <div key={index} className="space-y-1 text-center">
-                                <div className="flex items-center justify-center space-x-1 text-xs">
-                                  <UserIcon className="w-3 h-3 text-blue-600" />
-                                  <span className="text-foreground font-medium">
-                                    {member?.firstName} {member?.lastName}
-                                  </span>
-                                  <span className="text-xs text-muted-foreground capitalize px-1 py-0.5 bg-gray-100 rounded">
-                                    {playerType}
-                                  </span>
+                          {actualPlayers.map((player, index) => (
+                            <div key={index} className="space-y-1 text-center">
+                              <div className="flex items-center justify-center space-x-1 text-xs">
+                                <UserIcon className="w-3 h-3 text-blue-600" />
+                                <span className="text-foreground font-medium">
+                                  {player.name}
+                                </span>
+                                <span className="text-xs text-muted-foreground capitalize px-1 py-0.5 bg-gray-100 rounded">
+                                  {player.type}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-center space-x-2 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Car className="w-3 h-3" />
+                                  <span className="capitalize">{player.transportMode}</span>
                                 </div>
-                                <div className="flex items-center justify-center space-x-2 text-xs text-muted-foreground">
-                                  <div className="flex items-center gap-1">
-                                    <Car className="w-3 h-3" />
-                                    <span className="capitalize">{transportMode}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <MapPin className="w-3 h-3" />
-                                    <span>{holesPlaying} holes</span>
-                                  </div>
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  <span>{player.holesPlaying} holes</span>
                                 </div>
                               </div>
-                            );
-                          })}
+                            </div>
+                          ))
                         </div>
                       )}
 
@@ -396,7 +404,21 @@ export default function AdminTeeTimesPage() {
             {sortTimesProperly(availableTeetimes)
               .map((teetime) => {
               const statusInfo = getStatusInfo(teetime);
-              const bookedMembers = teetime.bookedBy?.map(userId => getMemberDetails(userId)).filter(Boolean) || [];
+              // Get actual player details (names, types, etc.) instead of just booking member
+              const actualPlayers = teetime.playerNames?.map((name, index) => {
+                const playerType = teetime.playerTypes?.[index] || 'member';
+                const transportMode = teetime.transportModes?.[index] || 'riding';
+                const holesPlaying = teetime.holesPlaying?.[index] || '18';
+                
+                return {
+                  name,
+                  type: playerType,
+                  transportMode,
+                  holesPlaying,
+                  // For members, try to find their details from the members list
+                  memberDetails: playerType === 'member' ? members.find(m => `${m.firstName} ${m.lastName}`.trim() === name.trim()) : null
+                };
+              }).filter(player => player.name && player.name.trim()) || [];
 
               return (
                 <Card key={teetime.id} className="border-0 shadow-sm bg-white">
@@ -421,39 +443,33 @@ export default function AdminTeeTimesPage() {
                       
                       {/* Middle - Player Details */}
                       <div className="flex-1 mx-8">
-                        {bookedMembers.length > 0 ? (
+                        {actualPlayers.length > 0 ? (
                           <div className="space-y-2">
                             <p className="text-sm font-medium text-muted-foreground">Booked Players:</p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                              {bookedMembers.map((member, index) => {
-                                const playerType = teetime.playerTypes?.[index] || 'member';
-                                const transportMode = teetime.transportModes?.[index] || 'riding';
-                                const holesPlaying = teetime.holesPlaying?.[index] || '18';
-                                
-                                return (
-                                  <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                                    <UserCheck className="w-4 h-4 text-blue-600" />
-                                    <div className="flex-1">
-                                      <p className="text-sm font-medium text-foreground">
-                                        {member?.firstName} {member?.lastName}
-                                      </p>
-                                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                        <span className="capitalize bg-gray-200 px-2 py-0.5 rounded">
-                                          {playerType}
-                                        </span>
-                                        <div className="flex items-center gap-1">
-                                          <Car className="w-3 h-3" />
-                                          <span className="capitalize">{transportMode}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                          <MapPin className="w-3 h-3" />
-                                          <span>{holesPlaying} holes</span>
-                                        </div>
+                              {actualPlayers.map((player, index) => (
+                                <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                                  <UserCheck className="w-4 h-4 text-blue-600" />
+                                  <div className="flex-1">
+                                    <p className="text-sm font-medium text-foreground">
+                                      {player.name}
+                                    </p>
+                                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                      <span className="capitalize bg-gray-200 px-2 py-0.5 rounded">
+                                        {player.type}
+                                      </span>
+                                      <div className="flex items-center gap-1">
+                                        <Car className="w-3 h-3" />
+                                        <span className="capitalize">{player.transportMode}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <MapPin className="w-3 h-3" />
+                                        <span>{player.holesPlaying} holes</span>
                                       </div>
                                     </div>
                                   </div>
-                                );
-                              })}
+                                </div>
+                              ))}
                             </div>
                           </div>
                         ) : (
