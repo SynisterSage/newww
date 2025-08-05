@@ -585,53 +585,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin member management routes
-  // Search members by name for autocomplete
-  app.get("/api/members/search", async (req, res) => {
-    try {
-      const { q } = req.query;
-      if (!q || typeof q !== 'string' || q.length < 2) {
-        return res.json([]);
-      }
-      
-      const searchTerm = q.toLowerCase().trim();
-      const allMembers = await storage.getAllUsers();
-      
-      console.log(`Searching for "${searchTerm}" in ${allMembers.length} members`);
-      
-      // Filter members by firstName, lastName, username, or full name containing search term
-      const matchingMembers = allMembers
-        .filter(member => {
-          const firstName = (member.firstName || '').toLowerCase();
-          const lastName = (member.lastName || '').toLowerCase();
-          const username = (member.username || '').toLowerCase();
-          const fullName = `${firstName} ${lastName}`.trim();
-          
-          // Debug log for first few members
-          if (allMembers.indexOf(member) < 3) {
-            console.log(`Member: ${member.username}, firstName: "${member.firstName}", lastName: "${member.lastName}"`);
-          }
-          
-          return firstName.includes(searchTerm) || 
-                 lastName.includes(searchTerm) || 
-                 username.includes(searchTerm) ||
-                 fullName.includes(searchTerm);
-        })
-        .slice(0, 10) // Limit to 10 results
-        .map(member => ({
-          id: member.id,
-          name: `${member.firstName || ''} ${member.lastName || ''}`.trim() || member.username,
-          memberNumber: member.memberNumber,
-          membershipType: member.membershipType
-        }));
-      
-      console.log(`Found ${matchingMembers.length} matching members`);
-      res.json(matchingMembers);
-    } catch (error) {
-      console.error("Member search error:", error);
-      res.status(500).json({ message: "Failed to search members" });
-    }
-  });
-
   app.get("/api/admin/members", async (req, res) => {
     try {
       const members = await storage.getAllUsers();
