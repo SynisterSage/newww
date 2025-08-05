@@ -58,11 +58,8 @@ export default function AdminEvents() {
     staleTime: 30000, // Cache for 30 seconds
   }) as { data: EventWithRegistrations[], isLoading: boolean };
 
-  // Filter out ended events from display
-  const events = allEvents.filter(event => {
-    const eventDateTime = new Date(`${event.date}T${event.time}`);
-    return eventDateTime >= new Date();
-  });
+  // Filter to show only active events (database handles inactive filtering)
+  const events = allEvents.filter(event => event.isActive !== false);
 
   // Create event mutation
   const createEventMutation = useMutation({

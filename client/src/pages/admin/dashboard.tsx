@@ -71,17 +71,29 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
 
   // Reset test data mutation
   const resetTestDataMutation = useMutation({
-    mutationFn: () => apiRequest("/api/admin/reset-test-data", "POST"),
-    onSuccess: () => {
+    mutationFn: () => apiRequest("POST", "/api/admin/reset-test-data"),
+    onSuccess: async () => {
       toast({
         title: "Test data reset successfully",
         description: "All events, bookings, orders, and conditions have been reset.",
       });
-      // Invalidate all related queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/course/conditions'] });
+      
+      // Comprehensive cache invalidation to clear all data immediately
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['/api/teetimes'] }),
+        queryClient.invalidateQueries({ queryKey: ['/api/orders'] }),
+        queryClient.invalidateQueries({ queryKey: ['/api/events'] }),
+        queryClient.invalidateQueries({ queryKey: ['/api/events/all'] }),
+        queryClient.invalidateQueries({ queryKey: ['/api/course/conditions'] }),
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/members'] }),
+        // Clear all event-related queries
+        queryClient.invalidateQueries({ predicate: (query) => 
+          Array.isArray(query.queryKey) && query.queryKey[0] === "/api/events"
+        }),
+        // Force refetch to ensure immediate updates
+        queryClient.refetchQueries({ queryKey: ['/api/events'] }),
+        queryClient.refetchQueries({ queryKey: ['/api/events/all'] }),
+      ]);
     },
     onError: () => {
       toast({

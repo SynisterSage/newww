@@ -815,20 +815,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Event routes
   app.get("/api/events", async (req, res) => {
     try {
-      const events = await storage.getEvents();
+      const events = await storage.getEvents(); // This already handles filtering active events
       const { userId } = req.query;
-
-      // Filter out past events (only filter if event is more than 1 day past)
-      const currentEvents = events.filter((event) => {
-        const eventDateTime = new Date(`${event.date}T${event.time}`);
-        const now = new Date();
-        const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-        return eventDateTime >= oneDayAgo; // Show events from last 24 hours and future
-      });
 
       // Add registration count and user registration status to each event
       const eventsWithMetadata = await Promise.all(
-        currentEvents.map(async (event) => {
+        events.map(async (event) => {
           const registrations = await storage.getEventRegistrations(event.id);
           const isRegistered = userId
             ? registrations.some((reg) => reg.userId === userId)
@@ -851,11 +843,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin endpoint to get all events including past ones
   app.get("/api/events/all", async (req, res) => {
     try {
-      const events = await storage.getEvents();
+      // Use storage method to get all events (both active and inactive for admin)
+      const allEvents = await storage.getAllEvents();
 
       // Add registration count to each event (no filtering for admin)
       const eventsWithCounts = await Promise.all(
-        events.map(async (event) => {
+        allEvents.map(async (event: any) => {
           const registrations = await storage.getEventRegistrations(event.id);
           return {
             ...event,
@@ -1055,7 +1048,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/reset-test-data", async (req, res) => {
     try {
       await storage.resetTestData();
-      res.json({ message: "Test data reset successfully" });
+      res.json({ 
+        message: "Test data reset successfully",
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
       console.error("Reset test data error:", error);
       res.status(500).json({ message: "Failed to reset test data" });
