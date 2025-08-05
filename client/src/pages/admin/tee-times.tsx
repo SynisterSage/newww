@@ -324,6 +324,15 @@ export default function AdminTeeTimesPage() {
               const getPlayerDetails = () => {
                 if (!teetime.playerNames || teetime.playerNames.length === 0) return [];
                 
+                // Debug logging to track the issue
+                if (teetime.playerNames.length > 1) {
+                  console.log('DEBUG - Admin Grid View - Tee time:', teetime.time, {
+                    playerNames: teetime.playerNames,
+                    playerTypes: teetime.playerTypes,
+                    bookedBy: teetime.bookedBy
+                  });
+                }
+                
                 return teetime.playerNames.map((playerName, index) => {
                   const playerType = teetime.playerTypes?.[index] || 'member';
                   const userId = teetime.bookedBy?.[index];

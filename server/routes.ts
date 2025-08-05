@@ -110,19 +110,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newTransportModes = [...(teetime.transportModes || [])];
       const newHolesPlaying = [...(teetime.holesPlaying || [])];
 
+      // Get all members once for efficient lookup
+      const allMembers = await storage.getAllUsers();
+      
       // Add each player to the arrays with validation
-      players.forEach((player: any) => {
+      for (const player of players) {
         // Ensure player object has required properties
         if (!player || typeof player !== 'object') {
           throw new Error('Invalid player object');
         }
         
-        newBookedBy.push(userId); // All players are associated with the booking user
+        // For members, try to find their actual user ID; for guests, use booking user's ID
+        let playerUserId = userId; // Default to booking user
+        if (player.type === 'member' && player.name) {
+          // Try to find the member's actual user ID by name
+          const memberMatch = allMembers.find(member => 
+            `${member.firstName} ${member.lastName}`.trim() === player.name.trim()
+          );
+          if (memberMatch) {
+            playerUserId = memberMatch.id;
+            console.log(`Found member match: ${player.name} -> ${memberMatch.id}`);
+          } else {
+            console.log(`No member match found for: ${player.name}`);
+          }
+        }
+        
+        newBookedBy.push(playerUserId); // Use actual member ID or booking user ID for guests
         newPlayerNames.push(player.name || "Unknown Player");
         newPlayerTypes.push(player.type || "member");
         newTransportModes.push(player.transportMode || "riding");
         newHolesPlaying.push(player.holesPlaying || "18");
-      });
+      }
 
       // Ensure all arrays have the same length after updates
       if (newBookedBy.length !== newPlayerNames.length || 
