@@ -327,8 +327,8 @@ export default function AdminDashboard({ adminEmail }: AdminDashboardProps) {
           <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 shadow-sm">
             <CardContent className="p-6 text-center">
               <Link href="/admin/conditions">
-                <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <CloudSun className="w-7 h-7 text-green-600" />
+                <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <CloudSun className="w-7 h-7 text-blue-600" />
                 </div>
                 <h3 className="font-semibold text-foreground mb-1">Course Conditions</h3>
                 <p className="text-sm text-muted-foreground">Adjust course rules</p>

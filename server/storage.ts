@@ -1294,7 +1294,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteEvent(id: string): Promise<void> {
-    await db.update(events).set({ isActive: false }).where(eq(events.id, id));
+    // First delete all registrations for this event
+    await db.delete(eventRegistrations).where(eq(eventRegistrations.eventId, id));
+    // Then delete the event itself
+    await db.delete(events).where(eq(events.id, id));
   }
 
   // Event registration methods
