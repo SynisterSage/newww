@@ -414,7 +414,7 @@ export default function Dining({ userData }: DiningProps) {
                   </div>
                   
                   {/* Footer with price and add button */}
-                  <div className="flex items-center justify-between mt-auto border-t border-gray-100 pt-[7px] pb-[7px]">
+                  <div className="flex items-center justify-between border-t border-gray-100 pt-[9.5px] pb-[9.5px] mt-[-17px] mb-[-17px]">
                     <div className="flex items-center gap-3">
                       <span className="text-xl font-bold text-[#1B4332]">${item.price}</span>
                     </div>
