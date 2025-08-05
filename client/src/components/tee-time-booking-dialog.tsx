@@ -110,8 +110,20 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
   // Handle member selection from autocomplete
   const selectMember = (index: number, memberName: string) => {
     console.log('Selecting member:', memberName, 'for index:', index);
-    updatePlayer(index, 'name', memberName);
-    updatePlayer(index, 'type', 'member'); // Auto-set to member when selecting from database
+    
+    // Update player data directly with immediate state change
+    setPlayers(prevPlayers => {
+      const updated = [...prevPlayers];
+      updated[index] = { 
+        ...updated[index], 
+        name: memberName,
+        type: 'member' // Auto-set to member when selecting from database
+      };
+      console.log('Updated players:', updated);
+      return updated;
+    });
+    
+    // Close autocomplete
     setOpenAutocomplete(prev => ({ ...prev, [index]: false }));
   };
 
