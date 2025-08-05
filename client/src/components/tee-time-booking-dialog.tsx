@@ -305,20 +305,20 @@ export function TeeTimeBookingDialog({ open, onOpenChange, teeTime, userData }: 
                             <ChevronDown className="absolute right-2 top-2 h-4 w-4 text-gray-400" />
                           )}
                           
-                          {/* Dropdown suggestions */}
+                          {/* Dropdown suggestions - positioned above input to avoid cutoff */}
                           {openAutocomplete[index] && getMemberSuggestions(player.name).length > 0 && (
-                            <div className="absolute z-50 w-full max-w-xs mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+                            <div className="absolute z-50 w-full max-w-xs bottom-full mb-1 bg-white border border-gray-200 rounded-md shadow-lg">
                               <div className="px-3 py-2 text-xs font-medium text-gray-600 border-b">
                                 Members ({getMemberSuggestions(player.name).length})
                               </div>
-                              <div className="max-h-40 overflow-y-auto">
+                              <div className="max-h-32 overflow-y-auto">
                                 {getMemberSuggestions(player.name).map((member) => (
                                   <div
                                     key={member.id}
                                     onClick={() => selectMember(index, member.name)}
-                                    className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-50"
+                                    className="flex items-center gap-2 px-3 py-1.5 cursor-pointer hover:bg-gray-50"
                                   >
-                                    <Users className="w-4 h-4 text-golf-green" />
+                                    <Users className="w-3 h-3 text-golf-green" />
                                     <div className="flex-1 min-w-0">
                                       <div className="text-sm font-medium truncate">{member.name}</div>
                                       <div className="text-xs text-gray-500 truncate">
