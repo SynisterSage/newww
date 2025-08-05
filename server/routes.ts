@@ -110,7 +110,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newTransportModes = [...(teetime.transportModes || [])];
       const newHolesPlaying = [...(teetime.holesPlaying || [])];
 
-      // Add each player to the arrays with validation
+      // Process all players and build arrays consistently
+      const playerData = [];
       for (const player of players) {
         // Ensure player object has required properties
         if (!player || typeof player !== 'object') {
@@ -126,18 +127,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
-        newBookedBy.push(playerUserId);
-        newPlayerNames.push(player.name || "Unknown Player");
-        newPlayerTypes.push(player.type || "member");
-        newTransportModes.push(player.transportMode || "riding");
-        newHolesPlaying.push(player.holesPlaying || "18");
+        playerData.push({
+          userId: playerUserId,
+          name: player.name || "Unknown Player",
+          type: player.type || "member",
+          transportMode: player.transportMode || "riding",
+          holesPlaying: player.holesPlaying || "18"
+        });
       }
+      
+      // Add all processed players to arrays in single operation
+      playerData.forEach(data => {
+        newBookedBy.push(data.userId);
+        newPlayerNames.push(data.name);
+        newPlayerTypes.push(data.type);
+        newTransportModes.push(data.transportMode);
+        newHolesPlaying.push(data.holesPlaying);
+      });
 
       // Ensure all arrays have the same length after updates
+      console.log('Array lengths after processing:', {
+        bookedBy: newBookedBy.length,
+        playerNames: newPlayerNames.length,
+        playerTypes: newPlayerTypes.length,
+        transportModes: newTransportModes.length,
+        holesPlaying: newHolesPlaying.length
+      });
+      
       if (newBookedBy.length !== newPlayerNames.length || 
           newPlayerNames.length !== newPlayerTypes.length ||
           newPlayerTypes.length !== newTransportModes.length ||
           newTransportModes.length !== newHolesPlaying.length) {
+        console.error('Array length mismatch details:', {
+          bookedBy: newBookedBy,
+          playerNames: newPlayerNames,
+          playerTypes: newPlayerTypes,
+          transportModes: newTransportModes,
+          holesPlaying: newHolesPlaying
+        });
         throw new Error('Array length mismatch in tee time data');
       }
 
