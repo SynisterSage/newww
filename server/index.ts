@@ -12,7 +12,8 @@ app.use((req, res, next) => {
     'https://pgcapp-12fba.web.app',
     'https://pgcapp-12fba.firebaseapp.com',
     'http://localhost:5173',
-    /\.replit\.dev$/
+    /\.replit\.dev$/,
+    /\.vercel\.app$/
   ];
   
   const origin = req.headers.origin;
@@ -69,6 +70,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get('/api/ping', (_req, res) => res.json({ ok: true }));
+
 export const ready = (async () => {
   const server = await registerRoutes(app);
 
@@ -107,13 +110,13 @@ export const ready = (async () => {
   });
 
   // dev = Vite, prod = static
-  if (app.get("env") === "development") {
+  if (app.get("env") === "development" && !process.env.VERCEL) {
     await setupVite(app, server);
-  } else {
+  } else if (!process.env.VERCEL) {
     serveStatic(app);
   }
 
-  // 🚩 only listen locally; Vercel sets process.env.VERCEL
+  // only listen locally (NOT on Vercel)
   if (!process.env.VERCEL) {
     const PORT = Number(process.env.PORT ?? 5000);
     const HOST = process.env.HOST ?? "127.0.0.1";
