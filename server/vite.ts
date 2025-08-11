@@ -1,6 +1,6 @@
 import express, { type Express } from "express";
 import fs from "fs";
-import path from "path";
+import path from "node:path";
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import viteConfig from "../vite.config";
@@ -67,19 +67,17 @@ export async function setupVite(app: Express, server: Server) {
   });
 }
 
-export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "public");
+export function serveStatic(app: express.Express) {
+  // When packaged by pkg, process.pkg is defined and the exe lives at process.execPath
+  const base = (process as any).pkg
+    ? path.dirname(process.execPath)           // folder where the .exe sits
+    : path.resolve(__dirname, '..')            // normal dev/prod path
 
-  if (!fs.existsSync(distPath)) {
-    throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
-    );
-  }
+  // We'll place the client build next to the .exe in a 'public' folder
+  const clientDist = path.join(base, 'public')
 
-  app.use(express.static(distPath));
-
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
-  });
+  app.use(express.static(clientDist))
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'))
+  })
 }

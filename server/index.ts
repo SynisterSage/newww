@@ -1,7 +1,8 @@
 import 'dotenv/config'
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { registerRoutes } from "./routes.js";
+import { setupVite, serveStatic, log } from "./vite.js";
+
 
 const app = express();
 export default app;
@@ -76,31 +77,25 @@ export const ready = (async () => {
   const server = await registerRoutes(app);
 
   // Get storage instance to run cleanup
-  const { storage } = await import('./routes');
+  const { storage } = (await import('./routes.js')) as any;
 
-  // Run initial cleanup on server start
-  if (storage && 'cleanupExpiredTeetimes' in storage) {
+if (storage?.cleanupExpiredTeetimes) {
+  try {
+    const cleaned = await storage.cleanupExpiredTeetimes();
+    if (cleaned > 0) log(`🧹 Cleaned ${cleaned} expired tee time bookings on startup`);
+  } catch (error) {
+    log(`Failed to clean expired tee times: ${error}`);
+  }
+
+  setInterval(async () => {
     try {
       const cleaned = await storage.cleanupExpiredTeetimes();
-      if (cleaned > 0) {
-        log(`🧹 Cleaned ${cleaned} expired tee time bookings on startup`);
-      }
+      if (cleaned > 0) log(`🧹 Cleaned ${cleaned} expired tee time bookings`);
     } catch (error) {
       log(`Failed to clean expired tee times: ${error}`);
     }
-
-    // Set up periodic cleanup every hour
-    setInterval(async () => {
-      try {
-        const cleaned = await storage.cleanupExpiredTeetimes();
-        if (cleaned > 0) {
-          log(`🧹 Cleaned ${cleaned} expired tee time bookings`);
-        }
-      } catch (error) {
-        log(`Failed to clean expired tee times: ${error}`);
-      }
-    }, 60 * 60 * 1000); // 1 hour
-  }
+  }, 60 * 60 * 1000);
+}
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
