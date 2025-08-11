@@ -1,7 +1,7 @@
-import { type User, type InsertUser, type AdminUser, type InsertAdminUser, type TeeTime, type InsertTeeTime, type MenuItem, type InsertMenuItem, type Order, type InsertOrder, type CourseHole, type InsertCourseHole, type Round, type InsertRound, type Session, type InsertSession, type CourseConditions, type InsertCourseConditions, type Event, type InsertEvent, type EventRegistration, type InsertEventRegistration } from "@shared/schema";
+import { type User, type InsertUser, type AdminUser, type InsertAdminUser, type TeeTime, type InsertTeeTime, type MenuItem, type InsertMenuItem, type Order, type InsertOrder, type CourseHole, type InsertCourseHole, type Round, type InsertRound, type Session, type InsertSession, type CourseConditions, type InsertCourseConditions, type Event, type InsertEvent, type EventRegistration, type InsertEventRegistration } from "@shared/schema.js";
 import { randomUUID } from "crypto";
-import { db } from "./db";
-import { users, adminUsers, teetimes, menuItems, orders, courseHoles, rounds, sessions, courseConditions, events, eventRegistrations } from "@shared/schema";
+import { db } from "./db.js";
+import { users, adminUsers, teetimes, menuItems, orders, courseHoles, rounds, sessions, courseConditions, events, eventRegistrations } from "@shared/schema.js";
 import { eq, and, sql, lt } from "drizzle-orm";
 
 export interface IStorage {
@@ -1353,6 +1353,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Clean up expired tee time bookings (past times should not keep booking data)
+
   async cleanupExpiredTeetimes(): Promise<number> {
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes(); // current time in minutes

@@ -1,5 +1,5 @@
-import { db } from "./db";
-import { users, adminUsers, menuItems, teetimes } from "@shared/schema";
+import { db } from "./db.js";
+import { users, adminUsers, menuItems, teetimes } from "@shared/schema.js";
 
 // Seed the database with member data from CSV
 async function seedMembers() {

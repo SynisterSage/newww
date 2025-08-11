@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 import {
   insertTeetimeSchema,
   insertOrderSchema,
@@ -9,7 +9,7 @@ import {
   insertCourseConditionsSchema,
   insertEventSchema,
   insertEventRegistrationSchema,
-} from "@shared/schema";
+} from "@shared/schema.js";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 
